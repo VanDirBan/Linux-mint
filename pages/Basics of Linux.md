@@ -35,9 +35,6 @@
 		- `systemctl restart NetworkManager` - restart the NetworkManager service
 	- Version Control
 		- `git` - distributed version control system
-	- Miscellaneous
-		- `mc` - midnight commander, a visual file manager
-		- `net-tools` - a collection of programs for controlling and monitoring networking
 - #Programs
 	- Network Management
 		- `nmtui` - text user interface for NetworkManager
