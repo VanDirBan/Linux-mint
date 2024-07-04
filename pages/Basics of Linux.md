@@ -7,5 +7,18 @@
 		- `cp` - copy files
 		- `mv` - move files
 		- `rm` - remove files
-		-
--
+		- `wget` - non-interactive network downloader
+	- Network
+		- `ip a` - display all IP addresses assigned to all network interfaces
+		- `route -n` - display the kernel routing tables
+		- `ping` - send ICMP ECHO_REQUEST to network hosts
+		- `systemctl restart NetworkManager` - restart the NetworkManager service
+	- Package Management
+		- `pip` - package installer for Python
+		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
+		- `apt` - package manager for Debian-based distributions (e.g., Ubuntu)
+	- Version Control
+		- `git` - distributed version control system
+	- Miscellaneous
+		- `mc` - midnight commander, a visual file manager
+		- `net-tools` - a collection of programs for controlling and monitoring networking
