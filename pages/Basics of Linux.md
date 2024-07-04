@@ -1,3 +1,9 @@
 - #Commands
 	- Command Line
+		- `ls` - list files
+		- `cd` - change directory
+		- `pwd` - print working directory
 	- File Management
+		- `cp` - copy files
+		- `mv` - move files
+		- `rm` - remove files
