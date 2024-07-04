@@ -38,3 +38,5 @@
 	- Network Management
 		- `nmtui` - text user interface for NetworkManager
 		- `wget` - non-interactive network downloader
+		- 'net-tools' -
+-
