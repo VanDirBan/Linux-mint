@@ -7,7 +7,6 @@
 		- `cp` - copy files
 		- `mv` - move files
 		- `rm` - remove files
-		- `wget` - non-interactive network downloader
 	- Package Management
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
@@ -38,3 +37,4 @@
 - #Programs
 	- Network Management
 		- `nmtui` - text user interface for NetworkManager
+		- `wget` - non-interactive network downloader
