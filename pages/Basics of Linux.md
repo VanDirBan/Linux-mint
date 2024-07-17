@@ -7,11 +7,17 @@
 		- `cp` - copy files
 		- `mv` - move files
 		- `rm` - remove files
+		- `touch` - create an empty file or update the timestamp of an existing file
+			- `touch ~/.ssh/authorized_keys` - create an empty `authorized_keys` file in the user's `.ssh` directory
 	- Package Management
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
 		- `apt` - package manager for Debian-based distributions (e.g., Ubuntu)
-	-
+	- Text Editors
+		- `nano` - a simple text editor for Unix-like systems
+			- `nano ~/.ssh/authorized_keys` - open the `authorized_keys` file in the user's `.ssh` directory for editing
+			- `nano /root/.ssh/authorized_keys` - open the `authorized_keys` file in the root's `.ssh` directory for editing
+			- `nano /etc/ssh/sshd_config` - open the SSH daemon configuration file for editing
 	- System Management
 		- `systemctl` - control the systemd system and service manager
 			- `systemctl start [service]` - start a service
@@ -27,6 +33,9 @@
 			- `sudo apt install [package_name]` - install a package
 			- `sudo apt remove [package_name]` - remove a package
 			- `apt search [package_name]` - search for a package
+	- SSH Management
+		- `ssh-keygen` - generate SSH key pairs for authentication
+			- `ssh-keygen -t rsa -b 4096 -C "your_email@example.com"` - generate a new RSA key pair with 4096 bits and a specified comment
 	- Network
 		- `ip a` - display all IP addresses assigned to all network interfaces
 		- `route -n` - display the kernel routing tables
