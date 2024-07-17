@@ -48,9 +48,67 @@
 			- `netstat -a` - display all active connections and listening ports
 			- `netstat -r` - display the routing table
 			- `netstat -i` - display network interface statistics
+			- `netstat -tulnp` - show listening ports
+				- `-t` - show TCP connections
+				- `-u` - show UDP connections
+				- `-l` - show listening ports
+				- `-n` - show numeric addresses instead of resolving names
+				- `-p` - show the PID and name of the program to which each socket belongs
 		- `systemctl restart NetworkManager` - restart the NetworkManager service
 	- Version Control
 		- `git` - distributed version control system
+- #User and Group Management
+	- `useradd` - create a new user
+		- `-c "comment"` - add a comment (usually the user's full name)
+			- Example: `useradd -c "John Doe" johndoe`
+		- `-d /home/dir` - set the user's home directory
+			- Example: `useradd -d /home/johndoe johndoe`
+		- `-e YYYY-MM-DD` - set the expiration date for the account
+			- Example: `useradd -e 2023-12-31 johndoe`
+		- `-g group` - set the primary group for the user
+			- Example: `useradd -g users johndoe`
+		- `-G groups` - set the supplementary groups for the user
+			- Example: `useradd -G wheel,audio johndoe`
+		- `-m` - create the user's home directory if it does not exist
+			- Example: `useradd -m johndoe`
+		- `-p password` - set the user's encrypted password (use with caution)
+			- Example: `useradd -p $(openssl passwd -crypt 'password') johndoe`
+		- `-s shell` - set the user's login shell
+			- Example: `useradd -s /bin/bash johndoe`
+		- `-u UID` - set the user ID for the user
+			- Example: `useradd -u 1001 johndoe`
+	- `groupadd` - create a new group
+		- `-f` - do not fail if the group already exists
+			- Example: `groupadd -f developers`
+		- `-g GID` - set the group ID for the group
+			- Example: `groupadd -g 1001 developers`
+		- `-r` - create a system group (with a GID less than 1000)
+			- Example: `groupadd -r developers`
+	- `usermod` - modify a user account
+		- `-c "comment"` - change the user's comment (usually full name)
+			- Example: `usermod -c "John Doe" johndoe`
+		- `-d /new/home/dir` - change the user's home directory
+			- Example: `usermod -d /new/home/dir johndoe`
+		- `-d /new/home/dir -m` - change the home directory and move current contents
+			- Example: `usermod -d /new/home/dir -m johndoe`
+		- `-e YYYY-MM-DD` - set the account expiration date
+			- Example: `usermod -e 2024-12-31 johndoe`
+		- `-g group` - change the user's primary group
+			- Example: `usermod -g newgroup johndoe`
+		- `-G groups` - change the user's supplementary groups (replaces current groups)
+			- Example: `usermod -G group1,group2 johndoe`
+		- `-aG group` - add the user to supplementary groups (does not replace current groups)
+			- Example: `usermod -aG newgroup johndoe`
+		- `-l newname` - change the user's login name
+			- Example: `usermod -l newname oldname`
+		- `-L` - lock the user's account
+			- Example: `usermod -L johndoe`
+		- `-U` - unlock the user's account
+			- Example: `usermod -U johndoe`
+		- `-s shell` - change the user's login shell
+			- Example: `usermod -s /bin/zsh johndoe`
+		- `-u UID` - change the user's user ID
+			- Example: `usermod -u 1001 johndoe`
 - #Programs
 	- Network Management
 		- `nmtui` - text user interface for NetworkManager
