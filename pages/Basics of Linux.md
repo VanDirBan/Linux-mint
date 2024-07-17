@@ -11,6 +11,7 @@
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
 		- `apt` - package manager for Debian-based distributions (e.g., Ubuntu)
+	-
 	- System Management
 		- `systemctl` - control the systemd system and service manager
 			- `systemctl start [service]` - start a service
@@ -19,6 +20,13 @@
 			- `systemctl status [service]` - check the status of a service
 			- `systemctl enable [service]` - enable a service to start at boot
 			- `systemctl disable [service]` - disable a service from starting at boot
+		- `apt-get` - Advanced Package Tool (stable interface for scripting)(old version)
+		- `apt` - Advanced Package Tool (interactive interface)
+			- `sudo apt update` - update the list of available packages
+			- `sudo apt upgrade` - upgrade all installed packages
+			- `sudo apt install [package_name]` - install a package
+			- `sudo apt remove [package_name]` - remove a package
+			- `apt search [package_name]` - search for a package
 	- Network
 		- `ip a` - display all IP addresses assigned to all network interfaces
 		- `route -n` - display the kernel routing tables
