@@ -99,6 +99,8 @@
 			- Example: `usermod -G group1,group2 johndoe`
 		- `-aG group` - add the user to supplementary groups (does not replace current groups)
 			- Example: `usermod -aG newgroup johndoe`
+		- `-aG sudo user`
+			- **sudo group**: In Debian-based systems, the `sudo` group is used to grant administrative privileges to its members. Users in this group can use the `sudo` command to execute commands as the superuser.
 		- `-l newname` - change the user's login name
 			- Example: `usermod -l newname oldname`
 		- `-L` - lock the user's account
@@ -109,9 +111,41 @@
 			- Example: `usermod -s /bin/zsh johndoe`
 		- `-u UID` - change the user's user ID
 			- Example: `usermod -u 1001 johndoe`
+	- `passwd` - change user passwords and manage password properties
+		- Change password for the current user:
+			- Command: `passwd`
+		- Change password for another user (requires superuser privileges):
+			- Command: `sudo passwd username`
+		- Lock a user account:
+			- Command: `sudo passwd -l username`
+		- Unlock a user account:
+			- Command: `sudo passwd -u username`
+		- Expire a user's password (force change on next login):
+			- Command: `sudo passwd -e username`
+		- Set the maximum number of days a password is valid:
+			- Command: `sudo passwd -x days username`
+		- Force user to change password on next login:
+			- Command: `sudo passwd -f username`
+	- `deluser` - remove a user account
+		- Remove a user account:
+			- Command: `sudo deluser username`
+			- Example: `sudo deluser johndoe`
+		- Remove a user account and home directory:
+			- Command: `sudo deluser --remove-home username`
+			- Example: `sudo deluser --remove-home johndoe`
+		- Remove a user account and all files:
+			- Command: `sudo deluser --remove-all-files username`
+			- Example: `sudo deluser --remove-all-files johndoe`
+		- Remove a user from a group:
+			- Command: `sudo deluser username groupname`
+			- Example: `sudo deluser johndoe sudo`
+		- Force removal of a user:
+			- Command: `sudo deluser --force username`
+			- Example: `sudo deluser --force johndoe`
 - #Programs
 	- Network Management
 		- `nmtui` - text user interface for NetworkManager
 		- `wget` - non-interactive network downloader
-		- 'net-tools' -
+		- `net-tools`  -
+-
 -
