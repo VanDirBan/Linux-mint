@@ -12,7 +12,32 @@
 	- Package Management
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
+			- `dnf repolist` - display the list of available repositories and their status (RPM-based systems)
 		- `apt` - package manager for Debian-based distributions (e.g., Ubuntu)
+			- `apt-cache policy` - display the list of available repositories and their priorities (Debian-based systems)
+		- Ubuntu Repositories
+			- **Main**: Officially supported packages
+			- **Universe**: Community-maintained packages
+			- **Multiverse**: Packages that may include non-free software
+			- **Restricted**: Restricted packages like drivers
+			- Adding PPAs
+				- **Example**
+					- Add a PPA (Personal Package Archive):
+						- Command: `sudo add-apt-repository ppa:repository-name/ppa`
+						- Example: `sudo add-apt-repository ppa:deadsnakes/ppa`
+					- Update the package list:
+						- Command: `sudo apt-get update`
+					- Install a package from the PPA:
+						- Command: `sudo apt-get install package-name`
+						- Example: `sudo apt-get install python3.9`
+				- **PHP PPA**:
+					- Add PPA: `sudo add-apt-repository ppa:ondrej/php`
+					- Update package list: `sudo apt-get update`
+					- Install PHP: `sudo apt-get install php7.4`
+				- **MySQL PPA**:
+					- Add PPA: `sudo add-apt-repository 'deb http://repo.mysql.com/apt/ubuntu/ focal mysql-5.7'`
+					- Update package list: `sudo apt-get update`
+					- Install MySQL: `sudo apt-get install mysql-server`
 	- Text Editors
 		- `nano` - a simple text editor for Unix-like systems
 			- `nano ~/.ssh/authorized_keys` - open the `authorized_keys` file in the user's `.ssh` directory for editing
