@@ -178,19 +178,39 @@
 			- Start and enable NetworkManager service:
 				- Command: `sudo systemctl start NetworkManager`
 				- Command: `sudo systemctl enable NetworkManager`
-		- **nmcli** - Command-line tool for NetworkManager
-			- Check NetworkManager status:
-				- Command: `nmcli general status`
-			- List available network connections:
-				- Command: `nmcli connection show`
-			- Connect to a Wi-Fi network:
-				- Command: `nmcli device wifi connect "SSID" password "your_password"`
-			- Create a new Ethernet connection:
-				- Command: `nmcli connection add type ethernet ifname eth0 con-name "Wired connection 1"`
-			- Disconnect a network connection:
-				- Command: `nmcli connection down "connection_name"`
-			- Activate a network connection:
-				- Command: `nmcli connection up "connection_name"`
+		- **`nmcli` (Network Manager Command Line Interface)**:
+			- A command-line tool for managing network connections via NetworkManager.
+			- **Key Features**:
+				- Manage network connections (create, modify, delete, activate).
+				- Configure network interfaces (enable, disable, view status).
+				- Monitor network status and view available networks.
+			- **Basic Commands**:
+				- **General Status**:
+					- Check NetworkManager status:
+						- Command: `nmcli general status`
+				- **Connection Management**:
+					- List all connections:
+						- Command: `nmcli connection show`
+					- Add a new connection:
+						- Command: `sudo nmcli connection add con-name 'dhcp' type ethernet ifname enp0s3`
+					- Delete a connection:
+						- Command: `sudo nmcli connection del 'dhcp'`
+					- Bring a connection up:
+						- Command: `nmcli connection up 'dhcp'`
+					- Bring a connection down:
+						- Command: `nmcli connection down 'dhcp'`
+				- **Wi-Fi Management**:
+					- List available Wi-Fi networks:
+						- Command: `nmcli device wifi list`
+					- Connect to a Wi-Fi network:
+						- Command: `nmcli device wifi connect 'SSID' password 'your_password'`
+				- **Device Management**:
+					- List all network devices:
+						- Command: `nmcli device status`
+					- Enable a network device:
+						- Command: `nmcli device set enp0s3 managed yes`
+					- Disconnect a network device:
+						- Command: `nmcli device disconnect enp0s3`
 		- **nmtui** - Text user interface for NetworkManager
 			- Start nmtui:
 				- Command: `sudo nmtui`
@@ -210,4 +230,22 @@
 				- `type ethernet`: Specifies that the connection type is Ethernet (wired connection).
 				- `ifname enp0s3`: Specifies the network interface name to which the connection will be applied (in this case, `enp0s3`).
 			- **Purpose**: This command adds a new Ethernet connection named 'dhcp' to the network interface `enp0s3`, allowing it to use DHCP for obtaining an IP address and other network settings.
+		- **Deleting a network connection using nmcli**:
+			- Command: `sudo nmcli connection del 'dhcp'`
+			- **Explanation**:
+				- `nmcli`: Command-line tool for interacting with NetworkManager.
+				- `connection del`: Subcommand to delete a network connection.
+				- `'dhcp'`: Name of the connection to be deleted.
+			- **Purpose**: This command deletes the network connection named 'dhcp'.
+		- **Adding a static Ethernet connection using nmcli**:
+			- Command: `nmcli connection add con-name 'static' ifname enp0s3 autoconnect no type ethernet ip4 192.168.200.52 gw4 192.168.1.1`
+			- **Explanation**:
+				- `connection add`: Subcommand to add a new network connection.
+				- `con-name 'static'`: Sets the name of the new connection to 'static'.
+				- `ifname enp0s3`: Specifies the network interface name (in this case, `enp0s3`).
+				- `autoconnect no`: Specifies that the connection should not automatically connect on boot.
+				- `type ethernet`: Specifies that the connection type is Ethernet (wired connection).
+				- `ip4 192.168.200.52`: Sets the static IPv4 address for this connection.
+				- `gw4 192.168.1.1`: Sets the gateway address for this connection.
+			- **Purpose**: This command adds a new static Ethernet connection with a specified IP address and gateway.
 -
