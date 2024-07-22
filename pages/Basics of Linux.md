@@ -82,7 +82,8 @@
 		- `systemctl restart NetworkManager` - restart the NetworkManager service
 	- Version Control
 		- `git` - distributed version control system
-- #User and Group Management
+- #User_and_Group_Management
+  collapsed:: true
 	- `useradd` - create a new user
 		- `-c "comment"` - add a comment (usually the user's full name)
 			- Example: `useradd -c "John Doe" johndoe`
@@ -168,9 +169,45 @@
 			- Command: `sudo deluser --force username`
 			- Example: `sudo deluser --force johndoe`
 - #Programs
+	- **NetworkManager** - Service for managing network connections in Linux
+		- Features: Automatic network configuration, support for various network types (Ethernet, Wi-Fi, mobile, VPN), graphical interfaces, and command-line tools.
+		- **Installation**:
+			- Install NetworkManager on Ubuntu:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install network-manager`
+			- Start and enable NetworkManager service:
+				- Command: `sudo systemctl start NetworkManager`
+				- Command: `sudo systemctl enable NetworkManager`
+		- **nmcli** - Command-line tool for NetworkManager
+			- Check NetworkManager status:
+				- Command: `nmcli general status`
+			- List available network connections:
+				- Command: `nmcli connection show`
+			- Connect to a Wi-Fi network:
+				- Command: `nmcli device wifi connect "SSID" password "your_password"`
+			- Create a new Ethernet connection:
+				- Command: `nmcli connection add type ethernet ifname eth0 con-name "Wired connection 1"`
+			- Disconnect a network connection:
+				- Command: `nmcli connection down "connection_name"`
+			- Activate a network connection:
+				- Command: `nmcli connection up "connection_name"`
+		- **nmtui** - Text user interface for NetworkManager
+			- Start nmtui:
+				- Command: `sudo nmtui`
+			- Main options in nmtui:
+				- Edit a connection
+				- Activate a connection
+				- Set system hostname
 	- Network Management
-		- `nmtui` - text user interface for NetworkManager
 		- `wget` - non-interactive network downloader
 		- `net-tools`  -
--
+		- **Adding a new Ethernet connection with DHCP using  `nmcli`**:
+			- Command: `sudo nmcli connection add con-name 'dhcp' type ethernet ifname enp0s3`
+			- **Explanation**:
+				- `nmcli`: Command-line tool for interacting with NetworkManager.
+				- `connection add`: Subcommand to add a new network connection.
+				- `con-name 'dhcp'`: Sets the name of the new connection to 'dhcp'.
+				- `type ethernet`: Specifies that the connection type is Ethernet (wired connection).
+				- `ifname enp0s3`: Specifies the network interface name to which the connection will be applied (in this case, `enp0s3`).
+			- **Purpose**: This command adds a new Ethernet connection named 'dhcp' to the network interface `enp0s3`, allowing it to use DHCP for obtaining an IP address and other network settings.
 -
