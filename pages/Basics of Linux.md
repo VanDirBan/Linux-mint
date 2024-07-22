@@ -248,4 +248,11 @@
 				- `ip4 192.168.200.52`: Sets the static IPv4 address for this connection.
 				- `gw4 192.168.1.1`: Sets the gateway address for this connection.
 			- **Purpose**: This command adds a new static Ethernet connection with a specified IP address and gateway.
+		- **Activating a network connection using nmcli**:
+			- Command: `nmcli con up 'static'`
+			- **Explanation**:
+				- `nmcli`: Command-line tool for interacting with NetworkManager.
+				- `con up`: Subcommand to bring up (activate) a network connection.
+				- `'static'`: Name of the connection to be activated.
+			- **Purpose**: This command activates the network connection named 'static'.
 -
