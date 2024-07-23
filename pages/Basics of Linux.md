@@ -46,12 +46,39 @@
 			- `nano /etc/ssh/sshd_config` - open the SSH daemon configuration file for editing
 	- System Management
 		- `systemctl` - control the systemd system and service manager
+			- `systemctl daemon-reload`- Reload systemd configuration
 			- `systemctl start [service]` - start a service
 			- `systemctl stop [service]` - stop a service
 			- `systemctl restart [service]` - restart a service
 			- `systemctl status [service]` - check the status of a service
 			- `systemctl enable [service]` - enable a service to start at boot
 			- `systemctl disable [service]` - disable a service from starting at boot
+		- **Unit** - A logical representation of a system resource or service managed by `systemd`.
+			- **Types of Units**:
+				- **Service Unit** (`.service`): Represents a service (daemon).
+				- **Socket Unit** (`.socket`): Represents a network socket.
+				- **Device Unit** (`.device`): Represents a device recognized by the system.
+				- **Mount Unit** (`.mount`): Represents a mount point.
+				- **Automount Unit** (`.automount`): Represents an automount point.
+				- **Swap Unit** (`.swap`): Represents a swap partition.
+				- **Target Unit** (`.target`): Represents a group of units.
+				- **Timer Unit** (`.timer`): Represents a timer for scheduling tasks.
+				- **Path Unit** (`.path`): Represents a file or directory to monitor for changes.
+				- **Slice Unit** (`.slice`): Represents a group of resources (e.g., process groups).
+				- **Scope Unit** (`.scope`): Represents external tasks not started by `systemd`.
+			- **Example Service Unit** (`/etc/systemd/system/example.service`):
+			  ```ini
+			  [Unit]
+			  Description=Example Service
+			  After=network.target
+			  
+			  [Service]
+			  ExecStart=/usr/bin/example-command
+			  Restart=always
+			  
+			  [Install]
+			  WantedBy=multi-user.target
+			  ```
 		- `apt-get` - Advanced Package Tool (stable interface for scripting)(old version)
 		- `apt` - Advanced Package Tool (interactive interface)
 			- `sudo apt update` - update the list of available packages
@@ -256,4 +283,75 @@
 				- `con up`: Subcommand to bring up (activate) a network connection.
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
+- **System Monitoring**
+	- **iotop** - A utility for monitoring I/O usage by processes in real time.
+		- **Features**:
+			- Displays current I/O activity for each process.
+			- Filters active processes using I/O.
+			- Shows cumulative I/O activity since `iotop` started.
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install iotop`
+			- Red Hat-based systems:
+				- Command: `sudo yum install iotop`
+		- **Examples**:
+			- Monitor all processes:
+				- Command: `sudo iotop`
+			- Filter active processes:
+				- Command: `sudo iotop -o`
+			- Show cumulative I/O:
+				- Command: `sudo iotop -a`
+- **Disk Performance Testing**
+	- **Command**: `sync; dd if=/dev/zero of=tempfile bs=2M count=2048; sync`
+		- **Explanation**:
+			- `sync`: Writes all cached data to disk, ensuring all file system changes are applied.
+			- `dd if=/dev/zero of=tempfile bs=2M count=2048`: Creates a file named `tempfile` filled with zeros, with a total size of 4GB (2048 blocks of 2MB each).
+			- `sync`: Ensures all data is written to disk after the file creation.
+		- **Purpose**: This command sequence is used for testing disk performance by creating a large file and ensuring all data is written to disk without using the cache.
+- **System Performance Testing**
+  collapsed:: true
+	- **`sysbench`** - A multi-purpose benchmarking tool for system performance testing.
+		- **Features**:
+			- CPU performance testing
+			- Memory performance testing
+			- Disk I/O performance testing
+			- Database performance testing (MySQL, PostgreSQL)
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install sysbench`
+			- Red Hat-based systems:
+				- Command: `sudo yum install sysbench`
+		- **Examples**:
+			- **CPU testing**:
+				- Command: `sysbench --test=cpu --cpu-max-prime=20000 run`
+			- **Memory testing**:
+				- Command: `sysbench --test=memory --memory-block-size=1M --memory-total-size=10G run`
+			- **Disk I/O testing**:
+				- Prepare: `sysbench --test=fileio --file-total-size=10G prepare`
+				- Run: `sysbench --test=fileio --file-total-size=10G --file-test-mode=rndrw run`
+				- Cleanup: `sysbench --test=fileio --file-total-size=10G cleanup`
+	- **`stress-ng`** - A tool for stress testing and benchmarking the system.
+		- **Features**:
+			- CPU stress testing
+			- Memory stress testing
+			- Disk I/O stress testing
+			- Stress testing of various system resources
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install stress-ng`
+			- Red Hat-based systems:
+				- Command: `sudo yum install epel-release`
+				- Command: `sudo yum install stress-ng`
+		- **Examples**:
+			- **CPU stress testing**:
+				- Command: `stress-ng --cpu 4 --timeout 60s`
+			- **Memory stress testing**:
+				- Command: `stress-ng --vm 2 --vm-bytes 1G --timeout 60s`
+			- **Disk I/O stress testing**:
+				- Command: `stress-ng --hdd 2 --timeout 60s`
+			- **Comprehensive system stress testing**:
+				- Command: `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --hdd 2 --timeout 60s`
 -
