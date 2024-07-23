@@ -1,4 +1,5 @@
 - #Commands
+  collapsed:: true
 	- Command Line
 		- `ls` - list files
 		- `cd` - change directory
@@ -45,12 +46,39 @@
 			- `nano /etc/ssh/sshd_config` - open the SSH daemon configuration file for editing
 	- System Management
 		- `systemctl` - control the systemd system and service manager
+			- `systemctl daemon-reload`- Reload systemd configuration
 			- `systemctl start [service]` - start a service
 			- `systemctl stop [service]` - stop a service
 			- `systemctl restart [service]` - restart a service
 			- `systemctl status [service]` - check the status of a service
 			- `systemctl enable [service]` - enable a service to start at boot
 			- `systemctl disable [service]` - disable a service from starting at boot
+		- **Unit** - A logical representation of a system resource or service managed by `systemd`.
+			- **Types of Units**:
+				- **Service Unit** (`.service`): Represents a service (daemon).
+				- **Socket Unit** (`.socket`): Represents a network socket.
+				- **Device Unit** (`.device`): Represents a device recognized by the system.
+				- **Mount Unit** (`.mount`): Represents a mount point.
+				- **Automount Unit** (`.automount`): Represents an automount point.
+				- **Swap Unit** (`.swap`): Represents a swap partition.
+				- **Target Unit** (`.target`): Represents a group of units.
+				- **Timer Unit** (`.timer`): Represents a timer for scheduling tasks.
+				- **Path Unit** (`.path`): Represents a file or directory to monitor for changes.
+				- **Slice Unit** (`.slice`): Represents a group of resources (e.g., process groups).
+				- **Scope Unit** (`.scope`): Represents external tasks not started by `systemd`.
+			- **Example Service Unit** (`/etc/systemd/system/example.service`):
+			  ```ini
+			  [Unit]
+			  Description=Example Service
+			  After=network.target
+			  
+			  [Service]
+			  ExecStart=/usr/bin/example-command
+			  Restart=always
+			  
+			  [Install]
+			  WantedBy=multi-user.target
+			  ```
 		- `apt-get` - Advanced Package Tool (stable interface for scripting)(old version)
 		- `apt` - Advanced Package Tool (interactive interface)
 			- `sudo apt update` - update the list of available packages
@@ -238,15 +266,15 @@
 				- `'dhcp'`: Name of the connection to be deleted.
 			- **Purpose**: This command deletes the network connection named 'dhcp'.
 		- **Adding a static Ethernet connection using nmcli**:
-			- Command: `nmcli connection add con-name 'static' ifname enp0s3 autoconnect no type ethernet ip4 192.168.200.52 gw4 192.168.1.1`
+			- Command: `nmcli connection add con-name 'static' ifname enp0s3 autoconnect no type ethernet ip4 192.168.200.52/24 gw4 192.168.200.1`
 			- **Explanation**:
 				- `connection add`: Subcommand to add a new network connection.
 				- `con-name 'static'`: Sets the name of the new connection to 'static'.
 				- `ifname enp0s3`: Specifies the network interface name (in this case, `enp0s3`).
 				- `autoconnect no`: Specifies that the connection should not automatically connect on boot.
 				- `type ethernet`: Specifies that the connection type is Ethernet (wired connection).
-				- `ip4 192.168.200.52`: Sets the static IPv4 address for this connection.
-				- `gw4 192.168.1.1`: Sets the gateway address for this connection.
+				- `ip4 192.168.200.52/24`: Sets the static IPv4 address for this connection.
+				- `gw4 192.168.200.1`: Sets the gateway address for this connection.
 			- **Purpose**: This command adds a new static Ethernet connection with a specified IP address and gateway.
 		- **Activating a network connection using nmcli**:
 			- Command: `nmcli con up 'static'`
@@ -255,4 +283,136 @@
 				- `con up`: Subcommand to bring up (activate) a network connection.
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
--
+- **System Monitoring**
+	- **Load Average**:
+		- **Definition**: A metric that shows the average number of processes waiting for execution or CPU resources in the system. It is measured over three time intervals: 1, 5, and 15 minutes.
+		- **Time Intervals**:
+			- **1 minute**: Load average over the last 1 minute.
+			- **5 minutes**: Load average over the last 5 minutes.
+			- **15 minutes**: Load average over the last 15 minutes.
+		- **Understanding Values**:
+			- **1.0 on a single-core system**: The system is fully loaded (one process is running or waiting).
+			- **1.0 on a multi-core system (e.g., 4 cores)**: The system is underutilized (4 cores can handle one process easily).
+		- **Interpreting Values**:
+			- **Less than 1.0 per core**: The system is functioning normally and is not overloaded.
+			- **Equal to 1.0 per core**: The system is loaded but not overloaded.
+			- **Greater than 1.0 per core**: The system is overloaded, and some processes must wait.
+		- **Commands to Check Load Average**:
+			- **`uptime`**:
+				- Example: `uptime`
+			- **`top`**:
+				- Example: `top`
+			- **`cat /proc/loadavg`**:
+				- Example: `cat /proc/loadavg`
+		- **Example Outputs**:
+			- **`uptime`**:
+			  ```plaintext
+			  14:23:19 up 10 days,  2:53,  3 users,  load average: 0.15, 0.10, 0.05
+			  ```
+			- **`top`**:
+			  ```plaintext
+			  top - 14:23:19 up 10 days,  2:53,  3 users,  load average: 0.15, 0.10, 0.05
+			  Tasks: 197 total,   1 running, 196 sleeping,   0 stopped,   0 zombie
+			  %Cpu(s):  0.7 us,  0.3 sy,  0.0 ni, 99.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+			  ```
+			- **`cat /proc/loadavg`**:
+			  ```plaintext
+			  0.15 0.10 0.05 1/197 4567
+			  ```
+	- **`iotop`** - A utility for monitoring I/O usage by processes in real time.
+		- **Features**:
+			- Displays current I/O activity for each process.
+			- Filters active processes using I/O.
+			- Shows cumulative I/O activity since `iotop` started.
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install iotop`
+			- Red Hat-based systems:
+				- Command: `sudo yum install iotop`
+		- **Examples**:
+			- Monitor all processes:
+				- Command: `sudo iotop`
+			- Filter active processes:
+				- Command: `sudo iotop -o`
+			- Show cumulative I/O:
+				- Command: `sudo iotop -a`
+	- **`iostat`** - A utility for monitoring system I/O statistics.
+		- **Features**:
+			- Displays CPU usage statistics.
+			- Shows I/O statistics for devices and partitions.
+			- Helps understand system resource utilization.
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install sysstat`
+			- Red Hat-based systems:
+				- Command: `sudo yum install sysstat`
+		- **Examples**:
+			- Basic command:
+				- Command: `iostat`
+			- Refresh statistics every 2 seconds:
+				- Command: `iostat 2`
+			- Refresh statistics every 2 seconds, 5 times:
+				- Command: `iostat 2 5`
+			- Display device statistics only:
+				- Command: `iostat -d`
+			- Display CPU statistics only:
+				- Command: `iostat -c`
+			- Display extended device statistics:
+				- Command: `iostat -x`
+			- Display statistics for a specific device:
+				- Command: `iostat -d sda`
+		- **Explanation of Output**:
+			- **avg-cpu**: Average CPU usage statistics.
+				- **%user**: Percentage of CPU time spent on user processes.
+				- **%nice**: Percentage of CPU time spent on low-priority user processes.
+				- **%system**: Percentage of CPU time spent on system (kernel) processes.
+				- **%iowait**: Percentage of CPU time spent waiting for I/O operations.
+				- **%steal**: Percentage of CPU time spent waiting for the hypervisor (in virtualized environments).
+				- **%idle**: Percentage of CPU time spent idle.
+			- **Device statistics**:
+				- **tps**: Transactions per second (I/O operations per second).
+				- **kB_read/s**: Kilobytes read per second.
+				- **kB_wrtn/s**: Kilobytes written per second.
+				- **kB_read**: Total kilobytes read.
+				- **kB_wrtn**: Total kilobytes written.
+	- **`lsof`** - A command-line utility to list open files and the processes that opened them.
+		- **Features**:
+			- Displays all open files in the system.
+			- Filters open files by user, process, or file.
+			- Monitors active network connections and sockets.
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install lsof`
+			- Red Hat-based systems:
+				- Command: `sudo yum install lsof`
+		- **Examples**:
+			- Display all open files:
+				- Command: `lsof`
+			- Display open files for a specific user:
+				- Command: `lsof -u username`
+			- Display open files for a specific process:
+				- Command: `lsof -p PID`
+			- Display processes that opened a specific file:
+				- Command: `lsof /path/to/file`
+			- Display open files in a specific directory:
+				- Command: `lsof +D /path/to/directory`
+			- Display network connections:
+				- Command: `lsof -i`
+			- Display processes using a specific port:
+				- Command: `lsof -i :80`
+		- **Example Output**:
+		  ```plaintext
+		  COMMAND     PID    USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+		  init          1    root  cwd    DIR  259,1     4096    2 /
+		  init          1    root  rtd    DIR  259,1     4096    2 /
+		  init          1    root  txt    REG  259,1  1599080 4373 /sbin/init
+		  bash        1313   user  cwd    DIR  259,1     4096  641 /home/user
+		  bash        1313   user  txt    REG  259,1  1113504 1496 /bin/bash
+		  sshd        2586   root  cwd    DIR  259,1     4096    2 /
+		  sshd        2586   root  txt    REG  259,1   941960 1453 /usr/sbin/sshd
+		  sshd        3014   user  cwd    DIR  259,1     4096  641 /home/user
+		  sshd        3014   user  txt    REG  259,1   941960 1453 /usr/sbin/sshd
+		  ```
