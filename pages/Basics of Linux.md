@@ -416,6 +416,61 @@
 		  sshd        3014   user  cwd    DIR  259,1     4096  641 /home/user
 		  sshd        3014   user  txt    REG  259,1   941960 1453 /usr/sbin/sshd
 		  ```
+	- **`df -hT`** - Command to display disk space usage and filesystem types.
+		- **Options**:
+			- `-h`: Display information in a human-readable format.
+			- `-T`: Show the filesystem type.
+		- **Example**:
+			- Command: `df -hT`
+			- Output:
+			  ```plaintext
+			  Filesystem     Type      Size  Used Avail Use% Mounted on
+			  udev           devtmpfs  3.9G     0  3.9G   0% /dev
+			  tmpfs          tmpfs     798M  1.3M  797M   1% /run
+			  /dev/sda1      ext4       50G   15G   32G  32% /
+			  tmpfs          tmpfs     3.9G  220K  3.9G   1% /dev/shm
+			  tmpfs          tmpfs     5.0M     0  5.0M   0% /run/lock
+			  tmpfs          tmpfs     798M   44K  798M   1% /run/user/1000
+			  ```
+- **File Management**
+	- **`rm -rf /nmt/junkdirectory/`** - Command to forcefully and recursively remove a directory and its contents.
+		- **Options**:
+			- `-r` (recursive): Recursively remove directories and their contents.
+			- `-f` (force): Force removal without confirmation.
+		- **Example**:
+			- Command: `rm -rf /nmt/junkdirectory/`
+		- **Caution**: This command permanently deletes the directory and its contents without asking for confirmation.
+- **Log Management**
+	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
+		- **Example Content**:
+		  ```plaintext
+		  /var/log/nginx/*.log {
+		      daily
+		      missingok
+		      rotate 14
+		      compress
+		      delaycompress
+		      notifempty
+		      create 0640 www-data adm
+		      sharedscripts
+		      postrotate
+		          if [ -f /var/run/nginx.pid ]; then
+		              kill -USR1 `cat /var/run/nginx.pid`
+		          fi
+		      endscript
+		  }
+		  ```
+		- **Explanation**:
+			- **/var/log/nginx/*.log**: Specifies the log files to rotate.
+			- **daily**: Rotate logs daily.
+			- **missingok**: Ignore missing log files and do not throw an error.
+			- **rotate 14**: Keep 14 old log files before deleting them.
+			- **compress**: Compress rotated log files using gzip.
+			- **delaycompress**: Delay compression until the next rotation.
+			- **notifempty**: Do not rotate empty log files.
+			- **create 0640 www-data adm**: Create new log files with specified permissions, owner, and group.
+			- **sharedscripts**: Ensure postrotate and prerotate scripts run only once.
+			- **postrotate...endscript**: Script to execute after rotation. Sends USR1 signal to Nginx to reopen log files.
 - **Disk Performance Testing**
 	- **Command**: `sync; dd if=/dev/zero of=tempfile bs=2M count=2048; sync`
 		- **Explanation**:
