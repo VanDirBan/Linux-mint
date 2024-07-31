@@ -283,8 +283,27 @@
 				- `con up`: Subcommand to bring up (activate) a network connection.
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
-	-
-- **System Monitoring**
+	- **File Systems**
+		- **`sshfs`** - A tool to mount remote filesystems over SSH.
+			- **Command Example**:
+				- Command: `sudo sshfs dev@192.168.200.52:/mnt/backup /mnt/backup_remote -o port=33555,allow_other`
+			- **Explanation**:
+				- **`sudo`**: Executes the command with superuser privileges.
+				- **`sshfs`**: Utility to mount a remote filesystem over SSH.
+				- **`dev@192.168.200.52:/mnt/backup`**: Remote directory to be mounted.
+					- `dev`: Username on the remote server.
+					- `192.168.200.52`: IP address of the remote server.
+					- `/mnt/backup`: Directory on the remote server to mount.
+				- **`/mnt/backup_remote`**: Local mount point.
+				- **`-o`**: Mount options.
+					- **`port=33555`**: Specifies that SSH should use port 33555 instead of the default port 22.
+					- **`allow_other`**: Allows other users to access the mounted filesystem.
+			- **Useful Commands**:
+				- **Mounting a remote filesystem**:
+					- Command: `sudo sshfs user@remote_host:/remote/directory /local/mountpoint -o options`
+				- **Unmounting a remote filesystem**:
+					- Command: `sudo fusermount -u /local/mountpoint`
+- #System_Monitoring
 	- **Load Average**:
 		- **Definition**: A metric that shows the average number of processes waiting for execution or CPU resources in the system. It is measured over three time intervals: 1, 5, and 15 minutes.
 		- **Time Intervals**:
@@ -433,7 +452,7 @@
 			  tmpfs          tmpfs     5.0M     0  5.0M   0% /run/lock
 			  tmpfs          tmpfs     798M   44K  798M   1% /run/user/1000
 			  ```
-- **File Management**
+- #File_Management
 	- **`rm -rf /nmt/junkdirectory/`** - Command to forcefully and recursively remove a directory and its contents.
 		- **Options**:
 			- `-r` (recursive): Recursively remove directories and their contents.
@@ -441,7 +460,7 @@
 		- **Example**:
 			- Command: `rm -rf /nmt/junkdirectory/`
 		- **Caution**: This command permanently deletes the directory and its contents without asking for confirmation.
-- **Log Management**
+- #Log_Management
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
 		- **Example Content**:
 		  ```plaintext
@@ -472,14 +491,14 @@
 			- **create 0640 www-data adm**: Create new log files with specified permissions, owner, and group.
 			- **sharedscripts**: Ensure postrotate and prerotate scripts run only once.
 			- **postrotate...endscript**: Script to execute after rotation. Sends USR1 signal to Nginx to reopen log files.
-- **Disk Performance Testing**
+- #Disk_Performance_Testing
 	- **Command**: `sync; dd if=/dev/zero of=tempfile bs=2M count=2048; sync`
 		- **Explanation**:
 			- `sync`: Writes all cached data to disk, ensuring all file system changes are applied.
 			- `dd if=/dev/zero of=tempfile bs=2M count=2048`: Creates a file named `tempfile` filled with zeros, with a total size of 4GB (2048 blocks of 2MB each).
 			- `sync`: Ensures all data is written to disk after the file creation.
 		- **Purpose**: This command sequence is used for testing disk performance by creating a large file and ensuring all data is written to disk without using the cache.
-- **System Performance Testing**
+- #System_Performance_Testing
 	- **`sysbench`** - A multi-purpose benchmarking tool for system performance testing.
 		- **Features**:
 			- CPU performance testing
