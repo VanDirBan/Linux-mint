@@ -197,6 +197,7 @@
 			- Command: `sudo deluser --force username`
 			- Example: `sudo deluser --force johndoe`
 - #Programs
+  collapsed:: true
 	- **NetworkManager** - Service for managing network connections in Linux
 		- Features: Automatic network configuration, support for various network types (Ethernet, Wi-Fi, mobile, VPN), graphical interfaces, and command-line tools.
 		- **Installation**:
