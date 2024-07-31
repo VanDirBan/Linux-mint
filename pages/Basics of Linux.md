@@ -435,6 +435,7 @@
 			  tmpfs          tmpfs     798M   44K  798M   1% /run/user/1000
 			  ```
 - #File_Management
+  collapsed:: true
 	- **`rm -rf /nmt/junkdirectory/`** - Command to forcefully and recursively remove a directory and its contents.
 		- **Options**:
 			- `-r` (recursive): Recursively remove directories and their contents.
