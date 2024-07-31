@@ -283,6 +283,7 @@
 				- `con up`: Subcommand to bring up (activate) a network connection.
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
+	-
 - **System Monitoring**
 	- **Load Average**:
 		- **Definition**: A metric that shows the average number of processes waiting for execution or CPU resources in the system. It is measured over three time intervals: 1, 5, and 15 minutes.
