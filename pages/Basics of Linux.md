@@ -462,6 +462,54 @@
 				- Command: `sudo sshfs user@remote_host:/remote/directory /local/mountpoint -o options`
 			- **Unmounting a remote filesystem**:
 				- Command: `sudo fusermount -u /local/mountpoint`
+- #Network_Management
+	- **`iptables`** - A powerful utility for configuring network packet filtering rules in Linux.
+		- **Tables**:
+			- **filter**: Main table for packet filtering.
+			- **nat**: Table for Network Address Translation (NAT).
+			- **mangle**: Table for packet alteration.
+			- **raw**: Table for raw packets (used for connection tracking exemptions).
+			- **security**: Table for SELinux.
+		- **Chains**:
+			- **INPUT**: Processes incoming packets destined for the local system.
+			- **OUTPUT**: Processes outgoing packets sent by the local system.
+			- **FORWARD**: Processes packets passing through the system (routed).
+			- **PREROUTING**: Processes packets before routing.
+			- **POSTROUTING**: Processes packets after routing.
+		- **Targets**:
+			- **ACCEPT**: Allows the packet.
+			- **DROP**: Drops the packet.
+			- **REJECT**: Drops the packet and sends an error message to the sender.
+			- **LOG**: Logs the packet.
+			- **MASQUERADE**: Performs masquerading (commonly used in NAT).
+		- **Basic Commands**:
+			- **List current rules**:
+				- Command: `sudo iptables -L`
+			- **Add a rule**:
+				- Command: `sudo iptables -A [CHAIN] -p [PROTOCOL] --dport [PORT] -j [TARGET]`
+				- Example: Allow incoming connections on port 22 (SSH):
+				  ```sh
+				  sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+				  ```
+			- **Delete a rule**:
+				- Command: `sudo iptables -D [CHAIN] [RULE_NUMBER]`
+				- Example: Delete the first rule in the INPUT chain:
+				  ```sh
+				  sudo iptables -D INPUT 1
+				  ```
+			- **Save rules**:
+				- Command: `sudo sh -c "iptables-save > /etc/iptables/rules.v4"`
+			- **Restore rules**:
+				- Command: `sudo iptables-restore < /etc/iptables/rules.v4`
+		- **Example Rules**:
+			- **Allow incoming connections on port 80 (HTTP)**:
+				- Command: `sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT`
+			- **Block all incoming connections**:
+				- Command: `sudo iptables -P INPUT DROP`
+			- **Allow outgoing connections**:
+				- Command: `sudo iptables -A OUTPUT -j ACCEPT`
+			- **Log dropped packets**:
+				- Command: `sudo iptables -A INPUT -j LOG --log-prefix "iptables: "`
 - #Log_Management
   collapsed:: true
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
