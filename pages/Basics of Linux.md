@@ -17,6 +17,7 @@
 		- `apt` - package manager for Debian-based distributions (e.g., Ubuntu)
 			- `apt-cache policy` - display the list of available repositories and their priorities (Debian-based systems)
 		- Ubuntu Repositories
+		  collapsed:: true
 			- **Main**: Officially supported packages
 			- **Universe**: Community-maintained packages
 			- **Multiverse**: Packages that may include non-free software
@@ -510,6 +511,123 @@
 				- Command: `sudo iptables -A OUTPUT -j ACCEPT`
 			- **Log dropped packets**:
 				- Command: `sudo iptables -A INPUT -j LOG --log-prefix "iptables: "`
+	- **`nftables`** - A modern packet filtering framework to replace `iptables`, `ip6tables`, `arptables`, and `ebtables`.
+		- **Features**:
+			- Unified utility for managing network packet filtering.
+			- Supports IPv4, IPv6, ARP, and other protocols.
+			- Simplified and flexible syntax for rules.
+			- Optimized performance and reduced system load.
+			- Supports sets for grouping addresses and other objects.
+		- **Installation**:
+			- Debian-based systems:
+				- Command: `sudo apt-get update`
+				- Command: `sudo apt-get install nftables`
+		- **Basic Commands**:
+			- **Start and enable nftables service**:
+				- Command: `sudo systemctl start nftables`
+				- Command: `sudo systemctl enable nftables`
+			- **Create a new table**:
+				- Command: `sudo nft add table inet filter`
+			- **Create a new chain**:
+				- Command: `sudo nft add chain inet filter input { type filter hook input priority 0 \; }`
+			- **Add a rule**:
+				- Command: `sudo nft add rule inet filter input tcp dport 22 accept`
+			- **List current rules**:
+				- Command: `sudo nft list ruleset`
+			- **Delete a rule**:
+				- Command: `sudo nft delete rule inet filter input handle [handle_number]`
+		- **Example Setup**:
+			- **Create filter table**:
+				- Command: `sudo nft add table inet filter`
+			- **Create input chain**:
+				- Command: `sudo nft add chain inet filter input { type filter hook input priority 0 \; }`
+			- **Create forward chain**:
+				- Command: `sudo nft add chain inet filter forward { type filter hook forward priority 0 \; }`
+			- **Create output chain**:
+				- Command: `sudo nft add chain inet filter output { type filter hook output priority 0 \; }`
+			- **Add rules**:
+				- Allow incoming SSH connections on port 22:
+					- Command: `sudo nft add rule inet filter input tcp dport 22 accept`
+				- Block all incoming connections by default:
+					- Command: `sudo nft add rule inet filter input drop`
+				- Allow outgoing connections:
+					- Command: `sudo nft add rule inet filter output accept`
+				- Log dropped packets:
+					- Command: `sudo nft add rule inet filter input drop log prefix "nftables: "`
+		- **`nftables` Practical Tips**
+			- **Automation with Scripts**
+				- Create a script:
+					- Command: `sudo nano /etc/nftables.conf`
+				- Example script content:
+				  ```plaintext
+				  #!/usr/sbin/nft -f
+				  
+				  table inet filter {
+				      chain input {
+				          type filter hook input priority 0; policy drop;
+				  
+				          # Allow established and related connections
+				          ct state established,related accept
+				  
+				          # Allow loopback traffic
+				          iif lo accept
+				  
+				          # Allow SSH
+				          tcp dport 22 accept
+				  
+				          # Allow HTTP and HTTPS
+				          tcp dport { 80, 443 } accept
+				  
+				          # Log and drop other traffic
+				          log prefix "nftables: input drop: " flags all counter
+				          drop
+				      }
+				  
+				      chain forward {
+				          type filter hook forward priority 0; policy drop;
+				      }
+				  
+				      chain output {
+				          type filter hook output priority 0; policy accept;
+				      }
+				  }
+				  
+				  table ip nat {
+				      chain prerouting {
+				          type nat hook prerouting priority -100; policy accept;
+				      }
+				  
+				      chain postrouting {
+				          type nat hook postrouting priority 100; policy accept;
+				          ip saddr 192.168.1.0/24 oif eth0 masquerade
+				      }
+				  }
+				  ```
+				- Apply the script:
+					- Command: `sudo nft -f /etc/nftables.conf`
+				- Enable automatic application on boot:
+					- Command: `sudo systemctl enable nftables`
+			- **Using Sets**
+				- Create a set for allowed IP addresses:
+					- Command: `sudo nft add set inet filter allowed_ips { type ipv4_addr\; }`
+				- Add IP addresses to the set:
+					- Command: `sudo nft add element inet filter allowed_ips { 192.168.1.100, 192.168.1.101 }`
+				- Use the set in rules:
+					- Command: `sudo nft add rule inet filter input ip saddr @allowed_ips accept`
+			- **Managing NAT**
+				- Create NAT table and chains:
+					- Command: `sudo nft add table ip nat`
+					- Command: `sudo nft add chain ip nat prerouting { type nat hook prerouting priority -100 \; }`
+					- Command: `sudo nft add chain ip nat postrouting { type nat hook postrouting priority 100 \; }`
+				- Add masquerading rule:
+					- Command: `sudo nft add rule ip nat postrouting oif eth0 masquerade`
+			- **Logging Traffic**
+				- Add logging rule for incoming traffic:
+					- Command: `sudo nft add rule inet filter input log prefix "nftables: input: " flags all counter`
+			- **DDoS Protection**
+				- Rate limit incoming SSH traffic:
+					- Command: `sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 15/minute accept`
+					- Command: `sudo nft add rule inet filter input tcp dport 22 drop`
 - #Log_Management
   collapsed:: true
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
