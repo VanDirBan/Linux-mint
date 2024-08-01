@@ -464,6 +464,7 @@
 			- **Unmounting a remote filesystem**:
 				- Command: `sudo fusermount -u /local/mountpoint`
 - #Network_Management
+  collapsed:: true
 	- **`iptables`** - A powerful utility for configuring network packet filtering rules in Linux.
 		- **Tables**:
 			- **filter**: Main table for packet filtering.
@@ -628,6 +629,52 @@
 				- Rate limit incoming SSH traffic:
 					- Command: `sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 15/minute accept`
 					- Command: `sudo nft add rule inet filter input tcp dport 22 drop`
+- #Disk_Management
+	- **RAID** - Redundant Array of Independent Disks
+		- **Levels**:
+			- **RAID 0**: Striping, no redundancy.
+			- **RAID 1**: Mirroring, high redundancy.
+			- **RAID 5**: Striping with parity, single disk fault tolerance.
+			- **RAID 6**: Striping with double parity, dual disk fault tolerance.
+			- **RAID 10**: Combination of RAID 1 and RAID 0.
+	- **`mdadm`** - Utility for managing software RAID arrays in Linux.
+		- **Commands**:
+			- Create RAID array:
+				- Command: `sudo mdadm --create /dev/md0 --level=1 --raid-devices=2 /dev/sda1 /dev/sdb1`
+			- Add device to RAID array:
+				- Command: `sudo mdadm --manage /dev/md0 --add /dev/sdc1`
+			- Remove device from RAID array:
+				- Command: `sudo mdadm --manage /dev/md0 --fail /dev/sdb1`
+				- Command: `sudo mdadm --manage /dev/md0 --remove /dev/sdb1`
+			- View RAID array status:
+				- Command: `sudo mdadm --detail /dev/md0`
+			- Create configuration file:
+				- Command: `sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf`
+			- Reassemble RAID array:
+				- Command: `sudo mdadm --assemble --scan`
+	- **`mkfs`** - Make File System, utility to create a filesystem on a partition or logical volume.
+		- **Commands**:
+			- Create ext4 filesystem:
+				- Command: `sudo mkfs.ext4 /dev/sda1`
+			- Create xfs filesystem:
+				- Command: `sudo mkfs.xfs /dev/sda1`
+			- Create vfat (FAT32) filesystem:
+				- Command: `sudo mkfs.vfat /dev/sda1`
+	- **`fdisk`** - Utility to create, modify, and delete partitions on hard drives.
+		- **Commands**:
+			- Start `fdisk` for a device:
+				- Command: `sudo fdisk /dev/sda`
+			- **Interactive Commands**:
+				- **`p`**: Print partition table.
+				- **`n`**: Create a new partition.
+				- **`d`**: Delete a partition.
+				- **`t`**: Change partition type.
+				- **`w`**: Write changes to disk and exit.
+				- **`q`**: Quit without saving changes.
+			- **Example**:
+				- Start `fdisk`: `sudo fdisk /dev/sda`
+				- Create a new partition: Press `n`, select type, number, start, and end sectors.
+				- Write changes: Press `w`.
 - #Log_Management
   collapsed:: true
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
