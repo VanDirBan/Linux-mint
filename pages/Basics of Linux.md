@@ -762,7 +762,6 @@
 			- **Comprehensive system stress testing**:
 				- Command: `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --hdd 2 --timeout 60s`
 - #System_Management
-  collapsed:: true
 	- **Resetting Root Password on Debian**
 		- **Step 1: Reboot the Server**
 			- Command: `sudo reboot`
@@ -790,3 +789,58 @@
 			- Synchronize and reboot:
 				- Command: `sync`
 				- Command: `reboot -f`
+	- **`systemd-resolved`** - A service for DNS resolution and caching, part of systemd.
+		- **Installation**:
+			- Command: `sudo apt-get update`
+			- Command: `sudo apt-get install systemd-resolved`
+		- **Start and enable service**:
+			- Command: `sudo systemctl start systemd-resolved`
+			- Command: `sudo systemctl enable systemd-resolved`
+		- **Configuration**:
+			- File: `/etc/systemd/resolved.conf`
+			- Example content:
+			  ```ini
+			  [Resolve]
+			  DNS=8.8.8.8 8.8.4.4
+			  FallbackDNS=1.1.1.1 1.0.0.1
+			  Domains=example.com
+			  DNSSEC=yes
+			  ```
+		- **Symbolic link for /etc/resolv.conf**:
+			- Command: `sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf`
+		- **Check status**:
+			- Command: `resolvectl status`
+		- **Example usage**:
+			- Query DNS: `resolvectl query example.com`
+			- Check DNS servers: `resolvectl dns`
+			- Set DNS server: `resolvectl dns eth0 8.8.8.8`
+	- **`nscd`** - Name Service Cache Daemon, caches results from various name services.
+		- **Installation**:
+			- Command: `sudo apt-get update`
+			- Command: `sudo apt-get install nscd`
+		- **Start and enable service**:
+			- Command: `sudo systemctl start nscd`
+			- Command: `sudo systemctl enable nscd`
+		- **Configuration**:
+			- File: `/etc/nscd.conf`
+			- Example content:
+			  ```ini
+			  logfile /var/log/nscd.log
+			  
+			  enable-cache    passwd          yes
+			  positive-time-to-live   passwd  600
+			  negative-time-to-live   passwd  20
+			  
+			  enable-cache    group           yes
+			  positive-time-to-live   group   3600
+			  negative-time-to-live   group   60
+			  
+			  enable-cache    hosts           yes
+			  positive-time-to-live   hosts   3600
+			  negative-time-to-live   hosts   20
+			  ```
+		- **Check status**:
+			- Command: `sudo nscd -g`
+		- **Example usage**:
+			- Invalidate hosts cache: `sudo nscd -i hosts`
+			- Invalidate passwd cache: `sudo nscd -i passwd`
