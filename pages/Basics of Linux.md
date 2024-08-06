@@ -760,7 +760,8 @@
 				- Command: `stress-ng --hdd 2 --timeout 60s`
 			- **Comprehensive system stress testing**:
 				- Command: `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --hdd 2 --timeout 60s`
-- #System Management
+- #System_Management
+  collapsed:: true
 	- **Resetting Root Password on Debian**
 		- **Step 1: Reboot the Server**
 			- Command: `sudo reboot`
