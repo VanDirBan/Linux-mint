@@ -760,4 +760,31 @@
 				- Command: `stress-ng --hdd 2 --timeout 60s`
 			- **Comprehensive system stress testing**:
 				- Command: `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --hdd 2 --timeout 60s`
--
+- #System Management
+	- **Resetting Root Password on Debian**
+		- **Step 1: Reboot the Server**
+			- Command: `sudo reboot`
+			- Alternatively, press the physical reboot button if you have direct access.
+		- **Step 2: Access GRUB Bootloader**
+			- During the reboot, press `Esc` or `Shift` to access the GRUB menu.
+		- **Step 3: Edit Boot Parameters**
+			- Select the current kernel entry and press `e` to edit.
+			- Add `single` or `init=/bin/bash` to the end of the `linux` line.
+				- Example:
+				  ```plaintext
+				  linux /boot/vmlinuz-4.19.0-16-amd64 root=UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx ro quiet single
+				  ```
+				  or
+				  ```plaintext
+				  linux /boot/vmlinuz-4.19.0-16-amd64 root=UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx ro quiet init=/bin/bash
+				  ```
+			- Press `Ctrl` + `X` or `F10` to boot with the modified parameters.
+		- **Step 4: Change Root Password**
+			- If using `init=/bin/bash`, remount the filesystem as read-write:
+				- Command: `mount -o remount,rw /`
+			- Change the root password:
+				- Command: `passwd root`
+				- Enter the new password twice.
+			- Synchronize and reboot:
+				- Command: `sync`
+				- Command: `reboot -f`
