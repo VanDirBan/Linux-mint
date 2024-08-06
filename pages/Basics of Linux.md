@@ -630,6 +630,7 @@
 					- Command: `sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 15/minute accept`
 					- Command: `sudo nft add rule inet filter input tcp dport 22 drop`
 - #Disk_Management
+  collapsed:: true
 	- **RAID** - Redundant Array of Independent Disks
 		- **Levels**:
 			- **RAID 0**: Striping, no redundancy.
