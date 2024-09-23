@@ -842,5 +842,5 @@
 		- **Check status**:
 			- Command: `sudo nscd -g`
 		- **Example usage**:
-			- Invalidate hosts  cache: `sudo nscd -i hosts`
+			- Invalidate hosts cache: `sudo nscd -i hosts`
 			- Invalidate passwd cache: `sudo nscd -i passwd`
