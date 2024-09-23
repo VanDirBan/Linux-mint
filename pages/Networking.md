@@ -1,74 +1,74 @@
 - **OSI Model (Open Systems Interconnection)**
 	- **Overview**:
-		- Модель OSI — это эталонная модель сетевого взаимодействия, состоящая из 7 уровней. Она была разработана ISO (International Organization for Standardization) для стандартизации процессов обмена данными в сетях.
-		- Каждый уровень выполняет определенные задачи и взаимодействует с верхними и нижними уровнями, обеспечивая полный путь передачи данных от отправителя к получателю.
-	- **Layer 1: Physical Layer (Физический уровень)**
-		- **Функции**:
-			- Определяет физические характеристики передачи данных: электрические сигналы, напряжение, частоты, разъемы и кабели.
-			- Отвечает за установление, поддержание и завершение физического соединения между устройствами.
-		- **Протоколы и технологии**:
-			- Ethernet (физическая часть), USB, Bluetooth, DSL, ISDN.
-		- **Устройства**:
-			- Хабы, повторители, кабели, разъемы, модемы.
-		- **Пример**: Передача битов по медному кабелю или оптоволоконному кабелю.
-	- **Layer 2: Data Link Layer (Канальный уровень)**
-		- **Функции**:
-			- Отвечает за передачу данных между соседними узлами сети.
-			- Управление доступом к среде передачи данных (MAC-адреса).
-			- Фреймирование, обнаружение и исправление ошибок.
-		- **Подуровни**:
-			- **MAC (Media Access Control)**: Управляет доступом к физической среде передачи данных.
-			- **LLC (Logical Link Control)**: Управляет связью между узлами и обработкой ошибок.
-		- **Протоколы и технологии**:
-			- Ethernet (канальная часть), PPP (Point-to-Point Protocol), HDLC (High-Level Data Link Control).
-		- **Устройства**:
-			- Коммутаторы (switches), сетевые карты (NIC).
-	- **Layer 3: Network Layer (Сетевой уровень)**
-		- **Функции**:
-			- Определяет маршрутизацию данных между различными сетями.
-			- Предоставляет логическую адресацию (например, IP-адреса).
-			- Фрагментация и сборка пакетов данных.
-		- **Протоколы**:
+		- The OSI Model is a seven-layer reference model developed by ISO (International Organization for Standardization) to standardize network communication processes.
+		- Each layer performs specific tasks and interacts with the layers above and below, providing a complete pathway for data transmission from sender to receiver.
+	- **Layer 1: Physical Layer**
+		- **Functions**:
+			- Defines the physical characteristics for data transmission: electrical signals, voltages, frequencies, connectors, and cables.
+			- Responsible for establishing, maintaining, and terminating physical connections between devices.
+		- **Protocols and Technologies**:
+			- Ethernet (physical part), USB, Bluetooth, DSL, ISDN.
+		- **Devices**:
+			- Hubs, repeaters, cables, connectors, modems.
+		- **Example**: Transmission of bits over copper wire or fiber optic cable.
+	- **Layer 2: Data Link Layer**
+		- **Functions**:
+			- Manages data transfer between neighboring network nodes.
+			- Controls access to the transmission medium using MAC (Media Access Control) addresses.
+			- Provides framing, error detection, and correction.
+		- **Sub-layers**:
+			- **MAC (Media Access Control)**: Manages access to the physical transmission medium.
+			- **LLC (Logical Link Control)**: Handles link establishment and error handling.
+		- **Protocols and Technologies**:
+			- Ethernet (data link part), PPP (Point-to-Point Protocol), HDLC (High-Level Data Link Control).
+		- **Devices**:
+			- Switches, Network Interface Cards (NIC).
+	- **Layer 3: Network Layer**
+		- **Functions**:
+			- Determines packet routing between different networks.
+			- Provides logical addressing (e.g., IP addresses).
+			- Handles packet fragmentation and reassembly.
+		- **Protocols**:
 			- IP (Internet Protocol), ICMP (Internet Control Message Protocol), RIP (Routing Information Protocol), OSPF (Open Shortest Path First), BGP (Border Gateway Protocol).
-		- **Устройства**:
-			- Маршрутизаторы (routers).
-		- **Пример**: Определение оптимального пути для передачи данных от отправителя к получателю.
-	- **Layer 4: Transport Layer (Транспортный уровень)**
-		- **Функции**:
-			- Обеспечивает надежную передачу данных между узлами, сегментацию и сборку данных.
-			- Управление потоком данных и контроль ошибок.
-			- Устанавливает виртуальные соединения между узлами.
-		- **Протоколы**:
-			- TCP (Transmission Control Protocol) — обеспечивает надежную передачу данных с подтверждением.
-			- UDP (User Datagram Protocol) — обеспечивает быструю передачу без подтверждения.
-		- **Механизмы**:
-			- **Порты**: Идентификаторы для различения приложений (например, порт 80 для HTTP).
-	- **Layer 5: Session Layer (Сеансовый уровень)**
-		- **Функции**:
-			- Управляет установлением, поддержанием и завершением сеансов связи между приложениями.
-			- Синхронизирует взаимодействие между приложениями и управляет обменом данными.
-		- **Примеры использования**:
-			- Управление сессией в удаленном доступе, конференц-связи, потоковом видео и аудио.
-		- **Протоколы**:
+		- **Devices**:
+			- Routers.
+		- **Example**: Determining the optimal path for data transmission from sender to receiver.
+	- **Layer 4: Transport Layer**
+		- **Functions**:
+			- Ensures reliable data transmission between nodes, segmenting and reassembling data.
+			- Provides flow control and error handling.
+			- Establishes virtual connections between nodes.
+		- **Protocols**:
+			- TCP (Transmission Control Protocol) — reliable, connection-oriented transmission.
+			- UDP (User Datagram Protocol) — faster, connectionless transmission.
+		- **Mechanisms**:
+			- **Ports**: Identifiers for distinguishing applications (e.g., port 80 for HTTP).
+	- **Layer 5: Session Layer**
+		- **Functions**:
+			- Manages the establishment, maintenance, and termination of communication sessions between applications.
+			- Synchronizes communication and manages data exchange.
+		- **Use Cases**:
+			- Remote access sessions, video and audio conferencing, and streaming.
+		- **Protocols**:
 			- NetBIOS, RPC (Remote Procedure Call), PPTP (Point-to-Point Tunneling Protocol).
-	- **Layer 6: Presentation Layer (Представительский уровень)**
-		- **Функции**:
-			- Отвечает за преобразование форматов данных, кодирование, шифрование и сжатие.
-			- Преобразует данные из одного формата в другой, чтобы приложения могли их понять.
-		- **Примеры**:
-			- Шифрование данных (SSL/TLS), преобразование текстовых данных (ASCII, EBCDIC), сжатие изображений (JPEG, PNG).
-	- **Layer 7: Application Layer (Прикладной уровень)**
-		- **Функции**:
-			- Предоставляет интерфейс для взаимодействия приложений с сетью.
-			- Обеспечивает доступ к сетевым службам и функциям, напрямую взаимодействуя с пользователями.
-		- **Протоколы**:
+	- **Layer 6: Presentation Layer**
+		- **Functions**:
+			- Handles data translation, encryption, compression, and format conversion.
+			- Converts data between transmission format and application-specific format.
+		- **Examples**:
+			- Data encryption (SSL/TLS), text encoding (ASCII, EBCDIC), image compression (JPEG, PNG).
+	- **Layer 7: Application Layer**
+		- **Functions**:
+			- Provides an interface for applications to interact with the network.
+			- Offers access to network services and functions, directly interacting with users.
+		- **Protocols**:
 			- HTTP (Hypertext Transfer Protocol), FTP (File Transfer Protocol), SMTP (Simple Mail Transfer Protocol), DNS (Domain Name System), SNMP (Simple Network Management Protocol).
-		- **Примеры использования**:
-			- Веб-браузеры, почтовые клиенты, системы удаленного доступа.
-	- **Дополнительные факты**:
-		- **Взаимодействие между уровнями**: Каждый уровень в модели OSI взаимодействует только с соседними уровнями. Это позволяет обеспечить модульность и гибкость сетевых коммуникаций.
-		- **Аналогия с реальной жизнью**: Модель OSI можно сравнить с отправкой письма по почте, где каждый уровень выполняет свою функцию (написание письма, упаковка, адресация, доставка и т. д.).
-	- **Преимущества модели OSI**:
-		- **Стандартизация**: Обеспечивает стандартный подход к сетевым взаимодействиям.
-		- **Интероперабельность**: Упрощает взаимодействие между различными производителями и технологиями.
-		- **Модульность**: Позволяет вносить изменения на одном уровне без необходимости менять всю систему.
+		- **Use Cases**:
+			- Web browsers, email clients, remote access systems.
+	- **Additional Facts**:
+		- **Layer Interaction**: Each layer in the OSI model interacts only with its adjacent layers, ensuring modularity and flexibility in network communications.
+		- **Real-World Analogy**: The OSI model can be compared to sending a letter through the postal system, where each layer performs a specific function (writing, packaging, addressing, delivering, etc.).
+	- **Benefits of the OSI Model**:
+		- **Standardization**: Provides a standardized approach to network communication.
+		- **Interoperability**: Simplifies interaction between different manufacturers and technologies.
+		- **Modularity**: Allows changes at one layer without impacting the entire system.
