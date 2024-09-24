@@ -1,4 +1,5 @@
 - **OSI Model (Open Systems Interconnection)**
+  collapsed:: true
 	- **Overview**:
 		- The OSI Model is a seven-layer reference model developed by ISO (International Organization for Standardization) to standardize network communication processes.
 		- Each layer performs specific tasks and interacts with the layers above and below, providing a complete pathway for data transmission from sender to receiver.
@@ -72,3 +73,66 @@
 		- **Standardization**: Provides a standardized approach to network communication.
 		- **Interoperability**: Simplifies interaction between different manufacturers and technologies.
 		- **Modularity**: Allows changes at one layer without impacting the entire system.
+- **TCP/IP Model (Transmission Control Protocol/Internet Protocol)**
+	- **Overview**:
+		- The TCP/IP Model is a concise, practical framework for network communication used in most modern networks, including the internet.
+		- It consists of four layers that define how data is transmitted across interconnected devices and networks.
+		- Unlike the OSI model's 7 layers, the TCP/IP model focuses more on protocols and real-world implementations.
+	- **Layer 1: Network Interface (Link) Layer**
+		- **Functions**:
+			- Responsible for handling the physical transmission of data between devices within the same network.
+			- Manages protocols for accessing the physical network, including addressing and framing.
+			- This layer combines the functionality of the Physical and Data Link layers of the OSI model.
+		- **Protocols and Technologies**:
+			- Ethernet, Wi-Fi (802.11), PPP (Point-to-Point Protocol), ARP (Address Resolution Protocol), Frame Relay.
+		- **Devices**:
+			- Network Interface Cards (NIC), switches, and bridges.
+		- **Example**: Transmitting frames over an Ethernet cable between devices within a Local Area Network (LAN).
+	- **Layer 2: Internet Layer**
+		- **Functions**:
+			- Responsible for logical addressing, routing, and packet forwarding between networks.
+			- Provides mechanisms for data encapsulation, fragmentation, and reassembly.
+			- Corresponds to the Network layer in the OSI model.
+		- **Protocols**:
+			- IP (Internet Protocol) — Provides addressing and routing of packets.
+				- **IPv4**: Uses 32-bit addresses (e.g., 192.168.1.1).
+				- **IPv6**: Uses 128-bit addresses (e.g., 2001:0db8:85a3:0000:0000:8a2e:0370:7334).
+			- ICMP (Internet Control Message Protocol) — Used for error messages and operational queries (e.g., `ping` command).
+			- ARP (Address Resolution Protocol) — Resolves IP addresses to MAC addresses.
+			- IGMP (Internet Group Management Protocol) — Manages multicast group memberships.
+		- **Devices**:
+			- Routers.
+		- **Example**: Determining the best route to send packets from one device to another over the internet using IP addresses.
+	- **Layer 3: Transport Layer**
+		- **Functions**:
+			- Provides end-to-end communication, error checking, and data flow control between devices.
+			- Manages the segmentation, transfer, and reassembly of data packets.
+			- Ensures data integrity and reliability (when using TCP).
+		- **Protocols**:
+			- **TCP (Transmission Control Protocol)**:
+				- Reliable, connection-oriented protocol that ensures data is delivered in the correct order and without errors.
+				- Establishes a connection before transmitting data (3-way handshake).
+			- **UDP (User Datagram Protocol)**:
+				- Unreliable, connectionless protocol that provides faster data transmission without error checking.
+				- Commonly used for real-time applications (e.g., streaming, gaming).
+		- **Mechanisms**:
+			- **Ports**: Numeric identifiers (e.g., port 80 for HTTP, port 443 for HTTPS) that help distinguish different services/applications on the same device.
+		- **Example**: Establishing a reliable connection for a web page request using TCP or sending a quick DNS query using UDP.
+	- **Layer 4: Application Layer**
+		- **Functions**:
+			- Provides an interface for applications to access network services and protocols.
+			- Manages high-level protocols that define how applications communicate over the network.
+			- Corresponds to the Application, Presentation, and Session layers of the OSI model.
+		- **Protocols**:
+			- **HTTP/HTTPS (Hypertext Transfer Protocol/Secure)**: Used for web browsing.
+			- **FTP (File Transfer Protocol)**: Used for transferring files.
+			- **SMTP (Simple Mail Transfer Protocol)**: Used for sending emails.
+			- **DNS (Domain Name System)**: Resolves domain names to IP addresses.
+			- **SSH (Secure Shell)**: Provides secure remote access to devices.
+		- **Example**: A user accessing a website via a browser, where HTTP/HTTPS is used to communicate with the web server.
+	- **Additional Notes**:
+		- **Comparison with OSI Model**:
+			- The OSI model has 7 layers, while the TCP/IP model has only 4, combining some layers for simplicity.
+			- The TCP/IP model is considered more practical and is widely used in real-world networking.
+		- **Real-World Usage**:
+			- TCP/IP is the foundation of internet communication, providing standardized protocols that enable different devices and networks to interact seamlessly.
