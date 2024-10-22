@@ -176,3 +176,42 @@
 		- **Example Commands**:
 			- snmpget: `snmpget -v2c -c public 192.168.1.1 sysName.0`
 			- snmpwalk: `snmpwalk -v2c -c public 192.168.1.1`
+	- **IP (Internet Protocol)**
+		- **Functions**:
+			- Provides logical addressing and routing of packets across networks.
+			- Operates in "best-effort delivery" mode without guaranteed delivery.
+		- **Types**:
+			- IPv4: 32-bit addressing, e.g., 192.168.1.1.
+			- IPv6: 128-bit addressing, e.g., 2001:0db8:85a3:0000:0000:8a2e:0370:7334.
+		- **Components**:
+			- IP Header, TTL (Time to Live), Fragmentation.
+		- **Example**: Basic routing of packets across the internet.
+	- **TCP (Transmission Control Protocol)**
+		- **Functions**:
+			- Ensures reliable, ordered, and error-checked data delivery.
+			- Establishes a connection before data transmission (Three-Way Handshake).
+		- **Mechanism**:
+			- Three-Way Handshake: SYN → SYN-ACK → ACK.
+		- **Use Cases**:
+			- Web browsing (HTTP/HTTPS), email (SMTP), file transfer (FTP).
+	- **UDP (User Datagram Protocol)**
+		- **Functions**:
+			- Provides fast, connectionless data transmission.
+			- No error checking, order control, or reliability.
+		- **Use Cases**:
+			- Real-time streaming (video/audio), online gaming, VoIP.
+	- **SSL (Secure Sockets Layer)**
+		- **Functions**:
+			- Provides encryption, authentication, and data integrity.
+			- Uses asymmetric encryption for connection setup, symmetric encryption for data transfer.
+		- **Status**:
+			- Considered obsolete, replaced by TLS.
+		- **Example**: Early version of HTTPS encryption.
+	- **TLS (Transport Layer Security)**
+		- **Functions**:
+			- Enhances SSL with stronger encryption, authentication, and data integrity.
+			- Establishes a secure connection via handshake, uses symmetric encryption for data transfer.
+		- **Versions**:
+			- TLS 1.0, 1.2, 1.3 (latest and most secure).
+		- **Use Cases**:
+			- Secure web browsing (HTTPS), secure email (SMTP/IMAP), VPN.
