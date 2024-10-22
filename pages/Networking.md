@@ -137,7 +137,7 @@
 			- The TCP/IP model is considered more practical and is widely used in real-world networking.
 		- **Real-World Usage**:
 			- TCP/IP is the foundation of internet communication, providing standardized protocols that enable different devices and networks to interact seamlessly.
-- **#Protocols**
+- #Protocols
 	- **ICMP (Internet Control Message Protocol)**
 		- **Functions**:
 			- Error reporting and diagnostic functions.
