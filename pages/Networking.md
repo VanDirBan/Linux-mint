@@ -215,3 +215,41 @@
 			- TLS 1.0, 1.2, 1.3 (latest and most secure).
 		- **Use Cases**:
 			- Secure web browsing (HTTPS), secure email (SMTP/IMAP), VPN.
+	- **HTTP (Hypertext Transfer Protocol)**
+		- **Functions**:
+			- Stateless, request-response protocol for web communication.
+			- Transfers HTML, images, videos, and other resources.
+		- **Methods**: GET, POST, PUT, DELETE, etc.
+		- **Ports**: Port 80.
+		- **Drawbacks**: No compression, multiplexing, or built-in security.
+		- **Example**: User requests a web page, server responds with HTML.
+	- **HTTP/2**
+		- **Improvements**:
+			- Binary format, header compression, multiplexing, server push.
+		- **Ports**: Typically uses port 443 (with TLS).
+		- **Use Case**: Faster web page loading with reduced latency.
+		- **Example**: Browsing a modern website with faster data transmission.
+	- **HTTP/3 & QUIC**
+		- **HTTP/3**:
+			- Runs over QUIC, offering faster, more reliable data transmission.
+		- **QUIC**:
+			- UDP-based protocol with built-in flow control, error correction, and encryption.
+		- **Ports**: Uses port 443 over UDP.
+		- **Use Case**: Faster web page loads, especially in unreliable networks.
+		- **Example**: Video streaming services like YouTube using HTTP/3.
+	- **HTTPS (Hypertext Transfer Protocol Secure)**
+		- **Functions**:
+			- Encrypts data, ensuring security and integrity.
+			- Uses TLS to protect data exchange.
+		- **Ports**: Port 443.
+		- **Use Case**: Secure data transmission for online transactions, banking, etc.
+		- **Example**: Accessing a secure website (https://example.com).
+	- **WebSockets**
+		- **Functions**:
+			- Enables real-time, two-way communication over a single connection.
+			- Upgrades from HTTP/HTTPS to maintain a persistent connection.
+		- **Ports**:
+			- WebSocket: ws:// (port 80).
+			- Secure WebSocket: wss:// (port 443).
+		- **Use Case**: Real-time applications like chat, gaming, stock trading.
+		- **Example**: Chatting in a web application where messages are sent instantly.
