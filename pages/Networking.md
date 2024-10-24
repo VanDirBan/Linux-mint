@@ -138,6 +138,7 @@
 		- **Real-World Usage**:
 			- TCP/IP is the foundation of internet communication, providing standardized protocols that enable different devices and networks to interact seamlessly.
 - #Protocols
+  collapsed:: true
 	- **ICMP (Internet Control Message Protocol)**
 		- **Functions**:
 			- Error reporting and diagnostic functions.
@@ -253,3 +254,7 @@
 			- Secure WebSocket: wss:// (port 443).
 		- **Use Case**: Real-time applications like chat, gaming, stock trading.
 		- **Example**: Chatting in a web application where messages are sent instantly.
+- **Socket**
+	- **Definition**: A socket is a virtual endpoint that enables communication between two programs over a network, acting as an entry and exit point for data exchange.
+	- **Function**: It establishes a connection between applications, similar to how a physical port connects network devices.
+	- **Use**: Sockets are used in client-server models, chat applications, web browsing, and any network-based communication.
