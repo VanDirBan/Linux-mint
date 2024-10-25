@@ -1,5 +1,4 @@
 - #Commands
-  collapsed:: true
 	- Command Line
 		- `ls` - list files
 		- `cd` - change directory
@@ -10,6 +9,55 @@
 		- `rm` - remove files
 		- `touch` - create an empty file or update the timestamp of an existing file
 			- `touch ~/.ssh/authorized_keys` - create an empty `authorized_keys` file in the user's `.ssh` directory
+	- Data Filtering
+		- **`grep` (Global Regular Expression Print)**
+			- **Definition**:
+				- A command-line utility used for searching specific patterns in text files or command output.
+			- **Basic Functions**:
+				- Searches for patterns in files and directories.
+				- Supports regular expressions for flexible searches.
+				- Filters output of other commands in real-time.
+			- **Examples**:
+				- **Simple Search in a File**:
+				  ```sh
+				  grep "error" /var/log/syslog
+				  ```
+				- **Case-Insensitive Search**:
+				  ```sh
+				  grep -i "error" /var/log/syslog
+				  ```
+				- **Recursive Search**:
+				  ```sh
+				  grep -r "main()" /home/user/code
+				  ```
+				- **Pattern Search with Regular Expressions**:
+				  ```sh
+				  grep "^[0-9]\{3\}-[0-9]\{2\}-[0-9]\{4\}" file.txt
+				  ```
+				- **Count Matches**:
+				  ```sh
+				  grep -c "user" /etc/passwd
+				  ```
+				- **Show Only File Names with Matches**:
+				  ```sh
+				  grep -l "TODO" *.c
+				  ```
+				- **Exclude Matching Lines**:
+				  ```sh
+				  grep -v "debug" /var/log/syslog
+				  ```
+				- **Show Context Around Matches**:
+					- **Lines After Matches**: `grep -A 2 "error" /var/log/syslog`
+					- **Lines Before Matches**: `grep -B 2 "error" /var/log/syslog`
+					- **Lines Before and After**: `grep -C 2 "error" /var/log/syslog`
+				- **Filter Output from Other Commands**:
+				  ```sh
+				  ps aux | grep "apache2"
+				  ```
+				- **Show Line Numbers for Matches**:
+				  ```sh
+				  grep -n "main" code.c
+				  ```
 	- Package Management
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
@@ -112,7 +160,6 @@
 	- Version Control
 		- `git` - distributed version control system
 - #User_and_Group_Management
-  collapsed:: true
 	- `useradd` - create a new user
 		- `-c "comment"` - add a comment (usually the user's full name)
 			- Example: `useradd -c "John Doe" johndoe`
@@ -198,7 +245,6 @@
 			- Command: `sudo deluser --force username`
 			- Example: `sudo deluser --force johndoe`
 - #Programs
-  collapsed:: true
 	- **NetworkManager** - Service for managing network connections in Linux
 		- Features: Automatic network configuration, support for various network types (Ethernet, Wi-Fi, mobile, VPN), graphical interfaces, and command-line tools.
 		- **Installation**:
@@ -286,7 +332,6 @@
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
 - #System_Monitoring
-  collapsed:: true
 	- **Load Average**:
 		- **Definition**: A metric that shows the average number of processes waiting for execution or CPU resources in the system. It is measured over three time intervals: 1, 5, and 15 minutes.
 		- **Time Intervals**:
@@ -436,7 +481,6 @@
 			  tmpfs          tmpfs     798M   44K  798M   1% /run/user/1000
 			  ```
 - #File_Management
-  collapsed:: true
 	- **`rm -rf /nmt/junkdirectory/`** - Command to forcefully and recursively remove a directory and its contents.
 		- **Options**:
 			- `-r` (recursive): Recursively remove directories and their contents.
@@ -630,7 +674,6 @@
 					- Command: `sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 15/minute accept`
 					- Command: `sudo nft add rule inet filter input tcp dport 22 drop`
 - #Disk_Management
-  collapsed:: true
 	- **RAID** - Redundant Array of Independent Disks
 		- **Levels**:
 			- **RAID 0**: Striping, no redundancy.
@@ -677,7 +720,6 @@
 				- Create a new partition: Press `n`, select type, number, start, and end sectors.
 				- Write changes: Press `w`.
 - #Log_Management
-  collapsed:: true
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
 		- **Example Content**:
 		  ```plaintext
@@ -709,7 +751,6 @@
 			- **sharedscripts**: Ensure postrotate and prerotate scripts run only once.
 			- **postrotate...endscript**: Script to execute after rotation. Sends USR1 signal to Nginx to reopen log files.
 - #Disk_Performance_Testing
-  collapsed:: true
 	- **Command**: `sync; dd if=/dev/zero of=tempfile bs=2M count=2048; sync`
 		- **Explanation**:
 			- `sync`: Writes all cached data to disk, ensuring all file system changes are applied.
@@ -717,7 +758,6 @@
 			- `sync`: Ensures all data is written to disk after the file creation.
 		- **Purpose**: This command sequence is used for testing disk performance by creating a large file and ensuring all data is written to disk without using the cache.
 - #System_Performance_Testing
-  collapsed:: true
 	- **`sysbench`** - A multi-purpose benchmarking tool for system performance testing.
 		- **Features**:
 			- CPU performance testing
