@@ -1,0 +1,22 @@
+- #Cryptography
+	- **Hash and Hash Function**
+	- **Hash**:
+		- A fixed-length string or numeric value generated from data of arbitrary length.
+		- Serves as a "digital fingerprint" of the data.
+		- Properties:
+			- Fixed length, regardless of input size.
+			- Represents the data uniquely (small change in input leads to a different hash).
+			- Cannot be reversed to reveal the original data.
+	- **Hash Function**:
+		- An algorithm that transforms input data into a fixed-length hash.
+		- Key properties:
+			- Deterministic: Same input always results in the same hash.
+			- Fast computation for any input.
+			- One-way: Impossible to reverse-engineer the original input from the hash.
+			- Collision-resistant: Unlikely to produce the same hash for different inputs.
+		- Applications:
+			- Password storage, data integrity checks, speeding up searches (e.g., hash tables).
+	- **Examples of Hash Functions**:
+		- **MD5**: Produces a 128-bit hash, but vulnerable to collisions.
+		- **SHA-1**: Produces a 160-bit hash, also prone to collisions.
+		- **SHA-256**: Produces a 256-bit hash, secure and widely used in modern cryptography.
