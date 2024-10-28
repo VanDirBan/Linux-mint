@@ -9,6 +9,48 @@
 		- `rm` - remove files
 		- `touch` - create an empty file or update the timestamp of an existing file
 			- `touch ~/.ssh/authorized_keys` - create an empty `authorized_keys` file in the user's `.ssh` directory
+		- **`chmod` (Change Mode)**
+			- **Definition**:
+				- A command used to change file and directory permissions in Linux.
+			- **Types of Owners**:
+				- **User (u)**: The owner of the file.
+				- **Group (g)**: Users in the group that owns the file.
+				- **Others (o)**: All other users.
+			- **Types of Permissions**:
+				- **r (read)**: Read permission.
+				- **w (write)**: Write permission.
+				- **x (execute)**: Execute permission.
+			- **Permission Formats**:
+				- **Symbolic Format**: Uses characters (`r`, `w`, `x`) for permissions.
+					- Example: `chmod u+x file.txt` (adds execute permission for the owner).
+				- **Octal Format**: Uses numeric values for permissions.
+					- `4` = read, `2` = write, `1` = execute.
+					- Example: `chmod 755 script.sh` (owner gets `rwx`, group and others get `r-x`).
+			- **Examples**:
+				- **Set read, write, and execute for all**:
+				  ```sh
+				  chmod 777 file.txt
+				  ```
+				- **Set read and execute for all**:
+				  ```sh
+				  chmod 755 script.sh
+				  ```
+				- **Add write permission for group**:
+				  ```sh
+				  chmod g+w file.txt
+				  ```
+				- **Remove execute permission for others**:
+				  ```sh
+				  chmod o-x file.txt
+				  ```
+				- **Recursive permission change**:
+				  ```sh
+				  chmod -R 755 /var/www/html
+				  ```
+				- **Set symbolic permissions for all owners**:
+				  ```sh
+				  chmod u=rwx,g=rx,o=r file.txt
+				  ```
 	- Data Filtering
 		- **`grep` (Global Regular Expression Print)**
 			- **Definition**:
