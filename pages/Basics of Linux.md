@@ -100,6 +100,39 @@
 				  ```sh
 				  grep -n "main" code.c
 				  ```
+		- **Regular Expressions (Regex)**
+			- **Definition**:
+				- A pattern of characters used for searching, matching, and manipulating text in Linux.
+			- **Basic Concepts**:
+				- **Characters**:
+					- Literals (e.g., "abc").
+					- Special characters (e.g., `.` matches any character).
+				- **Modifiers**:
+					- `*` (zero or more), `+` (one or more), `?` (zero or one).
+				- **Anchors**:
+					- `^` (start of string), `$` (end of string).
+				- **Grouping and Alternation**:
+					- `( )` for grouping, `|` for alternation.
+				- **Character Classes and Ranges**:
+					- `[abc]` (matches any character), `[a-z]` (matches any lowercase letter), `[^abc]` (matches any character except "a", "b", "c").
+			- **Examples in Linux**:
+				- **Using grep**: 
+				  ```sh
+				  grep -E "[0-9]{3}-[0-9]{2}-[0-9]{4}" file.txt
+				  ```
+				- **Using sed**: 
+				  ```sh
+				  sed -E 's/[0-9]{3}-[0-9]{2}-[0-9]{4}/XXX-XX-XXXX/g' file.txt
+				  ```
+				- **Using awk**: 
+				  ```sh
+				  awk '/[0-9]{3}-[0-9]{2}-[0-9]{4}/ {print $0}' file.txt
+				  ```
+			- **Common Regex Patterns**:
+				- **MAC Address**:
+					- Pattern: `([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}`
+				- **IPv4 Address**:
+					- Pattern: `\b([0-9]{1,3}\.){3}[0-9]{1,3}\b`
 	- Package Management
 		- `pip` - package installer for Python
 		- `dnf` - package manager for RPM-based distributions (e.g., Fedora)
