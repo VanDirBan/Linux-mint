@@ -410,6 +410,7 @@
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
 - #Linux_Scripting
+  collapsed:: true
 	- **Bash (Bourne Again Shell)**
 		- **Definition**:
 			- A command-line shell and scripting language for UNIX-based operating systems like Linux.
@@ -458,6 +459,60 @@
 			  ```
 		- **Running a Script**:
 			- Create a script, make it executable with `chmod +x script.sh`, and run it with `./script.sh`.
+- #Automation
+	- **Cron (Task Scheduler)**
+		- **Definition**:
+			- A Unix-based task scheduler used to automate recurring tasks by running commands or scripts at specific times or intervals.
+		- **Crontab Format**:
+			- Syntax: `* * * * * command`
+			- **Fields**:
+				- **Minute** (0–59)
+				- **Hour** (0–23)
+				- **Day of Month** (1–31)
+				- **Month** (1–12)
+				- **Day of Week** (0–7, where 0 and 7 represent Sunday)
+			- **Special Characters**:
+				- `*` (any value), `,` (list), `-` (range), `/` (step)
+		- **Examples**:
+			- **Run a script every day at 2:30 AM**:
+			  ```plaintext
+			  30 2 * * * /path/to/script.sh
+			  ```
+			- **Run a command every 5 minutes**:
+			  ```plaintext
+			  */5 * * * * /path/to/command
+			  ```
+			- **Weekly task on Sundays at noon**:
+			  ```plaintext
+			  0 12 * * 0 /path/to/script.sh
+			  ```
+			- **Monthly backup on the 1st at midnight**:
+			  ```plaintext
+			  0 0 1 * * /path/to/backup.sh
+			  ```
+		- **Management Commands**:
+			- **Edit crontab**: `crontab -e`
+			- **List crontab**: `crontab -l`
+			- **Remove crontab**: `crontab -r`
+		- **Logging**:
+			- Log file location varies by system (e.g., `/var/log/syslog` or `/var/log/cron`).
+			- Redirect output for debugging:
+			  ```plaintext
+			  0 3 * * * /path/to/script.sh >> /path/to/logfile.log 2>&1
+			  ```
+		- **Special Time Strings**:
+			- `@reboot`: Run at system startup
+				- Example:
+				  ```plaintext
+				  @reboot /path/to/script.sh
+				  ```
+			- `@daily`: Run daily at midnight
+				- Example:
+				  ```plaintext
+				  @daily /path/to/backup.sh
+				  ```
+			- `@weekly`: Run weekly at midnight on Sunday
+			- `@monthly`: Run monthly at midnight on the first day
 - #System_Monitoring
   collapsed:: true
 	- **Load Average**:
