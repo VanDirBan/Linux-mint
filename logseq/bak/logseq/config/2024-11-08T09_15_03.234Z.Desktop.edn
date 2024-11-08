@@ -299,7 +299,7 @@
  ;;  :charge-range    600}   ; Default value: 600
 
  ;; Favorites to list on the left sidebar
- :favorites ["web server" "basics of linux" "networking"]
+ :favorites ["web server" "networking" "basics of linux"]
 
  ;; Set flashcards interval.
  ;; Expected value:
