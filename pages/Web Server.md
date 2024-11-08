@@ -1,4 +1,4 @@
-- **Apache2**
+- #Apache2
 	- **Definition**:
 		- A widely-used open-source web server that supports serving websites and applications.
 	- **Key Features**:
@@ -57,7 +57,7 @@
 	- **Load Balancing**:
 		- **mod_proxy_balancer**: Set up load balancing across multiple servers.
 		- **Failover**: Configure backup servers for high availability.
-- **Nginx**
+- #Nginx
 	- **Definition**:
 		- A high-performance, open-source web server and reverse proxy designed to handle a large number of simultaneous connections.
 	- **Key Features**:
