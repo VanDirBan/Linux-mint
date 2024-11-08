@@ -39,10 +39,6 @@
 		- **mod_ssl**: Enables HTTPS with SSL/TLS.
 		- **mod_rewrite**: Enables URL rewriting.
 		- **mod_headers**: Controls HTTP headers for security and caching.
-	- **Security Tips**:
-		- Enable HTTPS with SSL/TLS.
-		- Use `.htaccess` for access control.
-		- Disable unused modules for improved security.
 	- **Performance and Optimization**:
 		- **Multi-Processing Modules (MPM)**: Choose `prefork`, `worker`, or `event` based on application requirements.
 		- **Caching**: Use `mod_cache` and `mod_cache_disk` to cache static content.
@@ -61,3 +57,53 @@
 	- **Load Balancing**:
 		- **mod_proxy_balancer**: Set up load balancing across multiple servers.
 		- **Failover**: Configure backup servers for high availability.
+- **Nginx**
+	- **Definition**:
+		- A high-performance, open-source web server and reverse proxy designed to handle a large number of simultaneous connections.
+	- **Key Features**:
+		- **Asynchronous Architecture**: Efficiently handles multiple connections with minimal resources.
+		- **Reverse Proxy and Load Balancing**: Routes traffic to internal servers and distributes load.
+		- **Caching**: Caches static resources and application responses to reduce server load.
+		- **SSL/TLS Support**: Provides secure connections with HTTPS.
+	- **Installation (Debian/Ubuntu)**:
+	  ```bash
+	  sudo apt update
+	  sudo apt install nginx
+	  ```
+	- **Basic Commands**:
+		- Start server: `sudo systemctl start nginx`
+		- Stop server: `sudo systemctl stop nginx`
+		- Restart server: `sudo systemctl restart nginx`
+		- Reload configuration: `sudo systemctl reload nginx`
+		- Check status: `sudo systemctl status nginx`
+	- **Configuration Files**:
+		- **`/etc/nginx/nginx.conf`**: Main configuration file.
+		- **`/etc/nginx/sites-available/`**: Directory for virtual host configurations.
+		- **`/etc/nginx/sites-enabled/`**: Symbolic links to active sites.
+	- **Modules**:
+		- **HTTP Proxy**: Forward requests to backend servers.
+		- **SSL/TLS**: Enable HTTPS.
+		- **Caching**: Reduce load by caching responses.
+		- **Load Balancing**: Distribute requests across multiple servers.
+	- **Security Tips**:
+		- Use SSL/TLS with Let's Encrypt for HTTPS.
+		- Limit connections and request rates to protect against DDoS.
+		- Configure headers for security enhancements.
+	- **Performance Optimization**:
+		- **worker_processes auto**: Automatically sets workers based on CPU cores.
+		- **worker_connections 1024**: Defines max connections per worker.
+		- **gzip on**: Enables gzip compression.
+		- **proxy_cache**: Enables caching for backend responses.
+	- **Load Balancing**:
+		- **Round Robin**: Default load balancing method.
+		- **Least Connections**: Sends requests to server with least connections.
+		- **IP Hash**: Consistent server for specific client IP.
+	- **Monitoring and Logging**:
+		- **Custom Logs**: Add custom fields for better insights.
+		- **Prometheus/Grafana**: Integration for real-time monitoring.
+	- **CI/CD Integration**:
+		- **Docker**: Official image for easy deployment.
+		- **Ansible**: Automates installation and configuration.
+	- **Useful Modules**:
+		- **ngx_http_realip_module**: Corrects client IP behind proxies.
+		- **ngx_http_stub_status_module**: Provides basic server status.
