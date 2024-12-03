@@ -1,78 +1,35 @@
-- **Core Components of Docker**
+- **Key Components**
+	- **Images**:
+		- Definition: Read-only templates that contain the application and its dependencies.
+		- Usage: Serve as a blueprint for creating containers.
+		- Commands:
+			- List images:
+			  ```bash
+			  docker images
+			  ```
+			- Pull an image:
+			  ```bash
+			  docker pull <image_name>
+			  ```
 	- **Containers**:
-		- **Definition**:
-			- Lightweight, standalone, and executable units of software that package an application and its dependencies.
-			- Containers ensure consistency across multiple environments (development, testing, production).
-		- **Key Features**:
-			- Isolated environment for applications.
-			- Uses the host OS kernel (unlike virtual machines).
-			- Stateless by default (persistent storage requires volumes or bind mounts).
-		- **Commands**:
+		- Definition: Lightweight, isolated runtime environments created from Docker images.
+		- Usage: Running instances of Docker images.
+		- Commands:
 			- List running containers:
 			  ```bash
 			  docker ps
 			  ```
-			- List all containers (including stopped ones):
-			  ```bash
-			  docker ps -a
-			  ```
 			- Start a container:
 			  ```bash
-			  docker start <container_name_or_id>
+			  docker start <container_id>
 			  ```
 			- Stop a container:
 			  ```bash
-			  docker stop <container_name_or_id>
-			  ```
-			- Remove a container:
-			  ```bash
-			  docker rm <container_name_or_id>
-			  ```
-			- Run a container from an image:
-			  ```bash
-			  docker run -d --name <container_name> <image_name>
-			  ```
-	- **Images**:
-		- **Definition**:
-			- Immutable templates used to create containers.
-			- Built from a **Dockerfile**, which contains instructions to set up the environment and application.
-		- **Key Features**:
-			- Layers: Each instruction in a Dockerfile creates a layer, making images lightweight and efficient.
-			- Reusable across multiple containers.
-		- **Commands**:
-			- List all images:
-			  ```bash
-			  docker images
-			  ```
-			- Pull an image from a repository:
-			  ```bash
-			  docker pull <image_name>
-			  ```
-			- Build an image from a Dockerfile:
-			  ```bash
-			  docker build -t <image_name> <path_to_dockerfile>
-			  ```
-			- Remove an image:
-			  ```bash
-			  docker rmi <image_name_or_id>
+			  docker stop <container_id>
 			  ```
 	- **Repositories**:
-		- **Definition**:
-			- Locations (local or remote) where Docker images are stored and shared.
-			- Images can be pulled from or pushed to repositories.
-		- **Types**:
-			- **Public Repositories**:
-				- Accessible to anyone (e.g., Docker Hub).
-			- **Private Repositories**:
-				- Restricted access; requires authentication.
-		- **Key Repositories**:
-			- **Docker Hub** (default registry): `https://hub.docker.com`
-			- Other registries: AWS ECR, Google Container Registry, GitHub Container Registry.
-		- **Commands**:
-			- Login to a repository:
-			  ```bash
-			  docker login
-			  ```
+		- Definition: Storage for Docker images, often hosted on Docker Hub or private registries.
+		- Commands:
 			- Push an image to a repository:
 			  ```bash
 			  docker push <repository>/<image_name>:<tag>
@@ -81,3 +38,85 @@
 			  ```bash
 			  docker pull <repository>/<image_name>:<tag>
 			  ```
+- **Basic Commands**
+	- **System Info**:
+		- Check Docker version:
+		  ```bash
+		  docker --version
+		  ```
+		- View Docker system information:
+		  ```bash
+		  docker info
+		  ```
+	- **Containers**:
+		- Run a new container:
+		  ```bash
+		  docker run <image_name>
+		  ```
+			- Options:
+				- `-d`: Run container in detached mode.
+				- `--name`: Assign a name to the container.
+				- `-it`: Run container interactively.
+		- List running containers:
+		  ```bash
+		  docker ps
+		  ```
+		- List all containers:
+		  ```bash
+		  docker ps -a
+		  ```
+		- Remove a container:
+		  ```bash
+		  docker rm <container_id>
+		  ```
+	- **Images**:
+		- Build an image from a Dockerfile:
+		  ```bash
+		  docker build -t <image_name> .
+		  ```
+		- Remove an image:
+		  ```bash
+		  docker rmi <image_name>
+		  ```
+- **Networking**
+	- **Publishing Ports**:
+		- Map container ports to host ports using the `-p` flag:
+		  ```bash
+		  docker run -d -p <host_port>:<container_port> <image_name>
+		  ```
+			- Example:
+			  ```bash
+			  docker run -d -p 8080:80 nginx
+			  ```
+			- Explanation:
+				- `8080`: Port on the host machine.
+				- `80`: Port inside the container.
+	- **Volumes**
+	- **Definition**:
+		- Volumes are used to persist data generated or used by Docker containers.
+	- **Mounting Volumes**:
+		- Use the `-v` flag to mount a volume:
+		  ```bash
+		  docker run -d -v <host_path>:<container_path> <image_name>
+		  ```
+			- Example:
+			  ```bash
+			  docker run -d -v /data:/var/lib/mysql mysql
+			  ```
+			- Explanation:
+				- `/data`: Host directory to store data.
+				- `/var/lib/mysql`: Directory inside the container where MySQL stores its data.
+	- **Listing Volumes**:
+		- List all volumes:
+		  ```bash
+		  docker volume ls
+		  ```
+	- **Creating a Volume**:
+		- Create a named volume:
+		  ```bash
+		  docker volume create <volume_name>
+		  ```
+		- Use the volume in a container:
+		  ```bash
+		  docker run -d -v <volume_name>:<container_path> <image_name>
+		  ```
