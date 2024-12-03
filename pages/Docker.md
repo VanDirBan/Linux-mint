@@ -120,3 +120,101 @@
 		  ```bash
 		  docker run -d -v <volume_name>:<container_path> <image_name>
 		  ```
+- **Building Custom Images with Dockerfile**
+	- **What is a Dockerfile?**
+		- A Dockerfile is a script containing a series of instructions to assemble a Docker image.
+		- It defines the base image, dependencies, configuration, and commands to set up the environment.
+	- **Basic Structure of a Dockerfile**:
+		- **FROM**: Specifies the base image.
+		- **RUN**: Executes commands to install dependencies or configure the environment.
+		- **COPY** or **ADD**: Copies files from the host to the image.
+		- **CMD** or **ENTRYPOINT**: Defines the command to run when the container starts.
+		- **EXPOSE**: Declares the port the container will listen on.
+	- **Example Dockerfile**:
+	  ```Dockerfile
+	  # Use an official Node.js image as the base
+	  FROM node:14
+	  
+	  # Set the working directory inside the container
+	  WORKDIR /app
+	  
+	  # Copy package.json and package-lock.json to the container
+	  COPY package*.json ./
+	  
+	  # Install dependencies
+	  RUN npm install
+	  
+	  # Copy the application code
+	  COPY . .
+	  
+	  # Expose the application port
+	  EXPOSE 3000
+	  
+	  # Start the application
+	  CMD ["npm", "start"]
+	  ```
+	- **Building an Image**:
+		- **Syntax**:
+		  ```bash
+		  docker build -t <image_name>:<tag> <path_to_dockerfile>
+		  ```
+		- **Example**:
+		  ```bash
+		  docker build -t my-node-app:1.0 .
+		  ```
+			- `-t`: Assigns a name and optional tag to the image.
+			- `.`: Indicates the context directory containing the Dockerfile.
+	- **Best Practices**:
+		- Use a minimal base image (e.g., `alpine`) to reduce image size:
+		  ```Dockerfile
+		  FROM alpine
+		  ```
+		- Combine multiple `RUN` instructions to minimize the number of layers:
+		  ```Dockerfile
+		  RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+		  ```
+		- Use `.dockerignore` to exclude unnecessary files and directories from the build context (e.g., logs, `.git`, `node_modules`):
+		  ```
+		  node_modules
+		  *.log
+		  .git
+		  ```
+	- **Dockerfile Instructions**:
+		- **FROM**: Sets the base image for the new image.
+		- **WORKDIR**: Sets the working directory inside the container.
+		- **RUN**: Executes commands during image build.
+		- **COPY**: Copies files/directories from the host to the container.
+		- **ADD**: Similar to COPY but supports remote URLs and extraction of archives.
+		- **CMD**: Specifies the default command to run when the container starts.
+		- **ENTRYPOINT**: Similar to CMD but allows arguments to be passed during container runtime.
+		- **EXPOSE**: Documents the port on which the container listens (for informational purposes only).
+		- **ENV**: Sets environment variables.
+		  ```Dockerfile
+		  ENV NODE_ENV=production
+		  ```
+		- **ARG**: Defines build-time variables.
+		  ```Dockerfile
+		  ARG APP_VERSION=1.0
+		  ```
+	- **Common Commands for Managing Images**:
+		- List built images:
+		  ```bash
+		  docker images
+		  ```
+		- Remove an image:
+		  ```bash
+		  docker rmi <image_name>
+		  ```
+		- Run a container from the custom image:
+		  ```bash
+		  docker run -d -p 3000:3000 my-node-app:1.0
+		  ```
+	- **Debugging Builds**:
+		- Use the `--no-cache` flag to force rebuild without using the cache:
+		  ```bash
+		  docker build --no-cache -t my-node-app:1.0 .
+		  ```
+		- Inspect intermediate build layers:
+		  ```bash
+		  docker history <image_id>
+		  ```
