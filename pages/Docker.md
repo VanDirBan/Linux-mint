@@ -218,3 +218,123 @@
 		  ```bash
 		  docker history <image_id>
 		  ```
+- **Docker Compose**
+	- **Definition**:
+		- Docker Compose is a tool for defining and managing multi-container Docker applications.
+		- Applications are defined using a `docker-compose.yml` file, which specifies the services, networks, and volumes needed for the application.
+	- **Basic Workflow**:
+	  1. Create a `docker-compose.yml` file.
+	  2. Use `docker-compose` commands to manage services (e.g., start, stop, restart).
+	- **Key Benefits**:
+		- Simplifies running multi-container setups (e.g., web app + database).
+		- Allows for easy scaling and orchestration of services.
+	- **Basic Commands**:
+		- Start services defined in `docker-compose.yml`:
+		  ```bash
+		  docker-compose up
+		  ```
+		- Start services in detached mode (background):
+		  ```bash
+		  docker-compose up -d
+		  ```
+		- Stop services:
+		  ```bash
+		  docker-compose down
+		  ```
+		- View running services:
+		  ```bash
+		  docker-compose ps
+		  ```
+		- Scale services:
+		  ```bash
+		  docker-compose up -d --scale <service>=<count>
+		  ```
+		- Restart services:
+		  ```bash
+		  docker-compose restart <service>
+		  ```
+	- **Example `docker-compose.yml` File**:
+		- Example: Running a web application with a PostgreSQL database:
+		  ```yaml
+		  version: '3.8'
+		  
+		  services:
+		    app:
+		      image: my-web-app:1.0
+		      ports:
+		        - "8080:8080"
+		      volumes:
+		        - ./app:/usr/src/app
+		      environment:
+		        - DATABASE_URL=postgres://user:password@db:5432/mydb
+		      depends_on:
+		        - db
+		  
+		    db:
+		      image: postgres:13
+		      volumes:
+		        - db-data:/var/lib/postgresql/data
+		      environment:
+		        POSTGRES_USER: user
+		        POSTGRES_PASSWORD: password
+		        POSTGRES_DB: mydb
+		  
+		  volumes:
+		    db-data:
+		  ```
+	- **Explanation of Example**:
+		- **Version**: Specifies the Docker Compose file format version.
+		- **Services**:
+			- **app**: Defines the web application service.
+				- **image**: The Docker image for the service.
+				- **ports**: Maps port 8080 on the host to port 8080 in the container.
+				- **volumes**: Mounts the local `./app` directory into the container.
+				- **environment**: Sets environment variables for the service.
+				- **depends_on**: Ensures the database service starts before the app.
+			- **db**: Defines the PostgreSQL database service.
+				- **volumes**: Mounts a named volume for persisting database data.
+				- **environment**: Sets PostgreSQL-specific environment variables.
+		- **Volumes**:
+			- `db-data`: A named volume for persistent data storage.
+	- **Best Practices**:
+		- Use `.env` files to store sensitive environment variables and load them into your `docker-compose.yml`:
+		  ```yaml
+		  environment:
+		    - POSTGRES_USER=${DB_USER}
+		    - POSTGRES_PASSWORD=${DB_PASSWORD}
+		  ```
+			- `.env` file example:
+			  ```
+			  DB_USER=user
+			  DB_PASSWORD=securepassword
+			  ```
+			- Load with:
+			  ```bash
+			  docker-compose --env-file .env up
+			  ```
+		- Always specify versions explicitly to avoid unexpected behavior.
+		- Use named volumes to persist important data (e.g., databases).
+	- **Scaling Services**:
+		- To scale services, add the `--scale` flag:
+		  ```bash
+		  docker-compose up -d --scale app=3
+		  ```
+			- This example creates three instances of the `app` service.
+	- **Logs and Debugging**:
+		- View logs for all services:
+		  ```bash
+		  docker-compose logs
+		  ```
+		- View logs for a specific service:
+		  ```bash
+		  docker-compose logs <service>
+		  ```
+		- Follow logs in real-time:
+		  ```bash
+		  docker-compose logs -f
+		  ```
+	- **Removing Containers, Networks, and Volumes**:
+		- Stop and remove all containers, networks, and volumes:
+		  ```bash
+		  docker-compose down --volumes
+		  ```
