@@ -53,7 +53,7 @@
 			- Agents: Execute builds.
 		- **Pipeline**:
 			- Automated sequence of stages for CI/CD.
-			- [See CI/CD Section](#CI/CD).
+			- [See [[CI/CD]] Section].
 	- **Basic Commands**:
 		- Restart Jenkins:
 		  ```bash

@@ -18,8 +18,8 @@
 		- **Source Control System** (e.g., Git).
 		- **Build Automation** (e.g., Maven, Gradle).
 		- **Testing Frameworks** (e.g., JUnit, Selenium).
-		- **Deployment Tools** (e.g., Ansible, Docker).
-		- **CI/CD Servers** (e.g., [Jenkins](#Jenkins)).
+		- **Deployment Tools** (e.g., Ansible, [[Docker]]).
+		- **CI/CD Servers** (e.g., [[Jenkins]]).
 	- **CI/CD Pipeline**:
 		- **Stages**:
 		  1. **Source**: Detect code changes in version control.
@@ -33,4 +33,4 @@
 		- **CD Tools**: Spinnaker, ArgoCD.
 		- **Integration with Jenkins**:
 			- Jenkins is a popular open-source tool for building CI/CD pipelines.
-			- [See Jenkins Section](#Jenkins).
+			- [See [[Jenkins]] Section].
