@@ -15,7 +15,7 @@
 		- Reduced deployment risks.
 		- Improved collaboration between development and operations.
 	- **Key Components**:
-		- **Source Control System** (e.g., Git).
+		- **Source Control System** (e.g., [[Git]]).
 		- **Build Automation** (e.g., Maven, Gradle).
 		- **Testing Frameworks** (e.g., JUnit, Selenium).
 		- **Deployment Tools** (e.g., Ansible, [[Docker]]).
