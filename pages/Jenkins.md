@@ -4,7 +4,7 @@
 		- Supports continuous integration and continuous delivery workflows.
 	- **Installation**:
 		- **Prerequisites**:
-			- Install OpenJDK 17 or 21:
+			- Install #OpenJDK 17 or 21:
 			  ```bash
 			  sudo apt update
 			  sudo apt install openjdk-17-jdk

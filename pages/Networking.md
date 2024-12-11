@@ -1,5 +1,4 @@
 - **OSI Model (Open Systems Interconnection)**
-  collapsed:: true
 	- **Overview**:
 		- The OSI Model is a seven-layer reference model developed by ISO (International Organization for Standardization) to standardize network communication processes.
 		- Each layer performs specific tasks and interacts with the layers above and below, providing a complete pathway for data transmission from sender to receiver.
@@ -74,7 +73,6 @@
 		- **Interoperability**: Simplifies interaction between different manufacturers and technologies.
 		- **Modularity**: Allows changes at one layer without impacting the entire system.
 - **TCP/IP Model (Transmission Control Protocol/Internet Protocol)**
-  collapsed:: true
 	- **Overview**:
 		- The TCP/IP Model is a concise, practical framework for network communication used in most modern networks, including the internet.
 		- It consists of four layers that define how data is transmitted across interconnected devices and networks.
@@ -138,7 +136,6 @@
 		- **Real-World Usage**:
 			- TCP/IP is the foundation of internet communication, providing standardized protocols that enable different devices and networks to interact seamlessly.
 - #Protocols
-  collapsed:: true
 	- **ICMP (Internet Control Message Protocol)**
 		- **Functions**:
 			- Error reporting and diagnostic functions.

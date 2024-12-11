@@ -29,7 +29,7 @@
 		  5. **Deploy**: Deploy to staging or production.
 		  6. **Monitor**: Monitor application performance and logs.
 	- **Tools Overview**:
-		- **CI Tools**: Jenkins, GitHub Actions, CircleCI.
+		- **CI Tools**: [[Jenkins]], GitHub Actions, CircleCI.
 		- **CD Tools**: Spinnaker, ArgoCD.
 		- **Integration with Jenkins**:
 			- Jenkins is a popular open-source tool for building CI/CD pipelines.

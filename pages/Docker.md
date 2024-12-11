@@ -105,7 +105,7 @@
 			  ```
 			- Explanation:
 				- `/data`: Host directory to store data.
-				- `/var/lib/mysql`: Directory inside the container where MySQL stores its data.
+				- `/var/lib/mysql`: Directory inside the container where [[MySQL]] stores its data.
 	- **Listing Volumes**:
 		- List all volumes:
 		  ```bash
@@ -254,7 +254,7 @@
 		  docker-compose restart <service>
 		  ```
 	- **Example `docker-compose.yml` File**:
-		- Example: Running a web application with a PostgreSQL database:
+		- Example: Running a web application with a [[PostgreSQL]] database:
 		  ```yaml
 		  version: '3.8'
 		  
