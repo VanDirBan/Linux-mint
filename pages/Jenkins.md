@@ -39,9 +39,9 @@
 	- **Basic Features**:
 		- **Plugins**:
 			- Jenkins has a rich plugin ecosystem to extend its capabilities.
-			- Examples: Git, Docker, Pipeline.
+			- Examples: [[Git]], [[Docker]], Pipeline.
 		- **Pipelines**:
-			- Define CI/CD workflows as code using Jenkinsfile.
+			- Define [[CI/CD]] workflows as code using Jenkinsfile.
 			- Two types: Declarative and Scripted.
 		- **Web Interface**:
 			- Intuitive UI for managing jobs, builds, and logs.
