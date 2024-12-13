@@ -161,3 +161,104 @@
 		- Authentication options:
 			- **Matrix-based Security**: Fine-grained access control.
 			- **Project-based Authorization**: Access control per job.
+- **Connecting Slave Agents (via SSH)**
+	- **Definition**:
+		- Slave agents (now called "nodes") are machines that Jenkins uses to run builds.
+		- Using SSH is a secure and efficient way to connect slave agents.
+	- **Steps to Configure an SSH Slave**:
+	  1. **Prepare the Slave Machine**:
+		- Install Java (compatible version for Jenkins):
+		  ```bash
+		  sudo apt update
+		  sudo apt install openjdk-17-jdk
+		  ```
+		- Create a Jenkins user on the slave machine:
+		  ```bash
+		  sudo adduser jenkins
+		  sudo usermod -aG sudo jenkins
+		  ```
+		- Enable SSH access for the Jenkins user.
+	- 2. **Add the Node in Jenkins**:
+		- Go to **Manage Jenkins** > **Manage Nodes and Clouds** > **New Node**.
+		- Enter the node name, select **Permanent Agent**, and configure:
+			- **Remote Root Directory**: Directory on the slave machine where Jenkins files will be stored (e.g., `/home/jenkins`).
+			- **Usage**: Choose "Use this node as much as possible" or other options based on your needs.
+			- **Launch Method**: Select **Launch agent via SSH**.
+	- 3. **Configure SSH Credentials**:
+		- In the node configuration, under **Credentials**, click **Add** to create SSH credentials:
+			- **Username**: `jenkins` (or the user created on the slave machine).
+			- **Private Key**: Upload the private key for SSH access.
+		- Test the connection to ensure proper setup.
+	- 4. **Verify the Connection**:
+		- Once saved, Jenkins will attempt to connect to the slave.
+		- Check the status of the node in **Manage Nodes**.
+- **Working with Credentials**
+	- **Definition**:
+		- Credentials in Jenkins are used to securely store and manage sensitive data (e.g., SSH keys, passwords, API tokens).
+	- **Types of Credentials**:
+		- **Username and Password**: For basic authentication.
+		- **SSH Key**: For connecting to remote servers or repositories.
+		- **Secret Text**: For API tokens or other sensitive strings.
+		- **Certificate**: For authentication using certificates.
+	- **Adding Credentials**:
+		- Navigate to **Manage Jenkins** > **Manage Credentials**.
+		- Select a credentials store (e.g., **Global** or **Folder-Specific**).
+		- Click **Add Credentials** and fill in the details:
+			- **Scope**:
+				- **Global**: Available for all jobs and nodes.
+				- **System**: Restricted to Jenkins system use only.
+				- **Folder/Job**: Available only within a specific folder or job.
+			- **ID**: Unique identifier for referencing the credentials in pipelines.
+		- Example:
+			- Add an SSH private key:
+				- **Kind**: SSH Username with private key.
+				- **Username**: `jenkins`.
+				- **Private Key**: Paste or upload the private key file.
+	- **Using Credentials in Jobs**:
+		- Credentials can be referenced in pipelines or freestyle jobs:
+		  ```groovy
+		  pipeline {
+		    agent any
+		    environment {
+		      GIT_CREDENTIALS = credentials('git-ssh-credentials')
+		    }
+		    stages {
+		      stage('Checkout') {
+		        steps {
+		          git url: 'git@github.com:user/repo.git',
+		              credentialsId: GIT_CREDENTIALS
+		        }
+		      }
+		    }
+		  }
+		  ```
+- **Access Control and Role-Based Access**
+	- **Global Security Configuration**:
+		- Navigate to **Manage Jenkins** > **Configure Global Security**.
+		- Enable **Authorization** and choose a strategy:
+			- **Matrix-based Security**:
+				- Allows granular permissions for users/groups.
+				- Common roles:
+					- **Admin**: Full control over Jenkins.
+					- **Developer**: Can create and manage jobs.
+					- **Viewer**: Can only view job configurations and results.
+			- **Project-based Authorization**:
+				- Configure permissions at the job or folder level.
+	- **Setting Up Roles with a Plugin**:
+		- Install the **Role-Based Authorization Strategy** plugin.
+		- Go to **Manage Jenkins** > **Manage and Assign Roles**:
+		  1. **Create Roles**:
+			- Define roles (e.g., admin, developer, viewer) and assign permissions.
+			  2. **Assign Roles**:
+			- Assign roles to users or groups at the global or folder level.
+		- Example Role Permissions:
+			- **Admin**:
+				- Full permissions.
+			- **Developer**:
+				- Build and configure jobs.
+				- No access to global configuration.
+			- **Viewer**:
+				- Read-only access to jobs and builds.
+	- **Best Practices**:
+		- Grant minimal permissions required for users to perform their tasks.
+		- Regularly review and audit permissions.
