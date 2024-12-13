@@ -86,7 +86,7 @@
 				- Example:
 					- Variable: `JAVA_HOME`
 					- Value: `/usr/lib/jvm/java-17-openjdk-amd64`
-	- **Plugins Management**
+- **Plugins Management**
 	- **Plugins Overview**:
 		- Plugins extend Jenkins' functionality (e.g., Git, Docker, Slack).
 	- **Install Plugins**:
@@ -112,7 +112,7 @@
 		  ```bash
 		  java -jar jenkins-cli.jar -s http://localhost:8080/ install-plugin git
 		  ```
-	- **Global Tools Configuration**
+- **Global Tools Configuration**
 	- **Definition**:
 		- Global tools are external software (e.g., JDK, Maven, Git) required for Jenkins jobs.
 	- **Configuration Steps**:
@@ -146,7 +146,7 @@
 		- Use descriptive names for tools to avoid confusion.
 		- Verify paths after configuration to ensure tools are properly installed.
 		- Use environment variables (e.g., `$JAVA_HOME`) for portability.
-	- **Security and Access Control**
+- **Security and Access Control**
 	- **Configure Credentials**:
 		- Go to **Manage Jenkins** > **Manage Credentials**.
 		- Types of credentials:
