@@ -262,3 +262,494 @@
 	- **Best Practices**:
 		- Grant minimal permissions required for users to perform their tasks.
 		- Regularly review and audit permissions.
+- **Job Types in Jenkins**
+	- **Freestyle Project**:
+		- **Definition**:
+			- The simplest type of Jenkins job for building, testing, and deploying applications.
+		- **Use Case**:
+			- Suitable for simple projects without complex workflows.
+		- **Features**:
+			- Integration with version control (Git, SVN).
+			- Build triggers (e.g., scheduled, webhook, manual).
+			- Build steps (e.g., shell commands, build tools like Maven).
+		- **Configuration**:
+			- Go to **New Item** > **Freestyle project**.
+			- Configure source code management, build steps, and post-build actions.
+	- **Pipeline**:
+		- **Definition**:
+			- Automates complex CI/CD workflows as code using a `Jenkinsfile`.
+		- **Benefits**:
+			- Pipeline as code: Version-controlled and reusable.
+			- Resilience: Supports resuming builds after a crash.
+			- Visualization: Displays stages and steps clearly in the Jenkins UI.
+		- **Types of Pipelines**:
+			- **Declarative Pipeline**:
+				- High-level, structured syntax.
+				- Easy to read and maintain.
+				- Example:
+				  ```groovy
+				  pipeline {
+				      agent any
+				      stages {
+				          stage('Build') {
+				              steps {
+				                  echo "Building application..."
+				                  sh 'mvn clean package'
+				              }
+				          }
+				          stage('Test') {
+				              steps {
+				                  echo "Running tests..."
+				                  sh 'mvn test'
+				              }
+				          }
+				          stage('Deploy') {
+				              steps {
+				                  echo "Deploying to production..."
+				              }
+				          }
+				      }
+				  }
+				  ```
+			- **Scripted Pipeline**:
+				- Flexible, uses Groovy scripts.
+				- Offers full control for advanced use cases.
+				- Example:
+				  ```groovy
+				  node {
+				      stage('Build') {
+				          sh 'mvn clean package'
+				      }
+				      stage('Test') {
+				          sh 'mvn test'
+				      }
+				      stage('Deploy') {
+				          sh 'scp target/*.jar user@server:/app/'
+				      }
+				  }
+				  ```
+	- **Multibranch Pipeline**:
+		- **Definition**:
+			- Automatically creates pipelines for branches and pull requests in a repository.
+		- **Use Case**:
+			- Projects with multiple branches (e.g., feature branches, main branch).
+		- **Configuration**:
+			- Go to **New Item** > **Multibranch Pipeline**.
+			- Link to a Git repository and configure the branch discovery strategy.
+	- **Folder**:
+		- **Definition**:
+			- Groups multiple jobs or pipelines into a folder for better organization.
+		- **Use Case**:
+			- Organize jobs by project, team, or environment.
+	- **Other Job Types**:
+		- **Maven Project**: A job type specifically designed for Maven builds.
+		- **External Job**: Executes jobs outside of Jenkins, useful for monitoring processes.
+		- **Pipeline Script from SCM**:
+			- Fetches `Jenkinsfile` from version control, making it easy to integrate with Git.
+- **Approaches to Writing Pipelines**
+	- **Declarative vs Scripted**:
+		- **Declarative**:
+			- Structured and easier to read.
+			- Recommended for most use cases.
+		- **Scripted**:
+			- More flexible for advanced workflows.
+			- Requires deeper understanding of Groovy syntax.
+	- **Best Practices**:
+		- **Store Jenkinsfile in Version Control**:
+			- Keep the `Jenkinsfile` alongside the project code for better traceability.
+		- **Parameterize Builds**:
+			- Use input parameters to customize builds dynamically.
+			  ```groovy
+			  parameters {
+			    string(name: 'ENVIRONMENT', defaultValue: 'staging', description: 'Target environment')
+			  }
+			  ```
+		- **Use Shared Libraries**:
+			- Store reusable pipeline scripts in a shared library.
+			- Example import:
+			  ```groovy
+			  @Library('my-shared-library') _
+			  ```
+		- **Split Pipelines into Stages**:
+			- Use clear stage names to visualize the CI/CD process.
+		- **Fail Fast**:
+			- Run tests and validations early to catch errors as soon as possible.
+	- **Pipeline Examples**:
+		- **Pipeline with Environment Variables**:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      environment {
+		          APP_ENV = 'production'
+		          JAVA_HOME = '/usr/lib/jvm/java-17-openjdk'
+		      }
+		      stages {
+		          stage('Build') {
+		              steps {
+		                  echo "Building in ${APP_ENV} environment..."
+		              }
+		          }
+		      }
+		  }
+		  ```
+		- **Parallel Stages**:
+			- Run multiple tasks simultaneously to save time.
+			  ```groovy
+			  pipeline {
+			    agent any
+			    stages {
+			        stage('Parallel Tests') {
+			            parallel {
+			                stage('Unit Tests') {
+			                    steps {
+			                        echo "Running unit tests..."
+			                    }
+			                }
+			                stage('Integration Tests') {
+			                    steps {
+			                        echo "Running integration tests..."
+			                    }
+			                }
+			            }
+			        }
+			    }
+			  }
+			  ```
+- **Declarative Pipeline**
+	- **Definition**:
+		- Declarative Pipeline is a high-level syntax for defining Jenkins pipelines as code.
+		- It is easier to read, structured, and requires minimal Groovy knowledge.
+	- **Basic Structure**:
+	  ```groovy
+	  pipeline {
+	      agent any
+	      stages {
+	          stage('Stage 1') {
+	              steps {
+	                  echo 'Executing Stage 1...'
+	              }
+	          }
+	          stage('Stage 2') {
+	              steps {
+	                  echo 'Executing Stage 2...'
+	              }
+	          }
+	      }
+	  }
+	  ```
+	- **Key Elements**:
+		- **pipeline**: The root block that contains the entire pipeline definition.
+		- **agent**: Specifies where the pipeline or a stage will run.
+			- **any**: Use any available node.
+			- **none**: No global agent; each stage must define its agent.
+			- Example:
+			  ```groovy
+			  agent { label 'docker' }
+			  ```
+		- **stages**: Contains multiple `stage` blocks that define steps.
+		- **stage**: Represents a single phase of the pipeline.
+		- **steps**: A sequence of actions to execute within a stage.
+		- **post**: Defines actions that run after the pipeline or a stage completes.
+- **Creating a Basic Declarative Pipeline**
+	- **Example Pipeline**:
+		- Build, Test, and Deploy a simple application:
+		  ```groovy
+		  pipeline {
+		      agent any
+		  
+		      environment {
+		          APP_ENV = 'development'
+		          BUILD_VERSION = '1.0'
+		      }
+		  
+		      stages {
+		          stage('Checkout Code') {
+		              steps {
+		                  echo "Checking out source code..."
+		                  git url: 'https://github.com/user/repository.git', branch: 'main'
+		              }
+		          }
+		  
+		          stage('Build Application') {
+		              steps {
+		                  echo "Building application..."
+		                  sh 'mvn clean package'
+		              }
+		          }
+		  
+		          stage('Run Tests') {
+		              steps {
+		                  echo "Running tests..."
+		                  sh 'mvn test'
+		              }
+		          }
+		  
+		          stage('Deploy Application') {
+		              steps {
+		                  echo "Deploying application version ${BUILD_VERSION} to ${APP_ENV} environment..."
+		                  sh 'scp target/app.jar user@server:/path/to/deploy'
+		              }
+		          }
+		      }
+		  
+		      post {
+		          always {
+		              echo "Pipeline completed!"
+		          }
+		          success {
+		              echo "Build and deployment succeeded!"
+		          }
+		          failure {
+		              echo "Build or deployment failed."
+		          }
+		      }
+		  }
+		  ```
+	- **Explanation**:
+		- **agent any**: Uses any available Jenkins node to run the pipeline.
+		- **environment**: Defines global environment variables for the pipeline.
+		- **stages**:
+			- **Checkout Code**: Fetches code from a Git repository.
+			- **Build Application**: Runs the build command using Maven.
+			- **Run Tests**: Executes tests to validate the application.
+			- **Deploy Application**: Copies the built file to the deployment server.
+		- **post**:
+			- Actions to execute after the pipeline finishes:
+				- **always**: Runs no matter the result.
+				- **success**: Runs if the pipeline succeeds.
+				- **failure**: Runs if the pipeline fails.
+	- **Best Practices for Writing Declarative Pipelines**
+	- **Keep Pipelines Simple**:
+		- Start with basic stages like `Build`, `Test`, and `Deploy`.
+	- **Use Environment Variables**:
+		- Use `environment` to manage values like build version, API keys, etc.
+	- **Version Control the Jenkinsfile**:
+		- Always store the Jenkinsfile in the repository root.
+	- **Fail Fast**:
+		- Run tests early to catch errors quickly.
+	- **Add Notifications**:
+		- Use plugins like Slack or email to notify on pipeline success/failure.
+	- **Debugging Pipelines**:
+	- Use `echo` statements to log pipeline progress:
+	  ```groovy
+	  steps {
+	      echo "Step is running..."
+	  }
+	  ```
+	- Use `sh` commands to debug:
+	  ```groovy
+	  sh 'ls -la'
+	  ```
+	- Run pipeline stages incrementally:
+		- Use the **"Replay"** feature in Jenkins to test minor pipeline changes.
+- **Pipeline Variables and Scope**
+	- **Definition**:
+		- Variables in Jenkins pipelines can have different scopes: global, local, and environment-specific.
+	- **Types of Variables**:
+		- **Global Variables**:
+			- Accessible throughout the pipeline.
+			- Example:
+			  ```groovy
+			  def globalVar = 'I am global'
+			  pipeline {
+			      agent any
+			      stages {
+			          stage('Show Global Var') {
+			              steps {
+			                  echo "${globalVar}"
+			              }
+			          }
+			      }
+			  }
+			  ```
+		- **Local Variables**:
+			- Defined inside stages or steps and not accessible outside.
+			- Example:
+			  ```groovy
+			  pipeline {
+			      agent any
+			      stages {
+			          stage('Local Var Example') {
+			              steps {
+			                  def localVar = 'I am local'
+			                  echo "${localVar}"
+			              }
+			          }
+			      }
+			  }
+			  ```
+		- **Environment Variables**:
+			- Predefined or custom variables available globally.
+			- Example:
+			  ```groovy
+			  pipeline {
+			      agent any
+			      environment {
+			          APP_ENV = 'production'
+			      }
+			      stages {
+			          stage('Env Var Example') {
+			              steps {
+			                  echo "Environment is ${env.APP_ENV}"
+			              }
+			          }
+			      }
+			  }
+			  ```
+- **Error Handling with try/catch and catchError**
+	- **try/catch**:
+		- Used to handle errors and continue the pipeline execution.
+		- Example:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      stages {
+		          stage('Error Handling') {
+		              steps {
+		                  script {
+		                      try {
+		                          sh 'exit 1' // Simulate failure
+		                      } catch (Exception e) {
+		                          echo "Error occurred: ${e}"
+		                      }
+		                  }
+		              }
+		          }
+		      }
+		  }
+		  ```
+	- **catchError**:
+		- A Jenkins pipeline step to mark a stage as failed but continue execution.
+		- Example:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      stages {
+		          stage('catchError Example') {
+		              steps {
+		                  catchError(buildResult: 'UNSTABLE') {
+		                      sh 'exit 1' // Simulate failure
+		                  }
+		                  echo "This step continues even after failure."
+		              }
+		          }
+		      }
+		  }
+		  ```
+- **Lockable Resources (Concurrency Control)**
+	- **Definition**:
+		- Prevent concurrent execution of critical sections using the `lock` step.
+		- Requires the **Lockable Resources Plugin**.
+	- **Use Case**:
+		- Useful when accessing shared resources (e.g., databases, test environments).
+	- **Example**:
+	  ```groovy
+	  pipeline {
+	      agent any
+	      stages {
+	          stage('Lock Resource') {
+	              steps {
+	                  lock(resource: 'shared-db') {
+	                      echo "Accessing shared resource..."
+	                      sh 'sleep 10'
+	                  }
+	              }
+	          }
+	      }
+	  }
+	  ```
+	- **Best Practice**:
+		- Define unique names for resources to avoid conflicts.
+		- Keep locked steps minimal to prevent long wait times.
+- **Using Groovy Code in Pipelines**
+	- **Why Use Groovy?**:
+		- Jenkins pipelines use Groovy for scripting.
+		- Groovy allows conditional execution, loops, and reusable functions.
+	- **Examples**:
+		- **Loops**:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      stages {
+		          stage('For Loop') {
+		              steps {
+		                  script {
+		                      for (int i = 1; i <= 3; i++) {
+		                          echo "Iteration: ${i}"
+		                      }
+		                  }
+		              }
+		          }
+		      }
+		  }
+		  ```
+		- **Conditions**:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      stages {
+		          stage('Conditional Stage') {
+		              steps {
+		                  script {
+		                      if (env.BRANCH_NAME == 'main') {
+		                          echo "Deploying to production..."
+		                      } else {
+		                          echo "Skipping deployment."
+		                      }
+		                  }
+		              }
+		          }
+		      }
+		  }
+		  ```
+		- **Functions**:
+			- Define reusable functions inside the script block:
+			  ```groovy
+			  pipeline {
+			      agent any
+			      stages {
+			          stage('Reusable Function') {
+			              steps {
+			                  script {
+			                      def sayHello(name) {
+			                          echo "Hello, ${name}!"
+			                      }
+			                      sayHello('DevOps')
+			                  }
+			              }
+			          }
+			      }
+			  }
+			  ```
+- **Best Practices for Writing Pipelines**
+	- **Organize Code**:
+		- Use clear stage names and logical steps.
+	- **Version Control the Jenkinsfile**:
+		- Store the Jenkinsfile in your repository for traceability.
+	- **Parameterize Pipelines**:
+		- Add input parameters for flexibility:
+		  ```groovy
+		  parameters {
+		      string(name: 'DEPLOY_ENV', defaultValue: 'staging', description: 'Target environment')
+		  }
+		  ```
+	- **Error Handling**:
+		- Use `try/catch` or `catchError` for graceful failures.
+	- **Keep Pipelines Clean**:
+		- Avoid inline scripts for complex logic; move them to shared libraries.
+	- **Parallel Execution**:
+		- Run independent tasks in parallel to reduce build time.
+		  ```groovy
+		  parallel {
+		      stage('Unit Tests') {
+		          steps { echo 'Running unit tests' }
+		      }
+		      stage('Integration Tests') {
+		          steps { echo 'Running integration tests' }
+		      }
+		  }
+		  ```
+	- **Lock Critical Resources**:
+		- Use `lock` for shared resources to avoid conflicts.
+	- **Add Notifications**:
+		- Integrate email, Slack, or other tools for build notifications.
