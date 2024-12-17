@@ -753,3 +753,276 @@
 		- Use `lock` for shared resources to avoid conflicts.
 	- **Add Notifications**:
 		- Integrate email, Slack, or other tools for build notifications.
+- **Maven Integration**
+	- **Definition**:
+		- Jenkins can build Maven-based projects directly using the **Maven Integration Plugin**.
+	- **Prerequisites**:
+		- Install Maven on the Jenkins server.
+		- Configure Maven in **Global Tool Configuration**:
+			- **Name**: `Maven3`
+			- **Installation**: Path to Maven or download from URL.
+	- **Configuring a Maven Job**:
+		- Go to **New Item** > **Maven Project**.
+		- Set the following:
+			- **Root POM**: Path to `pom.xml`.
+			- **Goals and Options**: Define Maven goals (e.g., `clean package`).
+	- **Pipeline Example**:
+		- Use `withMaven` step to integrate Maven builds:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      tools {
+		          maven 'Maven3'
+		      }
+		      stages {
+		          stage('Build with Maven') {
+		              steps {
+		                  withMaven(maven: 'Maven3') {
+		                      sh 'mvn clean package'
+		                  }
+		              }
+		          }
+		      }
+		      post {
+		          success {
+		              echo 'Build successful!'
+		          }
+		      }
+		  }
+		  ```
+	- **Common Maven Goals**:
+		- `clean`: Cleans the project by deleting target directories.
+		- `compile`: Compiles the source code.
+		- `test`: Runs unit tests.
+		- `package`: Packages the compiled code (e.g., JAR/WAR).
+		- `install`: Installs the package into the local repository.
+- **Sending Emails**
+	- **Purpose**:
+		- Send email notifications based on the pipeline or job result.
+	- **Prerequisites**:
+		- Install the **Email Extension Plugin**.
+		- Configure SMTP settings in **Manage Jenkins** > **Configure System**:
+			- SMTP Server: `smtp.example.com`
+			- User credentials for email authentication.
+	- **Pipeline Example (Basic Notification)**:
+	  ```groovy
+	  pipeline {
+	      agent any
+	      stages {
+	          stage('Build') {
+	              steps {
+	                  echo "Building project..."
+	              }
+	          }
+	      }
+	      post {
+	          failure {
+	              mail to: 'admin@example.com',
+	                   subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+	                   body: "The build has failed. Please check Jenkins for details."
+	          }
+	          success {
+	              mail to: 'team@example.com',
+	                   subject: "Build Success: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+	                   body: "The build completed successfully."
+	          }
+	      }
+	  }
+	  ```
+	- **Best Practices**:
+		- Use `post` blocks for email notifications.
+		- Configure emails for failure, success, or unstable builds.
+		- Use environment variables like `${env.JOB_NAME}` and `${env.BUILD_NUMBER}` for context.
+- **GitLab Integration**
+	- **Purpose**:
+		- Integrate Jenkins with GitLab for CI/CD workflows.
+	- **Plugins**:
+		- **GitLab Plugin**: Integrates GitLab triggers with Jenkins jobs.
+		- **Git Plugin**: Enables Jenkins to clone Git repositories.
+	- **Setup Steps**:
+	  1. **Install Plugins**:
+		- Go to **Manage Jenkins** > **Manage Plugins** > Install:
+			- **GitLab Plugin**
+			- **Git Plugin**
+			  2. **Generate a Personal Access Token in GitLab**:
+		- Go to GitLab: **Settings** > **Access Tokens**.
+		- Generate a token with the scope: `api`, `read_repository`, and `write_repository`.
+		  3. **Add GitLab Credentials to Jenkins**:
+		- Go to **Manage Jenkins** > **Manage Credentials**.
+		- Add a credential:
+			- **Kind**: GitLab API token.
+			- **Token**: Paste the generated token.
+			  4. **Configure a Pipeline Job**:
+		- Create a `Jenkinsfile` to clone and build the project.
+		  ```groovy
+		  pipeline {
+		    agent any
+		    stages {
+		        stage('Clone Repository') {
+		            steps {
+		                git branch: 'main',
+		                    url: 'https://gitlab.com/username/repository.git',
+		                    credentialsId: 'gitlab-token'
+		            }
+		        }
+		        stage('Build') {
+		            steps {
+		                sh 'mvn clean package'
+		            }
+		        }
+		    }
+		    post {
+		        success {
+		            echo "Build successful!"
+		        }
+		        failure {
+		            echo "Build failed. Check logs."
+		        }
+		    }
+		  }
+		  ```
+		  5. **Configure Webhooks in GitLab**:
+		- Go to your repository in GitLab:
+			- **Settings** > **Webhooks** > Add webhook.
+			- URL: `http://<jenkins-server>:8080/project/<job-name>`
+			- Trigger events: Push events or Merge request events.
+	- **Best Practices**:
+		- Use GitLab Merge Request triggers to initiate builds on PR creation.
+		- Store credentials securely in Jenkins using the credentials plugin.
+		- Combine GitLab CI pipelines with Jenkins for hybrid workflows.
+- **Code Scanning with SonarQube**
+	- **Definition**:
+		- SonarQube is a tool for static code analysis that detects bugs, code smells, and security vulnerabilities.
+	- **Prerequisites**:
+		- Install and configure **SonarQube Server**.
+		- Install the **SonarQube Scanner Plugin** in Jenkins.
+		- Ensure **Java** and **SonarQube Scanner** are installed on Jenkins nodes.
+	- **Steps to Configure SonarQube in Jenkins**:
+	  1. **Install Plugins**:
+		- Go to **Manage Jenkins** > **Manage Plugins** and install:
+			- **SonarQube Scanner Plugin**.
+			  2. **Configure SonarQube Server**:
+		- Go to **Manage Jenkins** > **Configure System**.
+		- Under **SonarQube Servers**, add:
+			- **Name**: `SonarQube`
+			- **Server URL**: `http://<sonarqube-server>:9000`
+			- Add a **token** for authentication (generate it in SonarQube under **My Account > Security**).
+			  3. **Configure SonarQube Scanner**:
+		- Go to **Manage Jenkins** > **Global Tool Configuration**.
+		- Add a new SonarQube Scanner installation:
+			- **Name**: `SonarQubeScanner`
+			- Set the path or download automatically.
+			  4. **Pipeline Configuration**:
+		- Use the SonarQube scanner step in the pipeline:
+		  ```groovy
+		  pipeline {
+		      agent any
+		      tools {
+		          maven 'Maven3'
+		      }
+		      environment {
+		          SONAR_TOKEN = credentials('sonarqube-token')
+		      }
+		      stages {
+		          stage('Build') {
+		              steps {
+		                  sh 'mvn clean package'
+		              }
+		          }
+		          stage('SonarQube Analysis') {
+		              steps {
+		                  withSonarQubeEnv('SonarQube') {
+		                      sh 'mvn sonar:sonar -Dsonar.projectKey=my-project'
+		                  }
+		              }
+		          }
+		      }
+		      post {
+		          success {
+		              echo 'Code analysis completed successfully.'
+		          }
+		      }
+		  }
+		  ```
+		- **Explanation**:
+			- `withSonarQubeEnv('SonarQube')`: Configures environment variables for SonarQube.
+			- **sonar:sonar**: Maven goal to run code analysis.
+			- **sonar.projectKey**: Unique project key in SonarQube.
+	- **Best Practices**:
+		- Integrate SonarQube into CI/CD pipelines to ensure quality gates.
+		- Use **Quality Profiles** to enforce coding standards.
+		- Regularly review **Quality Gates** to detect critical issues early.
+- **Uploading Artifacts to Nexus**
+	- **Definition**:
+		- Nexus Repository Manager is a tool for storing, managing, and distributing artifacts like JARs, WARs, Docker images, etc.
+	- **Prerequisites**:
+		- Install and configure **Nexus Repository**.
+		- Ensure the Nexus server URL and repository credentials are available.
+		- Install Maven or use the Maven tool for artifact builds.
+	- **Steps to Configure Nexus in Jenkins**:
+	  1. **Install Plugins**:
+		- Install **Nexus Artifact Uploader Plugin** (optional for manual uploads).
+		  2. **Configure Nexus Credentials**:
+		- Go to **Manage Jenkins** > **Manage Credentials**.
+		- Add:
+			- **Username/Password**: Nexus repository credentials.
+			- **ID**: `nexus-credentials`.
+			  3. **Pipeline Configuration**:
+		- Use Maven to deploy artifacts to Nexus:
+			- **Configure Maven's `settings.xml`**:
+				- Add Nexus repository credentials:
+				  ```xml
+				  <servers>
+				      <server>
+				          <id>nexus</id>
+				          <username>your-username</username>
+				          <password>your-password</password>
+				      </server>
+				  </servers>
+				  ```
+			- **Define a Maven Pipeline**:
+			  ```groovy
+			  pipeline {
+			      agent any
+			      tools {
+			          maven 'Maven3'
+			      }
+			      environment {
+			          NEXUS_URL = 'http://<nexus-server>:8081/repository/releases/'
+			      }
+			      stages {
+			          stage('Build') {
+			              steps {
+			                  sh 'mvn clean package'
+			              }
+			          }
+			          stage('Upload Artifact to Nexus') {
+			              steps {
+			                  sh '''
+			                  mvn deploy:deploy-file \
+			                      -DgroupId=com.example \
+			                      -DartifactId=my-app \
+			                      -Dversion=1.0.0 \
+			                      -Dpackaging=jar \
+			                      -Dfile=target/my-app-1.0.0.jar \
+			                      -DrepositoryId=nexus \
+			                      -Durl=${NEXUS_URL}
+			                  '''
+			              }
+			          }
+			      }
+			      post {
+			          success {
+			              echo 'Artifact uploaded to Nexus successfully.'
+			          }
+			      }
+			  }
+			  ```
+		- **Explanation**:
+			- `deploy:deploy-file`: Maven goal to upload artifacts manually.
+			- `repositoryId`: ID defined in Maven's `settings.xml`.
+			- `NEXUS_URL`: Nexus repository URL for uploading artifacts.
+	- **Best Practices**:
+		- Use **SNAPSHOT** versions for development builds and **RELEASE** for production.
+		- Automate artifact uploads as part of the build pipeline.
+		- Clean up old artifacts in Nexus to save storage space.
