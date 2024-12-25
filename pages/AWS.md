@@ -70,7 +70,121 @@
 			  aws sts get-caller-identity
 			  ```
 				- This command returns the ARN of the user whose credentials are being used.
-	- **Best Practices for AWS CLI**:
-		- Use IAM roles and temporary credentials whenever possible instead of storing access keys locally.
-		- Limit permissions for IAM users to the minimum required.
-		- Regularly rotate Access Key IDs and Secret Access Keys.
+		- **Best Practices for AWS CLI**:
+			- Use IAM roles and temporary credentials whenever possible instead of storing access keys locally.
+			- Limit permissions for IAM users to the minimum required.
+			- Regularly rotate Access Key IDs and Secret Access Keys.
+	- **IAM Identity Center**
+		- **Definition**:
+			- AWS IAM Identity Center (formerly AWS SSO) provides centralized access management to AWS accounts, cloud applications, and custom apps.
+		- **Key Features**:
+			- Single Sign-On (SSO): Access multiple AWS accounts and applications with one login.
+			- Centralized user management through AWS Directory Service or external identity providers (e.g., Microsoft AD, Google Workspace).
+			- Supports integration with IAM roles for managing permissions.
+		- **Setup Steps**:
+		  1. Go to **IAM Identity Center** in the AWS Management Console.
+		  2. Configure an identity source:
+			- AWS Managed Directory.
+			- External identity provider (via SAML).
+			  3. Assign users/groups to AWS accounts and permissions sets.
+		- **Usage**:
+			- Assign permissions sets to users/groups for access control.
+			- Users can log in via the AWS SSO portal.
+		- **Best Practices**:
+			- Use centralized identity management for teams with multiple AWS accounts.
+			- Leverage MFA for additional security.
+	- **IAM Policies**
+		- **Definition**:
+			- IAM policies are JSON documents that define permissions for AWS resources.
+		- **Policy Structure**:
+			- **Version**: Specifies the policy language version (e.g., `"2012-10-17"`).
+			- **Statement**: Contains the permission rules.
+				- **Effect**: `Allow` or `Deny`.
+				- **Action**: AWS service actions (e.g., `s3:ListBucket`).
+				- **Resource**: ARN of the resource (e.g., `arn:aws:s3:::my-bucket`).
+				- **Condition**: Optional, adds conditions for the policy.
+		- **Example Policy**:
+		  ```json
+		  {
+		    "Version": "2012-10-17",
+		    "Statement": [
+		      {
+		        "Effect": "Allow",
+		        "Action": "s3:ListBucket",
+		        "Resource": "arn:aws:s3:::my-bucket"
+		      },
+		      {
+		        "Effect": "Deny",
+		        "Action": "s3:DeleteObject",
+		        "Resource": "arn:aws:s3:::my-bucket/*"
+		      }
+		    ]
+		  }
+		  ```
+		- **Best Practices**:
+			- Follow the principle of least privilege.
+			- Test policies using the Policy Simulator.
+	- **Switching IAM Roles**
+		- **Definition**:
+			- Switching roles allows users or applications to assume different permissions temporarily.
+		- **Setup Steps**:
+		  1. Create a role with permissions to access specific resources.
+		  2. Add trusted entities that can assume the role (e.g., other AWS accounts or services).
+		  3. Use the AWS Management Console, CLI, or SDK to switch roles.
+		- **Example**:
+			- Assume a role using the CLI:
+			  ```bash
+			  aws sts assume-role --role-arn arn:aws:iam::123456789012:role/MyRole --role-session-name MySession
+			  ```
+		- **Best Practices**:
+			- Use IAM roles for cross-account access.
+			- Enable role-based access for temporary tasks.
+	- **Permissions Boundary**
+		- **Definition**:
+			- A permissions boundary is an advanced IAM feature that restricts the maximum permissions a user or role can have.
+		- **Usage**:
+			- Define a policy as the permissions boundary for IAM entities.
+		- **Example**:
+			- Policy to allow only read access:
+			  ```json
+			  {
+			    "Version": "2012-10-17",
+			    "Statement": [
+			      {
+			        "Effect": "Allow",
+			        "Action": "s3:GetObject",
+			        "Resource": "arn:aws:s3:::my-bucket/*"
+			      }
+			    ]
+			  }
+			  ```
+			- Attach this policy as a permissions boundary to a user or role.
+		- **Best Practices**:
+			- Use permissions boundaries to enforce organizational security policies.
+			- Combine with other IAM policies for granular control.
+	- **CloudTrail**
+		- **Definition**:
+			- AWS CloudTrail records all API calls and user activity in your AWS account.
+		- **Features**:
+			- Tracks actions taken by users, roles, and services.
+			- Stores logs in an S3 bucket for auditing and troubleshooting.
+		- **Setup Steps**:
+		  1. Enable CloudTrail in the AWS Management Console.
+		  2. Choose whether to create a new trail or use the default trail.
+		  3. Configure an S3 bucket to store logs.
+		  4. Enable encryption and log file validation for security.
+		- **Best Practices**:
+			- Enable CloudTrail across all AWS regions.
+			- Integrate with CloudWatch for real-time monitoring.
+			- Use CloudTrail Insights to detect unusual activity.
+	- **Policy Simulator**
+		- **Definition**:
+			- The AWS IAM Policy Simulator tests and validates IAM policies before applying them.
+		- **Usage**:
+		  1. Go to the [Policy Simulator Console](https://policysim.aws.amazon.com/).
+		  2. Load the policy to test.
+		  3. Select the actions, resources, and conditions.
+		  4. Review the results to ensure the policy works as intended.
+		- **Best Practices**:
+			- Test new policies before applying them to users or roles.
+			- Use the simulator to debug permission issues.
