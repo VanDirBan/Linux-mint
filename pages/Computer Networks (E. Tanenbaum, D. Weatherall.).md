@@ -1,0 +1,113 @@
+# 1. Introduction
+	- ## 1.1 Applications of Computer Networks
+		- ### 1.1.1 Networks in Organizations
+			- **Modern organizations**:
+				- Heavily reliant on computers for tasks such as product development, payroll management, and document creation.
+				- Initially isolated computers may later be networked for better information exchange.
+			- **Purpose of networks**:
+				- **Resource sharing**:
+					- Access to hardware like network printers.
+					- Centralized resources reduce costs (e.g., one printer for an office instead of individual printers).
+				- **Information sharing**:
+					- Electronic data critical for all organizations:
+						- Customer reports.
+						- Financial data.
+						- Inventory records.
+					- Example: A New York seller can access Singapore warehouse stock information instantly using a #VPN (Virtual Private Network).
+				- **Communication and collaboration**:
+					- Employees use email (#Email) and other tools for easy communication.
+					- Advanced methods include #VoIP (Voice over IP), video conferencing, and shared desktop access for real-time collaboration.
+			- **Client-server model**:
+				- **Server**:
+					- Centralized, powerful machine hosting applications and data.
+					- Often maintained by system administrators in secure locations.
+				- **Client**:
+					- Less powerful computers accessing the server.
+					- Can be laptops or desktops within the network.
+		- ### 1.1.2 Networks for Personal Use
+			- **Historical perspective**:
+				- Early home computer use focused on word processing and games.
+				- The internet now drives widespread adoption, enabling:
+					- **Access to remote data**:
+						- Browsing vast areas of knowledge.
+						- Subscription services for personalized news.
+					- **Social communication**:
+						- #SocialNetworks like #Facebook enable sharing and connecting.
+					- **E-commerce** (#ElectronicCommerce):
+						- Online shopping (#B2C, #C2C) and supplier management (#B2B).
+						- Emerging forms like #P2P networks for file sharing.
+			- **Peer-to-peer networks**:
+				- Examples: #BitTorrent.
+				- Users exchange files without centralized servers.
+				- Applications include legal content sharing and collaborative work.
+		- ### 1.1.3 Wireless Networks
+			- **Definition**:
+				- Networks without physical connections, using radio waves or other wireless technologies.
+			- **Applications**:
+				- Portable devices (#Laptops, #Smartphones) use wireless connectivity to access the internet from anywhere.
+				- **Technologies**:
+					- #WiFi (#802.11 standard): Wireless LANs.
+					- #CellularNetworks: Used for mobile internet (#3G, #4G, #5G).
+					- #Bluetooth: Connects peripherals like headphones.
+				- **Use cases**:
+					- Real-time GPS navigation.
+					- Business applications (e.g., logistics tracking).
+		- ### 1.1.4 Social Implications
+			- **Freedom of expression**:
+				- Platforms like #SocialNetworks and discussion boards allow users to share views widely.
+				- Challenges include offensive content and debates on censorship.
+			- **Ethical and legal concerns**:
+				- Piracy in #P2P networks.
+				- Surveillance issues:
+					- Government tools like #DCS1000 for email monitoring.
+					- Privacy concerns with #RFID and tracking technologies.
+			- **Spam and phishing**:
+				- Spam: Unsolicited bulk emails.
+				- Phishing: Fraudulent attempts to extract sensitive information.
+	- ## 1.2 Network Hardware
+		- ### 1.2.1 Personal Area Networks (PANs)
+			- **Purpose**:
+				- Connect devices near a single user.
+				- Example: Wireless connections between a computer and its peripherals.
+			- **Technology**:
+				- #Bluetooth:
+					- Master-slave configuration.
+					- Used in devices like headphones, keyboards, and even medical equipment.
+				- **Other technologies**:
+					- #RFID for identification in smart cards and libraries.
+		- ### 1.2.2 Local Area Networks (LANs)
+			- **Definition**:
+				- Private networks covering small areas like offices or homes.
+			- **Types**:
+				- **Wired LANs**:
+					- Example: #Ethernet (#IEEE802.3).
+					- Higher speeds (100 Mbps to 10 Gbps) and lower latency than wireless.
+				- **Wireless LANs**:
+					- Example: #WiFi (#IEEE802.11).
+					- Popular in homes and places where cabling is impractical.
+			- **Features**:
+				- **Scalability**:
+					- Networks can expand using switches and routers.
+				- **Virtual LANs (VLANs)**:
+					- Logical segmentation of a physical network.
+					- Example: Separating departments like engineering and finance within the same building.
+		- ### 1.2.3 Other Network Types
+			- **Broadband Networks**:
+				- **Definition**:
+					- Networks that transmit data over a single channel shared by multiple devices.
+				- **Broadcasting**:
+					- Messages sent by one machine can be received by all others.
+					- **Addressing**:
+						- Machines check if the packet is addressed to them; if not, they ignore it.
+					- **Special cases**:
+						- Broadcast messages addressed to all machines simultaneously.
+						- **Multicasting**:
+							- Messages sent to a subset of machines within the network.
+			- **Point-to-Point Networks**:
+				- **Definition**:
+					- Direct communication between two devices.
+				- **Features**:
+					- Data must often travel through multiple intermediate nodes.
+					- Important to determine the most efficient route.
+				- **Unicasting**:
+					- A message sent from one sender to one receiver.
