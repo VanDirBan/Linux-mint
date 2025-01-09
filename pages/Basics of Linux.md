@@ -1,4 +1,5 @@
 - #Commands
+  collapsed:: true
 	- Command Line
 		- `ls` - list files
 		- `cd` - change directory
@@ -235,6 +236,7 @@
 	- Version Control
 		- `git` - distributed version control system
 - #User_and_Group_Management
+  collapsed:: true
 	- `useradd` - create a new user
 		- `-c "comment"` - add a comment (usually the user's full name)
 			- Example: `useradd -c "John Doe" johndoe`
@@ -320,6 +322,7 @@
 			- Command: `sudo deluser --force username`
 			- Example: `sudo deluser --force johndoe`
 - #Programs
+  collapsed:: true
 	- **NetworkManager** - Service for managing network connections in Linux
 		- Features: Automatic network configuration, support for various network types (Ethernet, Wi-Fi, mobile, VPN), graphical interfaces, and command-line tools.
 		- **Installation**:
@@ -407,6 +410,7 @@
 				- `'static'`: Name of the connection to be activated.
 			- **Purpose**: This command activates the network connection named 'static'.
 - #Linux_Scripting
+  collapsed:: true
 	- **Bash (Bourne Again Shell)**
 		- **Definition**:
 			- A command-line shell and scripting language for UNIX-based operating systems like Linux.
@@ -456,6 +460,7 @@
 		- **Running a Script**:
 			- Create a script, make it executable with `chmod +x script.sh`, and run it with `./script.sh`.
 - #Automation
+  collapsed:: true
 	- **Cron (Task Scheduler)**
 		- **Definition**:
 			- A Unix-based task scheduler used to automate recurring tasks by running commands or scripts at specific times or intervals.
@@ -510,6 +515,7 @@
 			- `@weekly`: Run weekly at midnight on Sunday
 			- `@monthly`: Run monthly at midnight on the first day
 - #System_Monitoring
+  collapsed:: true
 	- **Load Average**:
 		- **Definition**: A metric that shows the average number of processes waiting for execution or CPU resources in the system. It is measured over three time intervals: 1, 5, and 15 minutes.
 		- **Time Intervals**:
@@ -659,6 +665,7 @@
 			  tmpfs          tmpfs     798M   44K  798M   1% /run/user/1000
 			  ```
 - #File_Management
+  collapsed:: true
 	- **`rm -rf /nmt/junkdirectory/`** - Command to forcefully and recursively remove a directory and its contents.
 		- **Options**:
 			- `-r` (recursive): Recursively remove directories and their contents.
@@ -686,6 +693,7 @@
 			- **Unmounting a remote filesystem**:
 				- Command: `sudo fusermount -u /local/mountpoint`
 - #Network_Management
+  collapsed:: true
 	- **`iptables`** - A powerful utility for configuring network packet filtering rules in Linux.
 		- **Tables**:
 			- **filter**: Main table for packet filtering.
@@ -851,6 +859,7 @@
 					- Command: `sudo nft add rule inet filter input tcp dport 22 ct state new limit rate 15/minute accept`
 					- Command: `sudo nft add rule inet filter input tcp dport 22 drop`
 - #Disk_Management
+  collapsed:: true
 	- **RAID** - Redundant Array of Independent Disks
 		- **Levels**:
 			- **RAID 0**: Striping, no redundancy.
@@ -897,6 +906,7 @@
 				- Create a new partition: Press `n`, select type, number, start, and end sectors.
 				- Write changes: Press `w`.
 - #Log_Management
+  collapsed:: true
 	- **`/etc/logrotate.d/nginx`** - Configuration file for `logrotate` to manage Nginx log files.
 		- **Example Content**:
 		  ```plaintext
@@ -928,6 +938,7 @@
 			- **sharedscripts**: Ensure postrotate and prerotate scripts run only once.
 			- **postrotate...endscript**: Script to execute after rotation. Sends USR1 signal to Nginx to reopen log files.
 - #Disk_Performance_Testing
+  collapsed:: true
 	- **Command**: `sync; dd if=/dev/zero of=tempfile bs=2M count=2048; sync`
 		- **Explanation**:
 			- `sync`: Writes all cached data to disk, ensuring all file system changes are applied.
@@ -935,6 +946,7 @@
 			- `sync`: Ensures all data is written to disk after the file creation.
 		- **Purpose**: This command sequence is used for testing disk performance by creating a large file and ensuring all data is written to disk without using the cache.
 - #System_Performance_Testing
+  collapsed:: true
 	- **`sysbench`** - A multi-purpose benchmarking tool for system performance testing.
 		- **Features**:
 			- CPU performance testing
@@ -979,6 +991,7 @@
 			- **Comprehensive system stress testing**:
 				- Command: `stress-ng --cpu 4 --vm 2 --vm-bytes 1G --hdd 2 --timeout 60s`
 - #System_Management
+  collapsed:: true
 	- **Resetting Root Password on Debian**
 		- **Step 1: Reboot the Server**
 			- Command: `sudo reboot`
@@ -1061,3 +1074,125 @@
 		- **Example usage**:
 			- Invalidate hosts cache: `sudo nscd -i hosts`
 			- Invalidate passwd cache: `sudo nscd -i passwd`
+- #Archiving_and_Compression
+	- **Definitions**:
+		- **Archiving**:
+			- Combining multiple files into a single file without reducing their size.
+			- Common tool: `tar`.
+		- **Compression**:
+			- Reducing the size of files to save space or for faster transfer.
+			- Common tools: `gzip`, `bzip2`, `xz`.
+	- **Archiving with `tar`**
+		- **Definition**:
+			- `tar` (tape archive) is used to create, extract, and manage archive files.
+		- **Common Commands**:
+			- **Create an archive**:
+			  ```bash
+			  tar -cvf archive.tar file1 file2 directory/
+			  ```
+				- `-c`: Create a new archive.
+				- `-v`: Verbose mode (show progress).
+				- `-f`: Specify the archive file name.
+			- **Extract an archive**:
+			  ```bash
+			  tar -xvf archive.tar
+			  ```
+				- `-x`: Extract files from an archive.
+			- **List contents of an archive**:
+			  ```bash
+			  tar -tvf archive.tar
+			  ```
+			- **Add files to an archive**:
+			  ```bash
+			  tar -rvf archive.tar newfile
+			  ```
+				- `-r`: Append files to an archive.
+		- **Best Practices**:
+			- Use meaningful names for archive files, including timestamps (e.g., `backup_2025-01-10.tar`).
+	- **Compression Tools**
+		- **gzip**:
+			- Compress a file:
+			  ```bash
+			  gzip file.txt
+			  ```
+				- Creates `file.txt.gz`.
+			- Decompress a file:
+			  ```bash
+			  gunzip file.txt.gz
+			  ```
+			- Combine with `tar`:
+			  ```bash
+			  tar -czvf archive.tar.gz file1 file2
+			  ```
+				- `-z`: Use gzip for compression.
+		- **bzip2**:
+			- Compress a file:
+			  ```bash
+			  bzip2 file.txt
+			  ```
+				- Creates `file.txt.bz2`.
+			- Decompress a file:
+			  ```bash
+			  bunzip2 file.txt.bz2
+			  ```
+			- Combine with `tar`:
+			  ```bash
+			  tar -cjvf archive.tar.bz2 file1 file2
+			  ```
+				- `-j`: Use bzip2 for compression.
+		- **xz**:
+			- Compress a file:
+			  ```bash
+			  xz file.txt
+			  ```
+				- Creates `file.txt.xz`.
+			- Decompress a file:
+			  ```bash
+			  unxz file.txt.xz
+			  ```
+			- Combine with `tar`:
+			  ```bash
+			  tar -cJvf archive.tar.xz file1 file2
+			  ```
+				- `-J`: Use xz for compression.
+		- **zip**:
+			- Create a compressed archive:
+			  ```bash
+			  zip archive.zip file1 file2
+			  ```
+			- Extract a zip archive:
+			  ```bash
+			  unzip archive.zip
+			  ```
+	- **Comparing Compression Tools**
+		- **gzip**:
+			- Fast, moderate compression ratio.
+		- **bzip2**:
+			- Slower, higher compression ratio than gzip.
+		- **xz**:
+			- Slowest, highest compression ratio.
+		- **zip**:
+			- Compresses and archives in one step; widely compatible.
+	- **Practical Examples**
+		- **Create a backup archive**:
+		  ```bash
+		  tar -czvf /backup/backup_$(date +%F).tar.gz /home/user/
+		  ```
+			- Compresses the `/home/user/` directory into a gzip archive with the current date.
+		- **Extract specific files from an archive**:
+		  ```bash
+		  tar -xvf archive.tar file1 file2
+		  ```
+		- **Compress large log files**:
+		  ```bash
+		  gzip -9 large_log_file.log
+		  ```
+			- `-9`: Maximum compression level.
+		- **Extract and decompress in one step**:
+		  ```bash
+		  tar -xzvf archive.tar.gz
+		  ```
+	- **Best Practices**
+		- Use `tar` with compression flags (`-z`, `-j`, `-J`) for simplicity.
+		- Automate backups with scripts and include compression to save space.
+		- Use `zip` for cross-platform compatibility.
