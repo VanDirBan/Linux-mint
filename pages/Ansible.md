@@ -75,7 +75,7 @@
 	  ```
 - **LEMP Stack Deployment with Ansible**
 	- **Definition**:
-		- LEMP stands for **Linux**, **Nginx**, **MySQL/MariaDB**, and **PHP**.
+		- LEMP stands for **[[Linux]]**, **[[Nginx]]**, **[[MySQL]]/[[MariaDB]]**, and **[[PHP]]**.
 		- Ansible automates the deployment of the LEMP stack across multiple servers.
 	- **Steps to Deploy a LEMP Stack**
 		- **1. Prepare the Inventory File**:
