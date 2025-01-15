@@ -52,7 +52,7 @@
 		- **Access Control**: Restrict access by IP or user with `.htaccess`.
 		- **DDoS Protection**: Use `mod_evasive` to mitigate DoS/DDoS attacks.
 	- **Automation**:
-		- **Ansible**: Automate Apache installation and configuration.
+		- [[Ansible]]: Automate Apache installation and configuration.
 		- **CI/CD Integration**: Use tools like Jenkins or GitLab CI for automated deployments.
 	- **Load Balancing**:
 		- **mod_proxy_balancer**: Set up load balancing across multiple servers.
@@ -103,7 +103,7 @@
 		- **Prometheus/Grafana**: Integration for real-time monitoring.
 	- **CI/CD Integration**:
 		- **Docker**: Official image for easy deployment.
-		- **Ansible**: Automates installation and configuration.
+		- [[Ansible]]: Automates installation and configuration.
 	- **Useful Modules**:
 		- **ngx_http_realip_module**: Corrects client IP behind proxies.
 		- **ngx_http_stub_status_module**: Provides basic server status.
