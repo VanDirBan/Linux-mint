@@ -1075,6 +1075,7 @@
 			- Invalidate hosts cache: `sudo nscd -i hosts`
 			- Invalidate passwd cache: `sudo nscd -i passwd`
 - #Archiving_and_Compression
+  collapsed:: true
 	- **Definitions**:
 		- **Archiving**:
 			- Combining multiple files into a single file without reducing their size.
@@ -1196,3 +1197,53 @@
 		- Use `tar` with compression flags (`-z`, `-j`, `-J`) for simplicity.
 		- Automate backups with scripts and include compression to save space.
 		- Use `zip` for cross-platform compatibility.
+- #ssh
+	- **Definition**:
+		- SSH is a protocol for securely accessing and managing remote servers.
+		- Provides encrypted communication between the client and the server.
+	- **Basic Commands**:
+		- **Connect to a remote server**:
+		  ```bash
+		  ssh username@remote_host
+		  ```
+		- **Specify a custom port**:
+		  ```bash
+		  ssh -p 2222 username@remote_host
+		  ```
+		- **Run a single command on a remote server**:
+		  ```bash
+		  ssh username@remote_host 'ls -la /path/to/directory'
+		  ```
+		- **Key-Based Authentication**:
+			- Generate an SSH key pair:
+			  ```bash
+			  ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
+			  ```
+			- Copy the public key to the remote server:
+			  ```bash
+			  ssh-copy-id username@remote_host
+			  ```
+			- Connect to the server without a password:
+			  ```bash
+			  ssh username@remote_host
+			  ```
+- #scp
+	- **Definition**:
+		- A command-line utility for securely transferring files between a local and a remote system (or between two remote systems) over SSH.
+	- **Basic Commands**:
+		- **Copy a file from local to remote**:
+		  ```bash
+		  scp file.txt username@remote_host:/path/to/destination
+		  ```
+		- **Copy a file from remote to local**:
+		  ```bash
+		  scp username@remote_host:/path/to/file.txt /local/destination
+		  ```
+		- **Copy a directory recursively**:
+		  ```bash
+		  scp -r /local/directory username@remote_host:/remote/destination
+		  ```
+		- **Use a custom SSH port**:
+		  ```bash
+		  scp -P 2222 file.txt username@remote_host:/path/to/destination
+		  ```
