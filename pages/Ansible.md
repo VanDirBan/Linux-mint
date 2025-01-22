@@ -424,3 +424,118 @@
 		          path: /tmp/install.log
 		          state: absent
 		  ```
+- **Loops in Ansible**
+	- **Definition**:
+		- Loops in Ansible allow tasks to iterate over a list of items, files, or conditions.
+	- **Purpose**:
+		- Automates repetitive tasks.
+		- Simplifies playbooks by avoiding hardcoding repetitive actions.
+- **Using Loop**
+	- **Definition**:
+		- The `loop` keyword is the modern way to iterate over lists.
+	- **Basic Example**:
+	  ```yaml
+	  - name: Install multiple packages
+	    apt:
+	      name: "{{ item }}"
+	      state: present
+	    loop:
+	      - nginx
+	      - mysql-server
+	      - php
+	  ```
+	- **With Variables**:
+	  ```yaml
+	  vars:
+	    packages:
+	      - nginx
+	      - mysql-server
+	      - php
+	  tasks:
+	    - name: Install packages
+	      apt:
+	        name: "{{ item }}"
+	        state: present
+	      loop: "{{ packages }}"
+	  ```
+	- **Enumerating with `loop`**:
+		- Use `loop.index` or `loop.index0` for indexes.
+		  ```yaml
+		  - name: Create numbered files
+		  copy:
+		    dest: "/tmp/file{{ loop.index }}.txt"
+		    content: "This is file number {{ loop.index }}"
+		  loop:
+		    - 1
+		    - 2
+		    - 3
+		  ```
+- **Using with_items**
+	- **Definition**:
+		- Legacy method for iterating over a list (replaced by `loop` but still supported).
+	- **Basic Example**:
+	  ```yaml
+	  - name: Add users
+	    user:
+	      name: "{{ item }}"
+	      state: present
+	    with_items:
+	      - alice
+	      - bob
+	      - charlie
+	  ```
+- **Using Until**
+	- **Definition**:
+		- Repeats a task until a condition is met or a timeout occurs.
+	- **Syntax**:
+	  ```yaml
+	  - name: Wait for a service to start
+	    shell: systemctl is-active nginx
+	    register: result
+	    until: result.stdout == "active"
+	    retries: 5
+	    delay: 10
+	  ```
+	- **Parameters**:
+		- `until`: The condition to check.
+		- `retries`: Maximum number of attempts.
+		- `delay`: Time (in seconds) between attempts.
+- **Using With_fileglob**
+	- **Definition**:
+		- Iterates over files matching a specific pattern.
+	- **Syntax**:
+	  ```yaml
+	  - name: Copy all config files
+	    copy:
+	      src: "{{ item }}"
+	      dest: /etc/myconfigs/
+	    with_fileglob:
+	      - "/home/user/configs/*.conf"
+	  ```
+	- **Best Practices**:
+		- Use for batch processing of files in directories.
+- **Advanced Loops**
+	- **With Nested Loops**:
+		- Combine two lists in a loop:
+		  ```yaml
+		  - name: Deploy applications to servers
+		    command: "{{ item.0 }} {{ item.1 }}"
+		    with_nested:
+		      - [ "app1", "app2", "app3" ]
+		      - [ "server1", "server2" ]
+		  ```
+	- **With Dictionaries**:
+		- Iterate over key-value pairs:
+		  ```yaml
+		  vars:
+		    users:
+		      alice: admin
+		      bob: user
+		  tasks:
+		    - name: Create users with roles
+		      user:
+		        name: "{{ item.key }}"
+		        groups: "{{ item.value }}"
+		      loop: "{{ users | dict2items }}"
+		  ```
+-
