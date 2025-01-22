@@ -538,4 +538,123 @@
 		        groups: "{{ item.value }}"
 		      loop: "{{ users | dict2items }}"
 		  ```
--
+- **Jinja Templates in Ansible**
+	- **Definition**:
+		- Jinja2 is a templating engine used in Ansible for creating dynamic content.
+		- Templates are written in `.j2` files and rendered with variables, loops, and conditionals.
+	- **Purpose**:
+		- Generate configuration files, scripts, or any text-based files dynamically.
+		- Simplify repetitive content with logic and variables.
+	- **Basic Syntax**
+		- **Variables**:
+			- Insert variables into templates using double curly braces (`{{ }}`):
+			  ```jinja
+			  server_name: {{ inventory_hostname }}
+			  user: {{ ansible_user }}
+			  ```
+		- **Conditionals**:
+			- Add logic with `if` statements:
+			  ```jinja
+			  {% if ansible_os_family == "Debian" %}
+			  package_manager: apt
+			  {% else %}
+			  package_manager: yum
+			  {% endif %}
+			  ```
+		- **Loops**:
+			- Iterate over lists or dictionaries:
+			  ```jinja
+			  users:
+			  {% for user in users %}
+			  - name: {{ user.name }}
+			    role: {{ user.role }}
+			  {% endfor %}
+			  ```
+		- **Filters**:
+			- Modify or format variables with Jinja filters:
+				- Uppercase a string:
+				  ```jinja
+				  {{ "hello" | upper }}
+				  ```
+				- Join a list:
+				  ```jinja
+				  {{ mylist | join(", ") }}
+				  ```
+	- **Using Jinja Templates in Ansible**
+		- **Directory Structure**:
+			- Store templates in the `templates/` directory of your playbook or role.
+		- **Template Module**:
+			- Use the `template` module to apply a Jinja2 template:
+			  ```yaml
+			  - name: Generate Nginx configuration
+			    template:
+			      src: nginx.conf.j2
+			      dest: /etc/nginx/nginx.conf
+			  ```
+		- **Passing Variables**:
+			- Variables used in templates come from:
+				- Playbook variables.
+				- Inventory variables.
+				- Facts gathered by Ansible.
+		- **Practical Examples**
+			- **Dynamic Nginx Configuration**:
+				- Template file `nginx.conf.j2`:
+				  ```jinja
+				  server {
+				      listen 80;
+				      server_name {{ inventory_hostname }};
+				      location / {
+				          proxy_pass http://{{ backend_server }};
+				      }
+				  }
+				  ```
+				- Playbook task:
+				  ```yaml
+				  - name: Configure Nginx
+				    template:
+				      src: nginx.conf.j2
+				      dest: /etc/nginx/nginx.conf
+				    vars:
+				      backend_server: "127.0.0.1:8080"
+				  ```
+			- **Generate a Hosts File**:
+				- Template file `hosts.j2`:
+				  ```jinja
+				  {% for host in groups['all'] %}
+				  {{ host }} ansible_host={{ hostvars[host]['ansible_host'] }}
+				  {% endfor %}
+				  ```
+				- Playbook task:
+				  ```yaml
+				  - name: Generate /etc/hosts
+				    template:
+				      src: hosts.j2
+				      dest: /etc/hosts
+				  ```
+	- **Common Jinja2 Filters**
+		- **Default**:
+			- Provide a fallback value:
+			  ```jinja
+			  {{ variable | default("fallback_value") }}
+			  ```
+		- **Replace**:
+			- Replace part of a string:
+			  ```jinja
+			  {{ "example.com" | replace("com", "org") }}
+			  ```
+		- **Trim**:
+			- Remove leading and trailing whitespace:
+			  ```jinja
+			  {{ "  hello  " | trim }}
+			  ```
+		- **Length**:
+			- Get the length of a list or string:
+			  ```jinja
+			  {{ mylist | length }}
+			  ```
+	- **Best Practices**
+		- Use descriptive variable names for clarity.
+		- Store templates in the `templates/` directory for better organization.
+		- Test templates independently before deploying them with Ansible.
+		- Leverage conditionals and loops to reduce redundancy in templates.
+		- Use `debug` to verify variable values before applying templates.
