@@ -218,3 +218,105 @@
 			  ```
 		- **PHP-FPM Socket Not Found**:
 			- Ensure the correct PHP-FPM version is specified in the Nginx configuration.
+- **Variables in Ansible**
+	- **Definition**:
+		- Variables allow dynamic data management in playbooks, making them reusable and flexible.
+	- **Defining Variables**:
+		- In playbooks:
+		  ```yaml
+		  vars:
+		    package_name: nginx
+		  ```
+		- In inventory files:
+		  ```ini
+		  [webservers]
+		  web1 ansible_host=192.168.1.10 ansible_user=ubuntu package_name=nginx
+		  ```
+		- In group/host variable files:
+			- Example: `group_vars/webservers.yml`:
+			  ```yaml
+			  package_name: nginx
+			  ```
+	- **Using Variables**:
+		- Access with `{{ variable_name }}`:
+		  ```yaml
+		  - name: Install a package
+		    apt:
+		      name: "{{ package_name }}"
+		      state: present
+		  ```
+	- **Types of Variables**:
+		- **Host Variables**: Defined per host in inventory files.
+		- **Group Variables**: Shared across hosts in a group.
+		- **Facts**: System properties gathered by the `setup` module.
+- **Debugging with Debug Module**
+	- **Purpose**:
+		- Prints variable values or custom messages during playbook execution.
+	- **Examples**:
+		- Print a variable:
+		  ```yaml
+		  - name: Print the package name
+		    debug:
+		      var: package_name
+		  ```
+		- Print a custom message:
+		  ```yaml
+		  - name: Print a custom message
+		    debug:
+		      msg: "The selected package is {{ package_name }}"
+		  ```
+	- **Use Cases**:
+		- Debug variable values.
+		- Check dynamic data during execution.
+- **Using Set_fact**
+	- **Definition**:
+		- The `set_fact` module dynamically creates variables during playbook execution.
+	- **Examples**:
+		- Set a variable based on a condition:
+		  ```yaml
+		  - name: Set custom fact
+		    set_fact:
+		      custom_fact: "{{ 'nginx' if ansible_distribution == 'Ubuntu' else 'httpd' }}"
+		  ```
+		- Use the fact in a task:
+		  ```yaml
+		  - name: Install package based on custom fact
+		    apt:
+		      name: "{{ custom_fact }}"
+		      state: present
+		  ```
+	- **Best Practices**:
+		- Use `set_fact` for temporary, dynamic variables.
+		- Combine with conditionals for advanced logic.
+- **Using Register**
+	- **Definition**:
+		- Captures the output of a task into a variable for later use.
+	- **Examples**:
+		- Register the output of a command:
+		  ```yaml
+		  - name: Get disk usage
+		    command: df -h
+		    register: disk_usage
+		  ```
+		- Use the registered variable:
+		  ```yaml
+		  - name: Print disk usage
+		    debug:
+		      var: disk_usage.stdout
+		  ```
+		- Conditional task with `register`:
+		  ```yaml
+		  - name: Check if a package is installed
+		    shell: dpkg -l | grep nginx
+		    register: nginx_check
+		    ignore_errors: yes
+		  
+		  - name: Install nginx if not present
+		    apt:
+		      name: nginx
+		      state: present
+		    when: nginx_check.rc != 0
+		  ```
+	- **Best Practices**:
+		- Use `register` for capturing dynamic data like command outputs.
+		- Combine with `debug` to verify task results during execution.
