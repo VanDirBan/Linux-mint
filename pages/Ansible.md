@@ -320,3 +320,107 @@
 	- **Best Practices**:
 		- Use `register` for capturing dynamic data like command outputs.
 		- Combine with `debug` to verify task results during execution.
+- **Blocks in Ansible**
+	- **Definition**:
+		- `block` groups multiple tasks into a logical unit for better organization, error handling, and conditional execution.
+	- **Purpose**:
+		- Simplifies complex playbooks.
+		- Handles multiple tasks together under the same condition or exception handling.
+	- **Basic Syntax**:
+	  ```yaml
+	  - name: Block example
+	    block:
+	      - name: Install Nginx
+	        apt:
+	          name: nginx
+	          state: present
+	      - name: Start Nginx
+	        service:
+	          name: nginx
+	          state: started
+	    rescue:
+	      - name: Print an error message
+	        debug:
+	          msg: "Something went wrong during the block execution!"
+	    always:
+	      - name: Ensure the system is updated
+	        apt:
+	          update_cache: yes
+	  ```
+		- **block**: Main tasks to execute.
+		- **rescue**: Tasks to run if any task in the block fails.
+		- **always**: Tasks that run regardless of success or failure of the block.
+- **Using Conditions with When**
+	- **Definition**:
+		- `when` is used to execute tasks or blocks conditionally based on variables, facts, or command results.
+	- **Basic Syntax**:
+	  ```yaml
+	  - name: Conditional task
+	    apt:
+	      name: nginx
+	      state: present
+	    when: ansible_distribution == 'Ubuntu'
+	  ```
+	- **Common Use Cases**:
+		- OS-specific tasks:
+		  ```yaml
+		  - name: Install a package on Ubuntu
+		    apt:
+		      name: nginx
+		      state: present
+		    when: ansible_os_family == "Debian"
+		  ```
+		- Using variables:
+		  ```yaml
+		  - name: Install custom package
+		    apt:
+		      name: "{{ package_name }}"
+		      state: present
+		    when: package_name is defined
+		  ```
+- **Block-When for Conditional Blocks**
+	- **Definition**:
+		- Applies a condition to an entire block of tasks using `when`.
+	- **Example**:
+	  ```yaml
+	  - name: Install and start Nginx if Ubuntu
+	    block:
+	      - name: Install Nginx
+	        apt:
+	          name: nginx
+	          state: present
+	      - name: Start Nginx
+	        service:
+	          name: nginx
+	          state: started
+	    when: ansible_os_family == "Debian"
+	  ```
+		- **Explanation**:
+			- The condition `when: ansible_os_family == "Debian"` applies to all tasks inside the block.
+- **Error Handling in Blocks**
+	- **Using Rescue and Always**:
+		- **Rescue**:
+			- Executes specific tasks when a block fails.
+		- **Always**:
+			- Ensures critical tasks run regardless of block success or failure.
+		- **Example**:
+		  ```yaml
+		  - name: Update and install Nginx
+		    block:
+		      - name: Update package cache
+		        apt:
+		          update_cache: yes
+		      - name: Install Nginx
+		        apt:
+		          name: nginx
+		          state: present
+		    rescue:
+		      - name: Print an error message
+		        debug:
+		          msg: "Block failed. Manual intervention may be required."
+		    always:
+		      - name: Clean temporary files
+		        file:
+		          path: /tmp/install.log
+		          state: absent
+		  ```
