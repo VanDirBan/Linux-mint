@@ -1434,3 +1434,120 @@
 			  filters:
 			    tag:Environment: Production
 			  ```
+- **Creating AWS Resources with Ansible**
+	- **Security Groups**
+		- **Definition**:
+			- Virtual firewalls for controlling inbound and outbound traffic for EC2 instances.
+		- **Creating Security Groups**:
+		  ```yaml
+		  - name: Create a security group
+		    amazon.aws.ec2_group:
+		      name: web_server_sg
+		      description: Security group for web servers
+		      vpc_id: vpc-0123456789abcdef0
+		      rules:
+		        - proto: tcp
+		          ports:
+		            - 22
+		          cidr_ip: 0.0.0.0/0
+		        - proto: tcp
+		          ports:
+		            - 80
+		            - 443
+		          cidr_ip: 0.0.0.0/0
+		      rules_egress:
+		        - proto: all
+		          cidr_ip: 0.0.0.0/0
+		    register: security_group
+		  ```
+	- **EC2 Instances**
+		- **Definition**:
+			- Virtual servers in AWS providing scalable compute capacity.
+		- **Launching EC2 Instances**:
+		  ```yaml
+		  - name: Launch EC2 instances
+		    amazon.aws.ec2:
+		      key_name: my_key_pair
+		      instance_type: t2.micro
+		      image_id: ami-0123456789abcdef0
+		      count: 2
+		      security_groups:
+		        - web_server_sg
+		      wait: yes
+		      region: us-east-1
+		      assign_public_ip: yes
+		    register: ec2_instances
+		  ```
+	- **Practical Example**
+		- **Playbook**:
+		  ```yaml
+		  - name: Provision AWS resources
+		    hosts: localhost
+		    tasks:
+		      - name: Create a security group
+		        amazon.aws.ec2_group:
+		          name: web_server_sg
+		          description: Security group for web servers
+		          vpc_id: vpc-0123456789abcdef0
+		          rules:
+		            - proto: tcp
+		              ports:
+		                - 22
+		              cidr_ip: 0.0.0.0/0
+		            - proto: tcp
+		              ports:
+		                - 80
+		                - 443
+		              cidr_ip: 0.0.0.0/0
+		          rules_egress:
+		            - proto: all
+		              cidr_ip: 0.0.0.0/0
+		        register: security_group
+		  
+		      - name: Launch EC2 instances
+		        amazon.aws.ec2:
+		          key_name: my_key_pair
+		          instance_type: t2.micro
+		          image_id: ami-0123456789abcdef0
+		          count: 2
+		          security_groups:
+		            - "{{ security_group.group_id }}"
+		          region: us-east-1
+		          assign_public_ip: yes
+		        register: ec2_instances
+		  
+		      - name: Display instance details
+		        debug:
+		          var: ec2_instances.instances
+		  ```
+	- **Best Practices**
+		- Use descriptive names for security groups.
+		- Limit CIDR ranges for SSH (`22`) to trusted IPs.
+		- Tag resources for easier management and identification:
+		  ```yaml
+		  tags:
+		    Name: WebServer
+		    Environment: Production
+		  ```
+		- Always secure SSH key pairs and ensure IAM roles have proper permissions.
+	- **IAM Policy for Automation**:
+		- Example:
+		  ```json
+		  {
+		    "Version": "2012-10-17",
+		    "Statement": [
+		      {
+		        "Effect": "Allow",
+		        "Action": [
+		          "ec2:RunInstances",
+		          "ec2:DescribeInstances",
+		          "ec2:TerminateInstances",
+		          "ec2:CreateSecurityGroup",
+		          "ec2:AuthorizeSecurityGroupIngress",
+		          "ec2:DescribeSecurityGroups"
+		        ],
+		        "Resource": "*"
+		      }
+		    ]
+		  }
+		  ```
