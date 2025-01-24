@@ -1200,3 +1200,116 @@
 		- Use `rescue` and `always` in `block` to handle critical workflows.
 		- Capture and analyze task results with `register` for advanced logic.
 		- Test playbooks thoroughly to anticipate and handle potential errors.
+- **Ansible Vault**
+	- **Definition**:
+		- Ansible Vault is a tool for encrypting sensitive data like passwords, API keys, or certificates.
+		- Encrypted files can still be used in playbooks without exposing the data in plaintext.
+	- **Use Cases**
+		- Store sensitive variables (e.g., database credentials).
+		- Encrypt entire playbooks, inventory files, or variable files.
+		- Securely share sensitive data among team members.
+	- **Basic Commands**
+		- **Create an encrypted file**:
+		  ```bash
+		  ansible-vault create secrets.yml
+		  ```
+			- Opens an editor to input the file content, which will be encrypted upon saving.
+		- **Encrypt an existing file**:
+		  ```bash
+		  ansible-vault encrypt existing_file.yml
+		  ```
+		- **Decrypt a file**:
+		  ```bash
+		  ansible-vault decrypt encrypted_file.yml
+		  ```
+		- **Edit an encrypted file**:
+		  ```bash
+		  ansible-vault edit secrets.yml
+		  ```
+			- Opens the encrypted file for editing.
+		- **View an encrypted file**:
+		  ```bash
+		  ansible-vault view secrets.yml
+		  ```
+	- **Using Encrypted Variables in Playbooks**
+		- **Encrypt Variables File**:
+		  ```bash
+		  ansible-vault encrypt group_vars/all/secrets.yml
+		  ```
+		- **Reference in a Playbook**:
+		  ```yaml
+		  - name: Use encrypted variables
+		    hosts: all
+		    vars_files:
+		      - group_vars/all/secrets.yml
+		    tasks:
+		      - name: Print the secret
+		        debug:
+		          msg: "Database password is {{ db_password }}"
+		  ```
+	- **Using Vault with Playbooks**
+		- **Run a Playbook with Vault**:
+			- When running a playbook that references encrypted files, specify the password:
+			  ```bash
+			  ansible-playbook playbook.yml --ask-vault-pass
+			  ```
+			- Use a password file for automation:
+			  ```bash
+			  ansible-playbook playbook.yml --vault-password-file /path/to/password_file
+			  ```
+	- **Encrypting Variables Inline**
+		- Encrypt a variable directly using the `ansible-vault encrypt_string` command:
+		  ```bash
+		  ansible-vault encrypt_string 'mypassword' --name 'db_password'
+		  ```
+			- Output:
+			  ```yaml
+			  db_password: !vault |
+			    $ANSIBLE_VAULT;1.1;AES256
+			    62386263373561303831663235663839323534303432313938616561333666633639303832333338
+			    ...
+			  ```
+			- Use the encrypted string directly in your playbook or variable files.
+	- **Best Practices**
+		- Use a centralized file (e.g., `vault.yml`) to store all secrets and reference it in playbooks.
+		- Secure the vault password file with appropriate file permissions.
+		- Rotate and update secrets regularly.
+		- Use `encrypt_string` for embedding encrypted values directly in files.
+		- Do not commit the vault password file or decrypted secrets to version control.
+	- **Common Issues**
+		- **Forgotten Vault Password**:
+			- Without the password, encrypted data cannot be recovered.
+		- **Inconsistent Encryption**:
+			- Ensure all team members use the same encryption key/password.
+		- **Automation Challenges**:
+			- Use `--vault-password-file` for automation in CI/CD pipelines.
+	- **Advanced Features**
+		- **Rekey Vault Files**:
+			- Change the encryption password for an existing vault:
+			  ```bash
+			  ansible-vault rekey secrets.yml
+			  ```
+		- **Encrypt Multiple Files**:
+			- Encrypt all variable files in a directory:
+			  ```bash
+			  find group_vars/ -type f -name '*.yml' -exec ansible-vault encrypt {} \;
+			  ```
+		- **Custom Encryption Cipher**:
+			- Specify a different cipher (default is AES256):
+			  ```bash
+			  ansible-vault create --vault-id dev@prompt secrets.yml
+			  ```
+	- **Changing the Default Text Editor for Ansible Vault**
+		- By default, Ansible Vault uses the editor specified by the `EDITOR` environment variable.
+		- **Change the Editor Temporarily**:
+			- Set the editor inline while running the command:
+			  ```bash
+			  EDITOR=nano ansible-vault edit secrets.yml
+			  ```
+		- **Change the Editor Permanently**:
+			- Update the `EDITOR` variable in your shell configuration file (e.g., `.bashrc` or `.zshrc`):
+			  ```bash
+			  echo "export EDITOR=nano" >> ~/.bashrc
+			  source ~/.bashrc
+			  ```
+			- Replace `nano` with your preferred editor (e.g., `vim`, `code`).
