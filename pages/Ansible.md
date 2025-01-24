@@ -1313,3 +1313,124 @@
 			  source ~/.bashrc
 			  ```
 			- Replace `nano` with your preferred editor (e.g., `vim`, `code`).
+- **Dynamic Inventory in AWS using ec2.py**
+	- **Definition**:
+		- A dynamic inventory script (`ec2.py`) for AWS retrieves EC2 instance information and dynamically generates an inventory for Ansible.
+		- Useful for managing dynamic cloud environments where servers are frequently added or removed.
+	- **Dynamic Inventory Basics**
+		- **Static Inventory**:
+			- Requires manual updating of hosts in inventory files.
+			- Example:
+			  ```ini
+			  [webservers]
+			  web1 ansible_host=192.168.1.10
+			  web2 ansible_host=192.168.1.11
+			  ```
+		- **Dynamic Inventory**:
+			- Automatically discovers and lists instances based on real-time data from AWS.
+			- Reduces manual effort and ensures up-to-date inventory.
+	- **ec2.py Script**
+		- **Purpose**:
+			- A Python script provided by Ansible to query AWS and generate dynamic inventory.
+		- **Source**:
+			- Download the script and its configuration file (`ec2.ini`) from the official Ansible repository:
+			  ```bash
+			  curl -O https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.py
+			  curl -O https://raw.githubusercontent.com/ansible/ansible/devel/contrib/inventory/ec2.ini
+			  ```
+		- **Make the Script Executable**:
+		  ```bash
+		  chmod +x ec2.py
+		  ```
+	- **Configuring ec2.py**
+		- **Edit the `ec2.ini` Configuration File**:
+			- Configure AWS access and filtering options:
+			  ```ini
+			  [ec2]
+			  regions = us-east-1,us-west-2
+			  destination_variable = private_ip_address
+			  vpc_destination_variable = private_ip_address
+			  instance_filters = tag:Environment=Production
+			  ```
+			- Key settings:
+				- **regions**: Define AWS regions to query.
+				- **destination_variable**: Specify private or public IP for Ansible connections.
+				- **instance_filters**: Filter instances by tags or other criteria.
+		- **AWS Credentials**:
+			- Ensure that AWS CLI is configured with valid credentials:
+			  ```bash
+			  aws configure
+			  ```
+			- Alternatively, use environment variables:
+			  ```bash
+			  export AWS_ACCESS_KEY_ID=your_access_key
+			  export AWS_SECRET_ACCESS_KEY=your_secret_key
+			  ```
+	- **Using ec2.py as Dynamic Inventory**
+		- **Basic Command**:
+			- Test the dynamic inventory:
+			  ```bash
+			  ./ec2.py --list
+			  ```
+			- Output: JSON structure of instances grouped by tags, regions, etc.
+		- **Run Playbooks with Dynamic Inventory**:
+		  ```bash
+		  ansible-playbook -i ec2.py playbook.yml
+		  ```
+	- **Filtering Instances**
+		- Use tags or attributes in `ec2.ini` to filter instances:
+			- Example: Only include instances with `Environment=Production` tag:
+			  ```ini
+			  instance_filters = tag:Environment=Production
+			  ```
+	- **Practical Example**
+		- **Tag-Based Inventory Grouping**:
+			- AWS Tags:
+				- `Name=web1`, `Environment=Production`
+				- `Name=db1`, `Environment=Staging`
+			- Use dynamic inventory with filtering:
+			  ```yaml
+			  - name: Configure web servers
+			    hosts: tag_Environment_Production
+			    tasks:
+			      - name: Install Nginx
+			        apt:
+			          name: nginx
+			          state: present
+			  ```
+	- **Best Practices**
+		- Limit regions in `ec2.ini` to reduce query time.
+		- Use AWS tags to organize and manage instance groups effectively.
+		- Secure AWS credentials using IAM roles or environment variables.
+		- Test `ec2.py` output regularly to ensure accurate inventory.
+	- **Common Issues**
+		- **Permission Errors**:
+			- Ensure the AWS IAM user or role has the required permissions:
+			  ```json
+			  {
+			    "Version": "2012-10-17",
+			    "Statement": [
+			      {
+			        "Effect": "Allow",
+			        "Action": [
+			          "ec2:DescribeInstances",
+			          "ec2:DescribeTags"
+			        ],
+			        "Resource": "*"
+			      }
+			    ]
+			  }
+			  ```
+		- **Empty Inventory**:
+			- Verify filters in `ec2.ini`.
+			- Ensure instances are tagged correctly.
+	- **Alternative Approaches**
+		- **ansible-inventory Command**:
+			- Use Ansible's built-in support for plugins like `aws_ec2` for dynamic inventory instead of `ec2.py`:
+			  ```yaml
+			  plugin: aws_ec2
+			  regions:
+			    - us-east-1
+			  filters:
+			    tag:Environment: Production
+			  ```
