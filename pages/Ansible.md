@@ -1099,3 +1099,104 @@
 			- SSH issues while delegating tasks.
 			- **Solution**:
 				- Verify the SSH access to the target server using the same credentials as in the playbook.
+- **Error Handling in Ansible**
+	- **Definition**:
+		- Ansible provides mechanisms to handle errors gracefully during playbook execution.
+		- Includes tools like `ignore_errors`, `failed_when`, `rescue`, and `always` to manage task outcomes and ensure reliability.
+	- **Ignoring Errors**
+		- **ignore_errors**:
+			- Allows playbook execution to continue even if a task fails.
+			- **Syntax**:
+			  ```yaml
+			  - name: Install a package
+			    apt:
+			      name: nginx
+			      state: present
+			    ignore_errors: yes
+			  ```
+			- **Best Practices**:
+				- Use when the task failure is not critical.
+				- Document why ignoring the error is necessary.
+	- **Custom Failure Conditions**
+		- **failed_when**:
+			- Specifies custom conditions to determine task failure.
+			- **Syntax**:
+			  ```yaml
+			  - name: Check a service status
+			    shell: systemctl is-active nginx
+			    register: result
+			    failed_when: result.stdout != "active"
+			  ```
+			- **Use Cases**:
+				- Handle non-standard exit codes.
+				- Define custom failure logic based on command output.
+	- **Error Handling with Blocks**
+		- **Using rescue and always**:
+			- `rescue`: Executes tasks when a block fails.
+			- `always`: Executes tasks regardless of block success or failure.
+			- **Example**:
+			  ```yaml
+			  - name: Error handling example
+			    block:
+			      - name: Install Nginx
+			        apt:
+			          name: nginx
+			          state: present
+			  
+			      - name: Start Nginx
+			        service:
+			          name: nginx
+			          state: started
+			    rescue:
+			      - name: Print error message
+			        debug:
+			          msg: "Failed to install or start Nginx."
+			    always:
+			      - name: Ensure package list is updated
+			        apt:
+			          update_cache: yes
+			  ```
+	- **Registering and Analyzing Task Results**
+		- **register**:
+			- Captures the result of a task for analysis in subsequent tasks.
+			- **Example**:
+			  ```yaml
+			  - name: Check disk usage
+			    shell: df -h
+			    register: disk_result
+			  
+			  - name: Print disk usage
+			    debug:
+			      var: disk_result.stdout
+			  ```
+		- **Combine with failed_when**:
+			- Use registered results to define failure conditions.
+	- **Retrying Tasks**
+		- **until**:
+			- Repeats a task until a condition is met or a maximum number of retries is reached.
+			- **Syntax**:
+			  ```yaml
+			  - name: Wait for a service to start
+			    shell: systemctl is-active nginx
+			    register: result
+			    until: result.stdout == "active"
+			    retries: 5
+			    delay: 10
+			  ```
+			- **Use Cases**:
+				- Waiting for asynchronous events (e.g., service startup, resource availability).
+	- **Handling Critical Failures**
+		- **force_handlers**:
+			- Ensures handlers are triggered even if a task fails.
+			- Enable in the playbook:
+			  ```yaml
+			  - name: Example playbook
+			    hosts: all
+			    force_handlers: yes
+			  ```
+	- **Best Practices**
+		- Use `ignore_errors` sparingly to avoid masking critical issues.
+		- Combine `failed_when` with meaningful conditions for better error detection.
+		- Use `rescue` and `always` in `block` to handle critical workflows.
+		- Capture and analyze task results with `register` for advanced logic.
+		- Test playbooks thoroughly to anticipate and handle potential errors.
