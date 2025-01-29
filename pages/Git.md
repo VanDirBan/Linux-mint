@@ -313,6 +313,14 @@
 		  ```bash
 		  git tag
 		  ```
+		- **Delete tag**:
+		  ```bash
+		  git tag -d <tag_name>
+		  ```
+		- **Delete remote tag**:
+		  ```bash
+		  git push origin --delete <tag_name>
+		  ```
 	- **Amending Commits**:
 		- **Purpose**: Edit the most recent commit (e.g., to fix a message or add changes).
 		- **Amend the last commit**:
