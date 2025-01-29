@@ -309,6 +309,10 @@
 		  ```bash
 		  git push origin <tag_name>
 		  ```
+		- **Push all tags to a remote repository**:
+		  ```bash
+		  git push origin --tags
+		  ```
 		- **List all tags**:
 		  ```bash
 		  git tag
