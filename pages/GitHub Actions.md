@@ -36,7 +36,7 @@
 		      - cron: "0 0 * * *"
 		  ```
 		- **Comparison with Jenkins**:
-			- Similar to Jenkins `triggers { pollSCM('* * * * *') }` in declarative pipelines.
+			- Similar to [[Jenkins]] `triggers { pollSCM('* * * * *') }` in declarative pipelines.
 	- **Jobs**
 		- Defines a set of tasks that run in sequence or in parallel.
 		- Example:
@@ -48,7 +48,7 @@
 		        - run: echo "Building project"
 		  ```
 		- **Comparison with Jenkins**:
-			- Similar to Jenkins "Stages" in pipelines.
+			- Similar to [[Jenkins]] "Stages" in pipelines.
 	- **Steps**
 		- Individual commands executed within a job.
 		- Each step runs in a new shell.
@@ -61,7 +61,7 @@
 		      run: npm test
 		  ```
 		- **Comparison with Jenkins**:
-			- Equivalent to `steps { sh 'npm test' }` in Jenkins.
+			- Equivalent to `steps { sh 'npm test' }` in [[Jenkins]].
 	- **Runners**
 		- Virtual machines that execute jobs.
 		- Available options:
@@ -78,7 +78,7 @@
 		      node-version: 16
 		  ```
 		- **Comparison with Jenkins**:
-			- Equivalent to plugins in Jenkins.
+			- Equivalent to plugins in [[Jenkins]].
 	- **Secrets & Environment Variables**
 		- Securely store sensitive data.
 		- Example:
@@ -87,7 +87,7 @@
 		    API_KEY: ${{ secrets.API_KEY }}
 		  ```
 		- **Comparison with Jenkins**:
-			- Similar to Jenkins credentials store (`withCredentials` block).
+			- Similar to [[Jenkins]] credentials store (`withCredentials` block).
 	- **Artifacts & Caching**
 		- Used for storing and sharing files between jobs.
 		- Example:
@@ -114,10 +114,10 @@
         run: npm install  
       - name: Run Tests
         run: npm test  
-    deploy:  
-      runs-on: ubuntu-latest  
-      needs: build  
-      steps:  
+        deploy:  
+        runs-on: ubuntu-latest  
+        needs: build  
+        steps:  
       - name: Deploy to Production
         run: echo "Deploying..."
   ```
