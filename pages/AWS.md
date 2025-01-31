@@ -10,6 +10,7 @@
 		- **Best Practices**:
 			- Use the root account only for billing and account management.
 			- Enable Multi-Factor Authentication (MFA) for the root account.
+- #IAM
 	- **Creating Users and Groups in AWS IAM**
 		- **Definition**:
 			- IAM (Identity and Access Management) manages access to AWS services and resources securely.
@@ -188,3 +189,149 @@
 		- **Best Practices**:
 			- Test new policies before applying them to users or roles.
 			- Use the simulator to debug permission issues.
+- #EC2
+	- **Definition**:
+		- Amazon Elastic Compute Cloud (EC2) provides scalable virtual machines (instances) in the AWS cloud.
+		- Allows users to launch, manage, and scale compute resources on-demand.
+	- **Key Features**:
+		- Various instance types for different workloads (general-purpose, compute-optimized, memory-optimized, etc.).
+		- Elastic Load Balancing (ELB) for distributing traffic.
+		- Auto Scaling to adjust instance count based on demand.
+		- Integration with other AWS services like S3, RDS, IAM, and CloudWatch.
+	- **Creating an EC2 Instance (Linux)**
+		- **Steps to Launch an Instance**:
+		  1. **Navigate to EC2 Dashboard**:
+			- Open AWS Console → EC2 → Instances → Launch Instance.
+			  2. **Select Amazon Machine Image (AMI)**:
+			- Choose a pre-configured OS (e.g., Amazon Linux, Ubuntu, Debian, CentOS).
+			  3. **Choose Instance Type**:
+			- Select based on CPU, memory, and performance needs (e.g., `t2.micro` for free tier).
+			  4. **Configure Instance Details**:
+			- Number of instances.
+			- Networking options (VPC, subnet).
+			- IAM role for instance permissions.
+			  5. **Add Storage**:
+			- Define disk size (e.g., 8GB default for Amazon Linux).
+			  6. **Configure Security Group**:
+			- Define inbound/outbound rules.
+			- Example:
+			  ```plaintext
+			  - SSH (22) → Your IP
+			  - HTTP (80) → Open to all (0.0.0.0/0)
+			  ```
+			  7. **Select or Create Key Pair**:
+			- Required for SSH access.
+			- Download the `.pem` key file.
+			  8. **Launch the Instance**.
+	- **Connecting to an EC2 Linux Instance**
+		- **Using SSH**:
+		  ```bash
+		  ssh -i my-key.pem ec2-user@<instance-public-ip>
+		  ```
+		- **Example for Ubuntu**:
+		  ```bash
+		  ssh -i my-key.pem ubuntu@<instance-public-ip>
+		  ```
+		- **Using AWS Session Manager (IAM-based, no key needed)**:
+		  ```bash
+		  aws ssm start-session --target <instance-id>
+		  ```
+	- **Managing EC2 Instances**
+		- **Start and Stop Instances**:
+		  ```bash
+		  aws ec2 start-instances --instance-ids i-1234567890abcdef0
+		  aws ec2 stop-instances --instance-ids i-1234567890abcdef0
+		  ```
+		- **Terminate an Instance**:
+		  ```bash
+		  aws ec2 terminate-instances --instance-ids i-1234567890abcdef0
+		  ```
+		- **Monitor Instance Performance**:
+			- Use CloudWatch for monitoring CPU, memory, and network usage.
+	- **Best Practices**
+		- Restrict SSH access (`22`) to specific IPs for security.
+		- Use IAM roles instead of storing credentials inside the instance.
+		- Regularly update and patch the OS.
+		- Use Auto Scaling for fault tolerance and performance optimization.
+- #S3
+	- **Definition**:
+		- Amazon Simple Storage Service (S3) is an object storage service that provides scalability, data availability, security, and performance.
+		- Stores data as objects within buckets.
+	- **Key Features**:
+		- **Durability**: 99.999999999% (11 9’s) durability.
+		- **Availability**: High uptime and redundancy across multiple Availability Zones.
+		- **Scalability**: Automatically scales based on usage.
+		- **Security**: Supports IAM policies, bucket policies, and encryption.
+	- **Creating an S3 Bucket**
+		- **Steps to Create a Bucket**:
+		  1. **Navigate to S3 in AWS Console**:
+			- AWS Console → S3 → Create Bucket.
+			  2. **Specify Bucket Name**:
+			- Must be globally unique.
+			- Example: `my-project-bucket`.
+			  3. **Choose AWS Region**:
+			- Select a region closest to users for lower latency.
+			  4. **Configure Bucket Settings**:
+			- **Block Public Access** (Recommended for private data).
+			- **Versioning** (Enables tracking of file changes).
+			- **Encryption** (SSE-S3, SSE-KMS, or client-side encryption).
+			  5. **Set Permissions**:
+			- IAM-based access control.
+			- Bucket policies for cross-account permissions.
+			  6. **Create the Bucket**.
+	- **Uploading and Managing Objects**
+		- **Uploading Files**:
+			- Using AWS Console:
+				- Click **Upload** → Select file → Set permissions → Confirm.
+			- Using AWS CLI:
+			  ```bash
+			  aws s3 cp myfile.txt s3://my-project-bucket/
+			  ```
+		- **Downloading Files**:
+		  ```bash
+		  aws s3 cp s3://my-project-bucket/myfile.txt .
+		  ```
+		- **Listing Files**:
+		  ```bash
+		  aws s3 ls s3://my-project-bucket/
+		  ```
+		- **Deleting Files**:
+		  ```bash
+		  aws s3 rm s3://my-project-bucket/myfile.txt
+		  ```
+	- **S3 Storage Classes**
+		- **Standard**: High availability, frequently accessed data.
+		- **Intelligent-Tiering**: Moves data automatically between storage classes based on access patterns.
+		- **Standard-IA (Infrequent Access)**: Cheaper, but retrieval costs apply.
+		- **One Zone-IA**: Lower cost, but stored in a single Availability Zone.
+		- **Glacier**: Low-cost, archival storage (retrieval times vary).
+		- **Glacier Deep Archive**: Cheapest option, for long-term storage.
+	- **Bucket Permissions and Security**
+		- **IAM Policies**:
+			- Example policy to allow access:
+			  ```json
+			  {
+			    "Effect": "Allow",
+			    "Principal": "*",
+			    "Action": "s3:GetObject",
+			    "Resource": "arn:aws:s3:::my-project-bucket/*"
+			  }
+			  ```
+		- **Bucket Policies**:
+			- JSON-based rules defining access controls at the bucket level.
+		- **ACLs (Access Control Lists)**:
+			- Used to grant permissions at the object level.
+	- **Static Website Hosting**
+		- **Enable Public Access** (Not recommended for private data).
+		- **Upload an `index.html` file**.
+		- **Configure Bucket as a Static Website**:
+			- AWS Console → S3 → Select Bucket → Properties → Enable Static Website Hosting.
+		- **Access via Public URL**:
+		  ```
+		  http://<bucket-name>.s3-website.<region>.amazonaws.com
+		  ```
+	- **Best Practices**
+		- Enable **Versioning** to protect against accidental deletions.
+		- Use **Lifecycle Policies** to move data to cheaper storage classes.
+		- Implement **S3 Encryption** (SSE-S3 or SSE-KMS) for security.
+		- Restrict public access to avoid data exposure.
