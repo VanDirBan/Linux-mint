@@ -533,63 +533,63 @@
 		  kubectl get deployments
 		  kubectl edit deployment my-deployment
 		  ```
-	- **Horizontal Pod Autoscaler (HPA)**
-		- **Definition**:
-			- The Horizontal Pod Autoscaler (HPA) automatically scales the number of Pods in a Deployment based on CPU or memory usage.
-			- Ensures efficient resource utilization and optimal application performance.
-		- **Key Features**:
-			- Monitors CPU/Memory usage using the Metrics API.
-			- Adjusts the number of Pods dynamically.
-			- Works with Deployments, ReplicaSets, and StatefulSets.
-		- **Enable Metrics Server (Required for HPA)**
-			- Check if Metrics Server is installed:
-			  ```bash
-			  kubectl get deployment metrics-server -n kube-system
-			  ```
-			- If missing, install it:
-			  ```bash
-			  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-			  ```
-		- **Creating an HPA for a Deployment**
-			- Example command to create an HPA:
-			  ```bash
-			  kubectl autoscale deployment my-deployment --cpu-percent=50 --min=2 --max=10
-			  ```
-			- Example YAML manifest:
-			  ```yaml
-			  apiVersion: autoscaling/v2
-			  kind: HorizontalPodAutoscaler
-			  metadata:
-			    name: my-deployment-hpa
-			  spec:
-			    scaleTargetRef:
-			      apiVersion: apps/v1
-			      kind: Deployment
-			      name: my-deployment
-			    minReplicas: 2
-			    maxReplicas: 10
-			    metrics:
-			      - type: Resource
-			        resource:
-			          name: cpu
-			          target:
-			            type: Utilization
-			            averageUtilization: 50
-			  ```
-			- Apply the configuration:
-			  ```bash
-			  kubectl apply -f hpa.yaml
-			  ```
-		- **View HPA Status**
+- **Horizontal Pod Autoscaler (HPA)**
+	- **Definition**:
+		- The Horizontal Pod Autoscaler (HPA) automatically scales the number of Pods in a Deployment based on CPU or memory usage.
+		- Ensures efficient resource utilization and optimal application performance.
+	- **Key Features**:
+		- Monitors CPU/Memory usage using the Metrics API.
+		- Adjusts the number of Pods dynamically.
+		- Works with Deployments, ReplicaSets, and StatefulSets.
+	- **Enable Metrics Server (Required for HPA)**
+		- Check if Metrics Server is installed:
 		  ```bash
-		  kubectl get hpa
+		  kubectl get deployment metrics-server -n kube-system
 		  ```
-		- **Delete HPA**
+		- If missing, install it:
 		  ```bash
-		  kubectl delete hpa my-deployment-hpa
+		  kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
 		  ```
-		  
-		  ---
+	- **Creating an HPA for a Deployment**
+		- Example command to create an HPA:
+		  ```bash
+		  kubectl autoscale deployment my-deployment --cpu-percent=50 --min=2 --max=10
+		  ```
+		- Example YAML manifest:
+		  ```yaml
+		  apiVersion: autoscaling/v2
+		  kind: HorizontalPodAutoscaler
+		  metadata:
+		    name: my-deployment-hpa
+		  spec:
+		    scaleTargetRef:
+		      apiVersion: apps/v1
+		      kind: Deployment
+		      name: my-deployment
+		    minReplicas: 2
+		    maxReplicas: 10
+		    metrics:
+		      - type: Resource
+		        resource:
+		          name: cpu
+		          target:
+		            type: Utilization
+		            averageUtilization: 50
+		  ```
+		- Apply the configuration:
+		  ```bash
+		  kubectl apply -f hpa.yaml
+		  ```
+	- **View HPA Status**
+	  ```bash
+	  kubectl get hpa
+	  ```
+	- **Delete HPA**
+	  ```bash
+	  kubectl delete hpa my-deployment-hpa
+	  ```
+	  
+	  ---
 	- **Best Practices**
 		- Always use **Deployments** instead of standalone Pods for high availability.
 		- Assign **resource limits** (`cpu`, `memory`) to avoid excessive resource usage.
