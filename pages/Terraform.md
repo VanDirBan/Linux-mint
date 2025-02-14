@@ -128,7 +128,7 @@
 	- [[AWS]] – Understanding instances, networking, and security groups.
 	- [[Kubernetes]] – Using Terraform to provision Kubernetes clusters.
 	- [[Helm Charts]] – Managing Kubernetes applications with Helm and Terraform.
-- **Deploying a Web Server with  NGINX**
+- **Deploying a Web Server with**  #NGINX
 	- **Definition**:
 		- Terraform can be used to deploy a web server (NGINX) on an AWS EC2 instance.
 		- Supports handling **static files**, **dynamic files**, and **dynamic code blocks**.
