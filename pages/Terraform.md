@@ -1,33 +1,31 @@
-- **Introduction to Terraform**
+- **Introduction to Terraform (v1.1+)**
 	- **Definition**:
-		- Terraform is an open-source **Infrastructure as Code (IaC)** tool developed by HashiCorp.
-		- It allows declarative provisioning and management of cloud infrastructure.
+		- Terraform is an open-source Infrastructure as Code (IaC) tool by HashiCorp.
+		- Allows declarative provisioning of cloud resources across multiple providers (AWS, Azure, GCP, etc.).
 	- **Key Features**:
-		- **Multi-Cloud Support**: Works with AWS, Azure, GCP, Kubernetes, and more.
-		- **State Management**: Keeps track of infrastructure changes.
-		- **Immutable Infrastructure**: Ensures consistency by rebuilding rather than modifying in-place.
-		- **Modular & Scalable**: Uses modules for reusable infrastructure components.
-	- **Comparison with Other IaC Tools**:
-		- **Ansible** → Configuration management, mainly procedural.
-		- **CloudFormation** → AWS-specific alternative to Terraform.
-		- **Pulumi** → Uses programming languages instead of declarative syntax.
+		- **Declarative Syntax**: Describes the desired state of infrastructure in `.tf` files.
+		- **Provider-based Architecture**: Uses plugins (e.g., AWS provider) to manage resources.
+		- **State Management**: Tracks resource changes in a state file for consistent updates.
+		- **Modules**: Organizes and reuses configurations.
 - **Installing Terraform**
-	- **Linux Installation**:
+	- **Linux Installation (Example)**:
 	  ```bash
-	  sudo apt update && sudo apt install -y unzip
-	  curl -fsSL https://releases.hashicorp.com/terraform/latest/terraform_$(curl -s https://api.github.com/repos/hashicorp/terraform/releases/latest | grep -oP '"tag_name": "\K(.*)(?=")').linux_amd64.zip -o terraform.zip
-	  unzip terraform.zip
-	  sudo mv terraform /usr/local/bin/
+	  sudo apt update && sudo apt install -y curl unzip
+	  curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+	  sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+	  sudo apt update && sudo apt install terraform
 	  terraform -version
 	  ```
-- **First Terraform Configuration**
-	- **Initializing a Terraform Project**
+	- **Verify Installation**:
 	  ```bash
-	  mkdir terraform-project && cd terraform-project
+	  terraform version
 	  ```
-	- **Create `main.tf`**:
+	- **Related**: See [[Ansible]] for configuration management vs IaC.
+- **Terraform Configuration**
+	- **Basic `main.tf` Structure**:
 	  ```hcl
 	  terraform {
+	    required_version = ">= 1.1.0"
 	    required_providers {
 	      aws = {
 	        source  = "hashicorp/aws"
@@ -40,16 +38,20 @@
 	    region = "us-east-1"
 	  }
 	  ```
-	- **Initialize Terraform**:
+	- **Initialize the Project**:
 	  ```bash
 	  terraform init
 	  ```
-	- **Check Configuration**:
+	- **Validate Syntax**:
 	  ```bash
 	  terraform validate
 	  ```
+	- **Format Code** (optional but recommended):
+	  ```bash
+	  terraform fmt
+	  ```
 - **Creating an AWS EC2 Instance**
-	- **Define an EC2 Instance in `main.tf`**:
+	- **Resource Definition**:
 	  ```hcl
 	  resource "aws_instance" "example" {
 	    ami           = "ami-0c55b159cbfafe1f0"
@@ -60,21 +62,24 @@
 	    }
 	  }
 	  ```
-	- **Plan Infrastructure Changes**:
+	- **Plan the Infrastructure**:
 	  ```bash
 	  terraform plan
 	  ```
-	- **Apply Changes (Create Instance)**:
+	- **Apply (Create Resources)**:
 	  ```bash
 	  terraform apply -auto-approve
 	  ```
-	- **View Created Resources**:
+	- **Check State**:
+	  ```bash
+	  terraform state list
+	  ```
+	- **View Resource Details**:
 	  ```bash
 	  terraform show
 	  ```
-	- **Check AWS Console**: Navigate to EC2 and verify the instance.
-- **Modifying an EC2 Instance**
-	- **Change Instance Type in `main.tf`**:
+- **Modifying Resources**
+	- **Example**: Changing the instance type
 	  ```hcl
 	  instance_type = "t3.micro"
 	  ```
@@ -82,97 +87,120 @@
 	  ```bash
 	  terraform apply -auto-approve
 	  ```
-	- **Check Terraform State**:
+	- **Inspect Differences**:
 	  ```bash
-	  terraform state list
-	  ```
-	- **Manually Refresh the State**:
-	  ```bash
-	  terraform refresh
+	  terraform plan
 	  ```
 - **Deleting Resources**
 	- **Destroy Infrastructure**:
 	  ```bash
 	  terraform destroy -auto-approve
 	  ```
-	- **Remove Local State Files**:
+	- **Remove Local Files** (if needed):
 	  ```bash
-	  rm -rf .terraform terraform.tfstate*
+	  rm -rf .terraform/ terraform.tfstate*
 	  ```
-- **Terraform State and Locking**
-	- **State File (`terraform.tfstate`)**:
-		- Stores the current infrastructure state.
-		- Should be stored securely (e.g., **S3 with DynamoDB locking**).
-	- **Remote State Example (S3 Backend)**:
-	  ```hcl
-	  terraform {
-	    backend "s3" {
-	      bucket         = "my-terraform-state"
-	      key            = "terraform.tfstate"
-	      region         = "us-east-1"
-	      dynamodb_table = "terraform-lock"
-	    }
-	  }
-	  ```
-	- **Initialize Remote State**:
+- **Managing State**
+	- **Local State File**:
+		- Stored as `terraform.tfstate`.
+		- Keep it secure and versioned if possible.
+	- **Remote State (S3, etc.)**:
+		- Example backend configuration:
+		  ```hcl
+		  terraform {
+		    backend "s3" {
+		      bucket         = "my-terraform-state"
+		      key            = "terraform.tfstate"
+		      region         = "us-east-1"
+		      dynamodb_table = "terraform-lock"
+		    }
+		  }
+		  ```
+	- **Initialize or Reconfigure**:
 	  ```bash
-	  terraform init
+	  terraform init -reconfigure
 	  ```
+- **Modules**
+	- **Purpose**:
+		- Reusable configurations for complex infrastructures.
+		- Example usage in `main.tf`:
+		  ```hcl
+		  module "vpc" {
+		    source = "./modules/vpc"
+		    cidr_block = "10.0.0.0/16"
+		  }
+		  ```
+	- **Related**: See [[Terraform Modules]] for advanced usage.
 - **Best Practices**
-	- Always use **`terraform plan`** before applying changes.
-	- Store Terraform state remotely for team collaboration.
-	- Use **variables** (`terraform.tfvars`) instead of hardcoded values.
-	- Implement **IAM roles and security groups** for controlled access.
-	- Use **Terraform modules** for reusable configurations.
-- **Related Topics**
-	- [[AWS]] – Understanding instances, networking, and security groups.
-	- [[Kubernetes]] – Using Terraform to provision Kubernetes clusters.
-	- [[Helm Charts]] – Managing Kubernetes applications with Helm and Terraform.
-- **Deploying a Web Server with**  #NGINX
-	- **Definition**:
-		- Terraform can be used to deploy a web server (NGINX) on an AWS EC2 instance.
-		- Supports handling **static files**, **dynamic files**, and **dynamic code blocks**.
-	- **Key Features**:
-		- Automates EC2 provisioning.
-		- Configures NGINX with user data.
-		- Uses external files for configuration.
+	- Always run `terraform plan` before `terraform apply`.
+	- Use **variables** and **tfvars** files for environment-specific data.
+	- Store state remotely for collaboration (e.g., S3 with DynamoDB lock).
+	- Implement version control (e.g., Git) for `.tf` files.
+	- Use **terraform fmt** and **terraform validate** for consistent code style and syntax checks.
+	- Tag resources for easier identification and cost tracking.
+	- Combine with other IaC or config management tools if needed (e.g., [[Ansible]], [[Helm Charts]]).
+- [[Web Server Deployment]]
+	- **Deploying a Web Server with Terraform and NGINX (v1.1+)**
+		- **Definition**:
+			- Terraform can automate the deployment of a web server with NGINX on AWS.
+			- Involves using **static external files**, **dynamic external files**, and **dynamic blocks**.
+		- **Key Features**:
+			- Infrastructure as Code (IaC) for consistent and repeatable deployments.
+			- Dynamic file templates for flexible configuration.
+			- Modular and scalable infrastructure with reusable code.
 	- **Terraform Configuration for NGINX**
-		- **Defining EC2 Instance with NGINX**:
+		- **Basic Infrastructure Setup (main.tf)**:
+		  ```hcl
+		  terraform {
+		    required_version = ">= 1.1.0"
+		    required_providers {
+		      aws = {
+		        source  = "hashicorp/aws"
+		        version = "~> 5.0"
+		      }
+		    }
+		  }
+		  
+		  provider "aws" {
+		    region = "us-east-1"
+		  }
+		  ```
+	- **Creating the AWS Resources**
+		- **EC2 Instance for NGINX**:
 		  ```hcl
 		  resource "aws_instance" "nginx_server" {
 		    ami           = "ami-0c55b159cbfafe1f0"
 		    instance_type = "t2.micro"
-		    key_name      = "my-key"
+		    key_name      = var.key_name
 		  
 		    security_groups = [aws_security_group.nginx_sg.name]
 		  
+		    # Using external file for user_data
 		    user_data = file("${path.module}/nginx-setup.sh")
 		  
 		    tags = {
-		      Name = "TerraformWebServer"
+		      Name = "TerraformNGINXServer"
 		    }
 		  }
 		  ```
-		- **Creating a Security Group for NGINX**:
+		- **Security Group Configuration**:
 		  ```hcl
 		  resource "aws_security_group" "nginx_sg" {
 		    name        = "nginx_sg"
-		    description = "Allow HTTP and SSH"
+		    description = "Allow HTTP and SSH access"
 		  
-		    ingress {
-		      from_port   = 80
-		      to_port     = 80
-		      protocol    = "tcp"
-		      cidr_blocks = ["0.0.0.0/0"]
+		    # Dynamic block to define ingress rules for ports 80 and 22
+		    dynamic "ingress" {
+		      for_each = toset([80, 22])
+		      content {
+		        from_port   = ingress.value
+		        to_port     = ingress.value
+		        protocol    = "tcp"
+		        cidr_blocks = ["0.0.0.0/0"]
+		      }
 		    }
 		  
-		    ingress {
-		      from_port   = 22
-		      to_port     = 22
-		      protocol    = "tcp"
-		      cidr_blocks = ["0.0.0.0/0"]
-		    }
-		  
+		    # Egress rule for all outbound traffic
 		    egress {
 		      from_port   = 0
 		      to_port     = 0
@@ -181,106 +209,129 @@
 		    }
 		  }
 		  ```
-	- **User Data Script for Installing NGINX**
-		- **Using External Static File (`nginx-setup.sh`)**:
-			- Create the `nginx-setup.sh` file:
-			  ```bash
-			  #!/bin/bash
-			  sudo apt update
-			  sudo apt install -y nginx
-			  sudo systemctl enable nginx
-			  sudo systemctl start nginx
-			  
-			  echo "<h1>Welcome to Terraform Web Server</h1>" | sudo tee /var/www/html/index.html
-			  ```
-			- Reference it in `main.tf`:
-			  ```hcl
-			  user_data = file("${path.module}/nginx-setup.sh")
-			  ```
-	- **Handling External Static Files**
-		- **Using `file()` Function**:
-			- Example of serving a static HTML file:
-			  ```hcl
-			  resource "aws_instance" "web_server" {
-			    user_data = file("${path.module}/index.html")
-			  }
-			  ```
-			- **Example Static HTML File (`index.html`)**:
-			  ```html
-			  <html>
-			    <head><title>Terraform Web Server</title></head>
-			    <body>
-			      <h1>Hello from Terraform-managed NGINX Server</h1>
-			    </body>
-			  </html>
-			  ```
-	- **Handling Dynamic File Generation**
-		- **Using `templatefile()` for Configuration Generation**:
-			- Create a template file (`nginx.conf.tmpl`):
-			  ```nginx
-			  server {
-			      listen 80;
-			      server_name ${server_name};
-			  
-			      location / {
-			          root /var/www/html;
-			          index index.html;
-			      }
-			  }
-			  ```
-			- Use it in Terraform:
-			  ```hcl
-			  data "template_file" "nginx_config" {
-			    template = file("${path.module}/nginx.conf.tmpl")
-			  
-			    vars = {
-			      server_name = "my-terraform-server"
-			    }
-			  }
-			  
-			  resource "aws_instance" "nginx_server" {
-			    user_data = data.template_file.nginx_config.rendered
-			  }
-			  ```
-	- **Handling Dynamic Blocks in Terraform**
-		- **Example: Defining Multiple Ingress Rules Dynamically**:
-		  ```hcl
-		  resource "aws_security_group" "nginx_sg" {
-		    name = "nginx_sg"
+	- **User Data Script for NGINX Setup**
+		- **Static External File (`nginx-setup.sh`)**:
+		  ```bash
+		  #!/bin/bash
+		  sudo apt update
+		  sudo apt install -y nginx
+		  sudo systemctl enable nginx
+		  sudo systemctl start nginx
 		  
-		    dynamic "ingress" {
-		      for_each = [80, 443]
+		  # Deploy a simple static page
+		  echo "<h1>Welcome to the Terraform-powered NGINX Server!</h1>" | sudo tee /var/www/html/index.html
+		  ```
+		- **Explanation**:  
+		  Используемая команда `file("${path.module}/nginx-setup.sh")` позволяет Terraform подключить внешний скрипт без дублирования кода в `main.tf`.
+	- **Dynamic Configuration File**
+		- **Template for NGINX Config (`nginx.conf.tmpl`)**:
+		  ```nginx
+		  server {
+		      listen 80;
+		      server_name ${server_name};
 		  
-		      content {
-		        from_port   = ingress.value
-		        to_port     = ingress.value
-		        protocol    = "tcp"
-		        cidr_blocks = ["0.0.0.0/0"]
+		      location / {
+		          root /var/www/html;
+		          index index.html;
 		      }
+		  
+		      location /api {
+		          proxy_pass http://localhost:8080;
+		      }
+		  }
+		  ```
+		- **Terraform Code Using `templatefile()`**:
+		  ```hcl
+		  data "template_file" "nginx_config" {
+		    template = file("${path.module}/nginx.conf.tmpl")
+		  
+		    vars = {
+		      server_name = "my-terraform-nginx"
+		    }
+		  }
+		  
+		  resource "aws_instance" "nginx_server" {
+		    ami           = "ami-0c55b159cbfafe1f0"
+		    instance_type = "t2.micro"
+		    key_name      = var.key_name
+		  
+		    user_data = data.template_file.nginx_config.rendered
+		  
+		    tags = {
+		      Name = "TerraformNGINXServer"
 		    }
 		  }
 		  ```
-	- **Applying Terraform Configuration**
-		- **Initialize and Apply**:
+	- **Terraform Variables for Flexibility**
+		- **`variables.tf`**:
+		  ```hcl
+		  variable "key_name" {
+		    description = "SSH key name for EC2 access"
+		    type        = string
+		  }
+		  
+		  variable "server_name" {
+		    description = "Name for the NGINX server"
+		    type        = string
+		    default     = "my-terraform-nginx"
+		  }
+		  ```
+		- **Applying with Custom Variables**:
+		  ```bash
+		  terraform apply -var="key_name=my-key"
+		  ```
+	- **Deploying the Infrastructure**
+		- **Initialize the Terraform Project**:
 		  ```bash
 		  terraform init
-		  terraform apply -auto-approve
 		  ```
-		- **Check Instance Public IP**:
+		- **Validate the Configuration**:
 		  ```bash
-		  terraform output instance_ip
+		  terraform validate
 		  ```
-		- **Access Web Server**:
+		- **Plan the Deployment**:
+		  ```bash
+		  terraform plan -var="key_name=my-key"
+		  ```
+		- **Apply Changes**:
+		  ```bash
+		  terraform apply -var="key_name=my-key" -auto-approve
+		  ```
+	- **Accessing the Web Server**
+		- **Retrieve Public IP**:
+		  ```bash
+		  aws ec2 describe-instances --query "Reservations[*].Instances[*].PublicIpAddress" --output text
+		  ```
+		- **Access the Server**:
 		  ```bash
 		  curl http://<instance-public-ip>
 		  ```
-	- **Destroying Infrastructure**
-		- **Delete Everything**:
+			- Should return the message:  
+			  **"Welcome to the Terraform-powered NGINX Server!"**
+	- **Modifying and Updating**
+		- **Updating the Welcome Message**:
+			- Modify the `nginx-setup.sh` file:
+			  ```bash
+			  echo "<h1>Updated: Terraform Web Server!</h1>" | sudo tee /var/www/html/index.html
+			  ```
+			- **Reapply the Changes**:
+			  ```bash
+			  terraform apply -var="key_name=my-key" -auto-approve
+			  ```
+	- **Tearing Down the Infrastructure**
+		- **Destroy the Deployed Resources**:
 		  ```bash
 		  terraform destroy -auto-approve
 		  ```
 	- **Best Practices**
-		- Use **remote state storage** for better management.
-		- Store sensitive data (e.g., SSH keys) in **AWS Secrets Manager** instead of plain text.
-		- Automate deployments with **Terraform Modules**.
-		- Implement **load balancers** for high availability.
+		- Use **remote state storage** (e.g., S3 with DynamoDB locking) for production environments.
+		- Implement **variables** instead of hardcoded values for flexibility.
+		- Avoid hardcoding sensitive information; use **AWS Secrets Manager** or **Terraform Vault**.
+		- Structure code into **modules** for better maintainability.
+		- Regularly update the **AWS provider** for compatibility with new features.
+	- **Related Topics**
+		- [[Terraform Basics]] – Overview of Terraform's core principles.
+		- [[AWS]] – AWS instance configuration.
+		- [[Terraform Variables]] – Managing dynamic input values.
+		- [[Terraform Modules]] – Reusable infrastructure patterns.
+		- [[Helm Charts]] – Kubernetes application management with Terraform.
