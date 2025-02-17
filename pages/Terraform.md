@@ -1,144 +1,145 @@
-- **Introduction to Terraform (v1.1+)**
-	- **Definition**:
-		- Terraform is an open-source Infrastructure as Code (IaC) tool by HashiCorp.
-		- Allows declarative provisioning of cloud resources across multiple providers (AWS, Azure, GCP, etc.).
-	- **Key Features**:
-		- **Declarative Syntax**: Describes the desired state of infrastructure in `.tf` files.
-		- **Provider-based Architecture**: Uses plugins (e.g., AWS provider) to manage resources.
-		- **State Management**: Tracks resource changes in a state file for consistent updates.
-		- **Modules**: Organizes and reuses configurations.
-- **Installing Terraform**
-	- **Linux Installation (Example)**:
-	  ```bash
-	  sudo apt update && sudo apt install -y curl unzip
-	  curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-	  sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-	  sudo apt update && sudo apt install terraform
-	  terraform -version
-	  ```
-	- **Verify Installation**:
-	  ```bash
-	  terraform version
-	  ```
-	- **Related**: See [[Ansible]] for configuration management vs IaC.
-- **Terraform Configuration**
-	- **Basic `main.tf` Structure**:
-	  ```hcl
-	  terraform {
-	    required_version = ">= 1.1.0"
-	    required_providers {
-	      aws = {
-	        source  = "hashicorp/aws"
-	        version = "~> 4.0"
-	      }
-	    }
-	  }
-	  
-	  provider "aws" {
-	    region = "us-east-1"
-	  }
-	  ```
-	- **Initialize the Project**:
-	  ```bash
-	  terraform init
-	  ```
-	- **Validate Syntax**:
-	  ```bash
-	  terraform validate
-	  ```
-	- **Format Code** (optional but recommended):
-	  ```bash
-	  terraform fmt
-	  ```
-- **Creating an AWS EC2 Instance**
-	- **Resource Definition**:
-	  ```hcl
-	  resource "aws_instance" "example" {
-	    ami           = "ami-0c55b159cbfafe1f0"
-	    instance_type = "t2.micro"
-	  
-	    tags = {
-	      Name = "TerraformInstance"
-	    }
-	  }
-	  ```
-	- **Plan the Infrastructure**:
-	  ```bash
-	  terraform plan
-	  ```
-	- **Apply (Create Resources)**:
-	  ```bash
-	  terraform apply -auto-approve
-	  ```
-	- **Check State**:
-	  ```bash
-	  terraform state list
-	  ```
-	- **View Resource Details**:
-	  ```bash
-	  terraform show
-	  ```
-- **Modifying Resources**
-	- **Example**: Changing the instance type
-	  ```hcl
-	  instance_type = "t3.micro"
-	  ```
-	- **Apply Changes**:
-	  ```bash
-	  terraform apply -auto-approve
-	  ```
-	- **Inspect Differences**:
-	  ```bash
-	  terraform plan
-	  ```
-- **Deleting Resources**
-	- **Destroy Infrastructure**:
-	  ```bash
-	  terraform destroy -auto-approve
-	  ```
-	- **Remove Local Files** (if needed):
-	  ```bash
-	  rm -rf .terraform/ terraform.tfstate*
-	  ```
-- **Managing State**
-	- **Local State File**:
-		- Stored as `terraform.tfstate`.
-		- Keep it secure and versioned if possible.
-	- **Remote State (S3, etc.)**:
-		- Example backend configuration:
+- [[Terraform Basics]]
+	- **Introduction to Terraform (v1.1+)**
+		- **Definition**:
+			- Terraform is an open-source Infrastructure as Code (IaC) tool by HashiCorp.
+			- Allows declarative provisioning of cloud resources across multiple providers (AWS, Azure, GCP, etc.).
+		- **Key Features**:
+			- **Declarative Syntax**: Describes the desired state of infrastructure in `.tf` files.
+			- **Provider-based Architecture**: Uses plugins (e.g., AWS provider) to manage resources.
+			- **State Management**: Tracks resource changes in a state file for consistent updates.
+			- **Modules**: Organizes and reuses configurations.
+	- **Installing Terraform**
+		- **Linux Installation (Example)**:
+		  ```bash
+		  sudo apt update && sudo apt install -y curl unzip
+		  curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+		  sudo apt-add-repository "deb https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+		  sudo apt update && sudo apt install terraform
+		  terraform -version
+		  ```
+		- **Verify Installation**:
+		  ```bash
+		  terraform version
+		  ```
+		- **Related**: See [[Ansible]] for configuration management vs IaC.
+	- **Terraform Configuration**
+		- **Basic `main.tf` Structure**:
 		  ```hcl
 		  terraform {
-		    backend "s3" {
-		      bucket         = "my-terraform-state"
-		      key            = "terraform.tfstate"
-		      region         = "us-east-1"
-		      dynamodb_table = "terraform-lock"
+		    required_version = ">= 1.1.0"
+		    required_providers {
+		      aws = {
+		        source  = "hashicorp/aws"
+		        version = "~> 4.0"
+		      }
+		    }
+		  }
+		  
+		  provider "aws" {
+		    region = "us-east-1"
+		  }
+		  ```
+		- **Initialize the Project**:
+		  ```bash
+		  terraform init
+		  ```
+		- **Validate Syntax**:
+		  ```bash
+		  terraform validate
+		  ```
+		- **Format Code** (optional but recommended):
+		  ```bash
+		  terraform fmt
+		  ```
+	- **Creating an AWS EC2 Instance**
+		- **Resource Definition**:
+		  ```hcl
+		  resource "aws_instance" "example" {
+		    ami           = "ami-0c55b159cbfafe1f0"
+		    instance_type = "t2.micro"
+		  
+		    tags = {
+		      Name = "TerraformInstance"
 		    }
 		  }
 		  ```
-	- **Initialize or Reconfigure**:
-	  ```bash
-	  terraform init -reconfigure
-	  ```
-- **Modules**
-	- **Purpose**:
-		- Reusable configurations for complex infrastructures.
-		- Example usage in `main.tf`:
-		  ```hcl
-		  module "vpc" {
-		    source = "./modules/vpc"
-		    cidr_block = "10.0.0.0/16"
-		  }
+		- **Plan the Infrastructure**:
+		  ```bash
+		  terraform plan
 		  ```
-	- **Related**: See [[Terraform Modules]] for advanced usage.
-- **Best Practices**
-	- Always run `terraform plan` before `terraform apply`.
-	- Use **variables** and **tfvars** files for environment-specific data.
-	- Store state remotely for collaboration (e.g., S3 with DynamoDB lock).
-	- Implement version control (e.g., Git) for `.tf` files.
-	- Use **terraform fmt** and **terraform validate** for consistent code style and syntax checks.
-	- Tag resources for easier identification and cost tracking.
-	- Combine with other IaC or config management tools if needed (e.g., [[Ansible]], [[Helm Charts]]).
+		- **Apply (Create Resources)**:
+		  ```bash
+		  terraform apply -auto-approve
+		  ```
+		- **Check State**:
+		  ```bash
+		  terraform state list
+		  ```
+		- **View Resource Details**:
+		  ```bash
+		  terraform show
+		  ```
+	- **Modifying Resources**
+		- **Example**: Changing the instance type
+		  ```hcl
+		  instance_type = "t3.micro"
+		  ```
+		- **Apply Changes**:
+		  ```bash
+		  terraform apply -auto-approve
+		  ```
+		- **Inspect Differences**:
+		  ```bash
+		  terraform plan
+		  ```
+	- **Deleting Resources**
+		- **Destroy Infrastructure**:
+		  ```bash
+		  terraform destroy -auto-approve
+		  ```
+		- **Remove Local Files** (if needed):
+		  ```bash
+		  rm -rf .terraform/ terraform.tfstate*
+		  ```
+	- **Managing State**
+		- **Local State File**:
+			- Stored as `terraform.tfstate`.
+			- Keep it secure and versioned if possible.
+		- **Remote State (S3, etc.)**:
+			- Example backend configuration:
+			  ```hcl
+			  terraform {
+			    backend "s3" {
+			      bucket         = "my-terraform-state"
+			      key            = "terraform.tfstate"
+			      region         = "us-east-1"
+			      dynamodb_table = "terraform-lock"
+			    }
+			  }
+			  ```
+		- **Initialize or Reconfigure**:
+		  ```bash
+		  terraform init -reconfigure
+		  ```
+	- **Modules**
+		- **Purpose**:
+			- Reusable configurations for complex infrastructures.
+			- Example usage in `main.tf`:
+			  ```hcl
+			  module "vpc" {
+			    source = "./modules/vpc"
+			    cidr_block = "10.0.0.0/16"
+			  }
+			  ```
+		- **Related**: See [[Terraform Modules]] for advanced usage.
+	- **Best Practices**
+		- Always run `terraform plan` before `terraform apply`.
+		- Use **variables** and **tfvars** files for environment-specific data.
+		- Store state remotely for collaboration (e.g., S3 with DynamoDB lock).
+		- Implement version control (e.g., Git) for `.tf` files.
+		- Use **terraform fmt** and **terraform validate** for consistent code style and syntax checks.
+		- Tag resources for easier identification and cost tracking.
+		- Combine with other IaC or config management tools if needed (e.g., [[Ansible]], [[Helm Charts]]).
 - [[Web Server Deployment]]
 	- **Deploying a Web Server with Terraform and NGINX (v1.1+)**
 		- **Definition**:
