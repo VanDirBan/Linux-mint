@@ -336,3 +336,94 @@
 		- [[Terraform Variables]] – Managing dynamic input values.
 		- [[Terraform Modules]] – Reusable infrastructure patterns.
 		- [[Helm Charts]] – Kubernetes application management with Terraform.
+- **Terraform: Lifecycle, Outputs, and Depends_On**
+	- **Overview**:
+		- Terraform is an Infrastructure as Code (IaC) tool used to provision and manage cloud infrastructure on various platforms (e.g., [[AWS]], GCP, [[Azure]]).
+		- Key features include state management, dependency graphing, and repeatable, version-controlled provisioning.
+		- Understanding how Terraform handles resource lifecycles, outputs, and dependencies helps ensure a predictable and maintainable setup.
+	- **Lifecycle**
+		- **Definition**:
+			- The `lifecycle` meta-argument is placed inside a resource block.
+			- It modifies resource behavior during create, update, or delete actions.
+		- **Common Lifecycle Arguments**:
+		  1. **`create_before_destroy`**
+			- Ensures a new resource is created before the old one is destroyed.
+			- Useful when you want to minimize downtime (e.g., updating an [[AWS]] instance with zero downtime).
+			  2. **`prevent_destroy`**
+			- Prevents a resource from being destroyed by throwing an error if a plan attempts to destroy it.
+			- Ideal for critical resources like production databases where accidental deletion is unacceptable.
+			  3. **`ignore_changes`**
+			- Instructs Terraform to ignore changes in certain attributes (e.g., ephemeral fields set by an external process like [[Docker]] containers or #ssh key rotation).
+		- **Example Usage**:
+		  ```hcl
+		  resource "aws_instance" "example" {
+		    ami           = "ami-0c55b159cbfafe1f0"
+		    instance_type = "t2.micro"
+		  
+		    lifecycle {
+		      create_before_destroy = true
+		      prevent_destroy       = false
+		      ignore_changes        = [
+		        tags
+		      ]
+		    }
+		  }
+		  ```
+	- **Outputs**
+		- **Definition**:
+			- Outputs allow you to expose or print resource attributes after a Terraform apply.
+			- Often used to pass values to parent modules or display critical information (IP addresses, connection strings) in the CLI.
+		- **Why Use Outputs?**:
+			- Provide visibility into key resource attributes (e.g., instance IP).
+			- Pass information between modules or to external tools (e.g., a script configuring [[Docker]] containers).
+		- **Example Usage**:
+		  ```hcl
+		  output "instance_ip" {
+		    description = "Public IP address of the instance"
+		    value       = aws_instance.example.public_ip
+		  }
+		  
+		  output "db_connection_string" {
+		    description = "Database connection string"
+		    value       = module.database.connection_string
+		    sensitive   = true
+		  }
+		  ```
+			- **`description`**: Adds clarity about the purpose of the output.
+			- **`value`**: Typically references a resource or module attribute.
+			- **`sensitive`**: Hides the output from logs; helpful for secrets or tokens.
+	- **Depends_On**
+		- **Definition**:
+			- `depends_on` is a meta-argument within resource or module blocks to explicitly define dependencies.
+			- Ensures Terraform creates, updates, or destroys resources in a specific order when automatic inference isn’t enough.
+		- **When to Use `depends_on`**:
+			- **Indirect dependencies**: When resources rely on each other but no direct reference exists in the code.
+			- **Complex service requirements**: For example, waiting for a [[Kubernetes]] cluster to be ready before deploying pods.
+			- **Explicit orchestration**: If external or partial references that Terraform can’t infer are needed (like #ssh key setup scripts).
+		- **Example Usage**:
+		  ```hcl
+		  resource "aws_s3_bucket" "my_bucket" {
+		    bucket = "my-bucket"
+		  }
+		  
+		  resource "aws_s3_bucket_policy" "my_bucket_policy" {
+		    bucket = aws_s3_bucket.my_bucket.bucket
+		    policy = data.aws_iam_policy_document.bucket_policy.json
+		  
+		    depends_on = [
+		      aws_s3_bucket.my_bucket
+		    ]
+		  }
+		  ```
+			- Ensures `aws_s3_bucket_policy` is only created after `aws_s3_bucket`.
+	- **Additional Notes**:
+		- **Terraform Version**: Examples align with Terraform v1.1+ syntax; older versions may behave differently.
+		- For advanced configuration, see [[Terraform Modules]].
+		- For references on SSH automation, check [#ssh](#) in your notes.
+		- For containerized infrastructure, explore [[Docker]] or [[Kubernetes]] references.
+	- **Summary**:
+		- **Lifecycle**: Use to control creation, update, and destruction patterns of resources.
+		- **Outputs**: Useful for exposing or sharing resource information.
+		- **Depends_On**: Essential for manually defining dependencies beyond Terraform’s automatic inference.
+	- **Conclusion**:
+		- By leveraging `lifecycle`, `outputs`, and `depends_on`, you can create a robust, predictable workflow for managing infrastructure with Terraform, whether on [[AWS]], on-prem, or in container environments with [[Docker]] and [[Kubernetes]].
