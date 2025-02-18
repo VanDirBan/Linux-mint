@@ -336,7 +336,7 @@
 		- [[Terraform Variables]] – Managing dynamic input values.
 		- [[Terraform Modules]] – Reusable infrastructure patterns.
 		- [[Helm Charts]] – Kubernetes application management with Terraform.
-- **Terraform: Lifecycle, Outputs, and Depends_On**
+- **Lifecycle, Outputs, and Depends_On**
 	- **Overview**:
 		- Terraform is an Infrastructure as Code (IaC) tool used to provision and manage cloud infrastructure on various platforms (e.g., [[AWS]], [[GCP]], [[Azure]]).
 		- Key features include state management, dependency graphing, and repeatable, version-controlled provisioning.
@@ -427,3 +427,124 @@
 		- **Depends_On**: Essential for manually defining dependencies beyond Terraform’s automatic inference.
 	- **Conclusion**:
 		- By leveraging `lifecycle`, `outputs`, and `depends_on`, you can create a robust, predictable workflow for managing infrastructure with Terraform, whether on [[AWS]], on-prem, or in container environments with [[Docker]] and [[Kubernetes]].
+- **Data Sources**
+	- **Definition**:
+		- Terraform **data sources** allow you to retrieve information from external systems to use within your Terraform configuration.
+		- For example, you can fetch details about existing resources (e.g., VPCs, subnets) or AWS account info without manually hardcoding them.
+		- This helps keep configurations dynamic, maintainable, and less prone to errors.
+	- **Why Use Data Sources**:
+		- Avoid hardcoding resource information.
+		- Dynamically configure infrastructure based on existing [[AWS]] components.
+		- Facilitate sharing information across multiple Terraform configurations or modules.
+		- Improve maintainability by automatically updating resource references when they change.
+	- **Common AWS Data Sources**:
+	  1. **aws_availability_zones**
+		- Retrieves a list of availability zones for a given region.
+		- Useful for distributing resources across multiple AZs.
+		  ```hcl
+		  data "aws_availability_zones" "available" {
+		  state = "available"
+		  }
+		  ```
+		- You might use `data.aws_availability_zones.available.names` to loop over these zones for creating subnets.
+		  
+		  2. **aws_caller_identity**
+		- Exposes information about the currently configured [[AWS]] account, including the account ID and ARN of the credentials.
+		  ```hcl
+		  data "aws_caller_identity" "current" {}
+		  ```
+		- Attributes:
+			- `data.aws_caller_identity.current.account_id`
+			- `data.aws_caller_identity.current.arn`
+			- `data.aws_caller_identity.current.user_id`
+		- Helps in tagging or naming resources automatically with the account ID.
+		  
+		  3. **aws_region**
+		- Retrieves the current [[AWS]] region from the provider configuration.
+		  ```hcl
+		  data "aws_region" "current" {}
+		  ```
+		- Attributes:
+			- `data.aws_region.current.name` (e.g., `us-east-1` or `eu-west-1`)
+			  
+			  4. **aws_vpcs**
+		- Retrieves information about multiple VPCs in your account.
+		  ```hcl
+		  data "aws_vpcs" "all" {}
+		  ```
+		- Attributes:
+			- `data.aws_vpcs.all.ids` → A list of VPC IDs.
+			- You can filter or reference them dynamically for subsequent resource creation (e.g., subnets, routing tables).
+	- **Auto-Lookup of AMI (Example of Data Source)**
+		- Instead of hardcoding an AMI ID, you can use the **aws_ami** data source to automatically find the most recent or matching image.
+		- **Example**: Find the latest Amazon Linux 2 AMI.
+		  ```hcl
+		  data "aws_ami" "amazon_linux" {
+		    most_recent = true
+		    owners      = ["amazon"]
+		  
+		    filter {
+		      name   = "name"
+		      values = ["amzn2-ami-kernel-*-x86_64"]
+		    }
+		  
+		    filter {
+		      name   = "state"
+		      values = ["available"]
+		    }
+		  }
+		  
+		  resource "aws_instance" "example" {
+		    ami           = data.aws_ami.amazon_linux.id
+		    instance_type = "t2.micro"
+		  }
+		  ```
+			- **Explanation**:
+				- `most_recent = true` returns the newest AMI matching the filters.
+				- `owners = ["amazon"]` ensures the AMI is provided by [[AWS]].
+				- The `filter` blocks specify additional search criteria.
+	- **Example Use-Case**:
+		- In a typical scenario, you might combine multiple data sources in a single config:
+		  ```hcl
+		  provider "aws" {
+		    region = "us-east-1"
+		  }
+		  
+		  data "aws_caller_identity" "current" {}
+		  
+		  data "aws_vpcs" "all" {}
+		  
+		  data "aws_region" "current" {}
+		  
+		  data "aws_ami" "my_ami" {
+		    most_recent = true
+		    owners      = ["amazon"]
+		  
+		    filter {
+		      name   = "name"
+		      values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+		    }
+		  
+		    filter {
+		      name   = "state"
+		      values = ["available"]
+		    }
+		  }
+		  
+		  resource "aws_instance" "example" {
+		    ami           = data.aws_ami.my_ami.id
+		    instance_type = "t2.micro"
+		    subnet_id     = element(data.aws_vpcs.all.ids, 0) # Example usage of the first VPC ID
+		    tags = {
+		      Name      = "ExampleInstance"
+		      OwnerID   = data.aws_caller_identity.current.account_id
+		      Region    = data.aws_region.current.name
+		    }
+		  }
+		  ```
+			- Here you can see how each data source provides dynamic input to resource creation.
+	- **Summary**:
+		- **Data Sources** enable you to dynamically fetch external information for use in your Terraform configs.
+		- **aws_availability_zones**, **aws_caller_identity**, **aws_region**, and **aws_vpcs** are common built-in data sources for gathering environment details.
+		- **Auto-lookup of AMI** using **aws_ami** ensures you’re always using the latest or most suitable image for your [[AWS]] infrastructure.
+		- Overall, data sources help keep your infrastructure code clean, flexible, and up-to-date.
