@@ -742,4 +742,186 @@
 		- This Terraform configuration sets up a highly available web server using an **Auto Scaling Group** and **ELB** in multiple availability zones.
 		- **Zero Downtime** is achieved through careful use of Terraform’s lifecycle rules, health checks, and multi-AZ redundancy.
 		- For advanced configurations, consider exploring [[Terraform Modules]], containerization with [[Docker]] or [[Kubernetes]] for container-based deployments, or #ssh for remote instance management.
+- **Comparison: Zero Downtime Web Server (Version 1 vs. Improved Version)**
+	- **Overview**:
+		- In the first configuration, a **Classic ELB** (`aws_elb`) was used, while in the improved version we’ve migrated to an **Application Load Balancer (ALB)** (`aws_lb`).
+		- Default VPC and subnets are explicitly defined, making network configuration more intentional.
+		- **Default tags** are applied at the provider level, removing the need to repeat them in multiple resources.
+		- An additional port (443) is now opened, hinting at potential HTTPS usage or future SSL offloading.
+		  
+		  ---
+	- **1. Provider & Default Tags**:
+		- **Previous**:
+			- No default tags were defined at the provider level; tags had to be set manually for each resource.
+		- **Improved Version**:
+		  ```hcl
+		  provider "aws" {
+		    default_tags {
+		      tags = {
+		        Owner     = "Van"
+		        CreatedBy = "Terraform"
+		      }
+		    }
+		  }
+		  ```
+			- Simplifies tagging across all resources.
+			- Ensures consistency, reduces repetitive code, and helps with cost allocation or resource tracking in the AWS console.
+			  
+			  ---
+	- **2. Network Configuration**:
+		- **Previous**:
+			- Used `aws_default_subnet` but didn’t explicitly reference a VPC resource.
+			- Relied on the default AWS VPC implicitly.
+		- **Improved Version**:
+		  ```hcl
+		  resource "aws_default_vpc" "default" {}
+		  
+		  resource "aws_default_subnet" "default_az1" {
+		    availability_zone = data.aws_availability_zones.avaiblible.names[0]
+		  }
+		  
+		  resource "aws_default_subnet" "default_az2" {
+		    availability_zone = data.aws_availability_zones.avaiblible.names[1]
+		  }
+		  ```
+			- Explicitly declares a `aws_default_vpc.default` resource.
+			- Confirms the subnet placement within that VPC.
+			- Improves clarity regarding which VPC is being used.
+			  
+			  ---
+	- **3. Security Group**:
+		- **Previous**:
+			- Allowed only port 80 inbound.
+			- Did not specify `vpc_id`, assuming default behavior.
+		- **Improved Version**:
+		  ```hcl
+		  resource "aws_security_group" "web" {
+		    name   = "My Security Group"
+		    vpc_id = aws_default_vpc.default.id
+		  
+		    dynamic "ingress" {
+		      for_each = ["80", "443"]
+		      content {
+		        from_port   = ingress.value
+		        to_port     = ingress.value
+		        protocol    = "tcp"
+		        cidr_blocks = ["0.0.0.0/0"]
+		      }
+		    }
+		  
+		    ...
+		  }
+		  ```
+			- Now opens both **port 80 and port 443**, indicating readiness for HTTPS traffic or SSL/TLS termination in the future.
+			- Explicitly assigns the security group to the default VPC, increasing transparency.
+			  
+			  ---
+	- **4. Load Balancer**:
+		- **Previous**:
+			- Used `aws_elb.web` (Classic Load Balancer).
+			- Configured with listeners, health checks, and attached to the ASG via `load_balancers` argument.
+		- **Improved Version**:
+		  ```hcl
+		  resource "aws_lb" "web" {
+		    name               = "WebServer-Highly-Available-LB"
+		    load_balancer_type = "application"
+		    security_groups    = [aws_security_group.web.id]
+		    subnets            = [
+		      aws_default_subnet.default_az1.id,
+		      aws_default_subnet.default_az2.id
+		    ]
+		  }
+		  ```
+			- Upgrades to an **Application Load Balancer (ALB)** (`aws_lb`).
+			- **ALB** is often preferred for advanced routing, path-based or host-based rules, and improved metrics.
+			- The security groups and subnets are explicitly declared, clarifying the LB’s networking setup.
+		- **Target Group & Listener**:
+		  ```hcl
+		  resource "aws_lb_target_group" "web" {
+		    name       = "WebServer-Highly-Available-TG"
+		    vpc_id     = aws_default_vpc.default.id
+		    port       = 80
+		    protocol   = "HTTP"
+		    ...
+		  }
+		  
+		  resource "aws_lb_listener" "http" {
+		    load_balancer_arn = aws_lb.web.arn
+		    port              = 80
+		    protocol          = "HTTP"
+		  
+		    default_action {
+		      type             = "forward"
+		      target_group_arn = aws_lb_target_group.web.arn
+		    }
+		  }
+		  ```
+			- **aws_lb_target_group** and **aws_lb_listener** replace the previous single resource configuration of `aws_elb`.
+			- Allows for more flexible and modern load balancing features, including **deregistration delay** for graceful shutdowns (set to 10 seconds).
+			  
+			  ---
+	- **5. Auto Scaling Group (ASG)**:
+		- **Previous**:
+			- Associated an ASG with the Classic ELB using the `load_balancers` argument.
+		- **Improved Version**:
+		  ```hcl
+		  resource "aws_autoscaling_group" "web" {
+		    ...
+		    target_group_arns = [aws_lb_target_group.web.arn]
+		  
+		    launch_template {
+		      id      = aws_launch_template.web.id
+		      version = aws_launch_template.web.latest_version
+		    }
+		  
+		    dynamic "tag" {
+		      for_each = {
+		        Name = "WebServer-in-ASG-v${aws_launch_template.web.latest_version}"
+		      }
+		      content {
+		        key                 = tag.key
+		        value               = tag.value
+		        propagate_at_launch = true
+		      }
+		    }
+		    ...
+		  }
+		  ```
+			- **`target_group_arns`** is used instead of the `load_balancers` argument (Classic ELB).
+			- **Launch Template** references a single version (no name prefix needed, because `aws_launch_template` explicitly uses `name`).
+			- The **dynamic tag** key now includes the version from the launch template (`v${aws_launch_template.web.latest_version}`), improving traceability.
+			- Retains **create_before_destroy** for zero-downtime updates.
+			  
+			  ---
+	- **6. Launch Template**:
+		- **Previous**:
+			- `name_prefix` was used, user data was read from `filebase64("user_data.sh")`.
+		- **Improved Version**:
+		  ```hcl
+		  resource "aws_launch_template" "web" {
+		    name                   = "WebServer-Highly-Available-LT"
+		    image_id               = data.aws_ami.latest_ubuntu.id
+		    instance_type          = "t3.micro"
+		    vpc_security_group_ids = [aws_security_group.web.id]
+		    user_data              = filebase64("${path.module}/user_data.sh")
+		  }
+		  ```
+			- Provides a **fixed name** (`WebServer-Highly-Available-LT`) rather than a prefix.
+			- Uses `${path.module}` to make the path more explicit for user_data.
+			- Overall cleaner approach, though functionally similar to the prior version for setting up the instance configuration.
+			  
+			  ---
+	- **7. Summary of Improvements**:
+	  1. **Default Tags**: Centralized tagging logic in the provider for consistent resource tagging.
+	  2. **Default VPC & Subnets**: Explicitly declared, ensuring clarity about the environment.
+	  3. **Security Group Enhancements**: Inbound rules for both HTTP (80) and HTTPS (443).
+	  4. **Shift to Application Load Balancer**:
+		- Adds advanced load balancing features.
+		- Improves modern best practices over Classic ELB.
+		  5. **Target Group & Listener**: Allows fine-grained control of how traffic is routed.
+		  6. **Launch Template**: Simplified naming and explicit user_data reference.
+		  7. **ASG with target_group_arns**: Aligns with ALB usage, better logging, and deregistration.
+	- **Conclusion**:
+		- The **improved configuration** offers a more flexible and maintainable setup, leveraging Application Load Balancing, explicit network references, and centralized tagging.
+		- These changes make the infrastructure more **scalable, future-proof**, and **easier to manage** compared to the original version.
 -
