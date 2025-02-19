@@ -548,3 +548,198 @@
 		- **aws_availability_zones**, **aws_caller_identity**, **aws_region**, and **aws_vpcs** are common built-in data sources for gathering environment details.
 		- **Auto-lookup of AMI** using **aws_ami** ensures you’re always using the latest or most suitable image for your [[AWS]] infrastructure.
 		- Overall, data sources help keep your infrastructure code clean, flexible, and up-to-date.
+- **Zero Downtime Web Server with Terraform**
+	- **Definition**:
+		- **Zero Downtime** refers to updating or redeploying your application or infrastructure without causing any interruptions or outages in the service.
+		- This approach is often required for production environments where a service must remain accessible at all times.
+	- **Key Components**:
+		- **[[AWS]] ELB (Classic ELB)**:
+			- Distributes incoming traffic across multiple instances in different availability zones.
+			- Health checks ensure traffic is only routed to healthy instances.
+		- **Auto Scaling Group (ASG)**:
+			- Manages and scales a group of instances automatically.
+			- Ensures minimum and maximum capacity, and replaces unhealthy instances.
+		- **Launch Template**:
+			- Defines the configuration (AMI, instance type, security groups, etc.) for instances in the ASG.
+			- Supports versioning, allowing updates without downtime.
+		- **Security Group**:
+			- Configures inbound (TCP 80) and outbound rules.
+			- Ensures controlled network access to and from the instances.
+		- **AWS Default Subnets**:
+			- Subnets that exist by default in each AZ, used here for simplicity.
+			- Distributing instances across multiple AZs increases fault tolerance.
+	- **Conceptual Flow**:
+	  1. **User Requests** → [[AWS]] **ELB** → Healthy Instances in **Auto Scaling Group** → Serve Web Content.
+	  2. **ASG** ensures there are always at least 2 instances running (min_size = 2).
+	  3. **Lifecycle** settings in Terraform are used to create new resources before destroying old ones (`create_before_destroy`), helping to maintain zero downtime.
+	  4. **Health Checks** in the ELB continuously verify instance health. Unhealthy instances are removed from rotation automatically.
+	- **Terraform Configuration Walkthrough**:
+		- **Provider and Data Sources**:
+		  ```hcl
+		  provider "aws" {}
+		  
+		  data "aws_availability_zones" "avaiblible" {}
+		  
+		  data "aws_ami" "latest_ubuntu" {
+		    owners      = ["099720109477"]
+		    most_recent = true
+		    filter {
+		      name   = "name"
+		      values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server*"]
+		    }
+		  }
+		  ```
+			- **`aws_availability_zones`**: Retrieves the available AZs for your region.
+			- **`aws_ami`**: Dynamically fetches the latest Ubuntu 22.04 (Jammy) image owned by Canonical.
+		- **Security Group**:
+		  ```hcl
+		  resource "aws_security_group" "web" {
+		    name = "My Security Group"
+		  
+		    dynamic "ingress" {
+		      for_each = ["80"]
+		      content {
+		        from_port   = ingress.value
+		        to_port     = ingress.value
+		        protocol    = "tcp"
+		        cidr_blocks = ["0.0.0.0/0"]
+		      }
+		    }
+		  
+		    egress {
+		      from_port   = 0
+		      to_port     = 0
+		      protocol    = "-1"
+		      cidr_blocks = ["0.0.0.0/0"]
+		    }
+		  
+		    tags = {
+		      Name  = "My Security Group"
+		      Onwer = "Van"
+		    }
+		  }
+		  ```
+			- Allows HTTP access on port 80 from anywhere.
+			- Allows outbound traffic on all ports.
+			- Minimal config for a simple web server.
+		- **Launch Template**:
+		  ```hcl
+		  resource "aws_launch_template" "as_lt" {
+		    name_prefix   = "web-server-lt-"
+		    image_id      = data.aws_ami.latest_ubuntu.id
+		    instance_type = "t3.micro"
+		  
+		    vpc_security_group_ids = [aws_security_group.web.id]
+		  
+		    user_data = filebase64("user_data.sh")
+		  
+		    tag_specifications {
+		      resource_type = "instance"
+		      tags = {
+		        Name  = "WebServer-instance"
+		        Owner = "Van"
+		      }
+		    }
+		  
+		    lifecycle {
+		      create_before_destroy = true
+		      prevent_destroy       = false
+		    }
+		  }
+		  ```
+			- References `data.aws_ami.latest_ubuntu.id` to always use the latest Ubuntu image.
+			- `user_data` can include commands to install and configure your web server automatically.
+		- **Auto Scaling Group (ASG)**:
+		  ```hcl
+		  resource "aws_autoscaling_group" "web" {
+		    name = "ASG-${aws_launch_template.as_lt.latest_version}"
+		  
+		    launch_template {
+		      id      = aws_launch_template.as_lt.id
+		      version = "$Latest"
+		    }
+		  
+		    min_size            = 2
+		    max_size            = 4
+		    min_elb_capacity    = 2
+		    vpc_zone_identifier = [aws_default_subnet.default_az1.id, aws_default_subnet.default_az2.id]
+		    health_check_type   = "ELB"
+		    load_balancers      = [aws_elb.web.name]
+		  
+		    dynamic "tag" {
+		      for_each = {
+		        Name  = "WebServer-in-ASG"
+		        Owner = "Van"
+		      }
+		      content {
+		        key                 = tag.key
+		        value               = tag.value
+		        propagate_at_launch = true
+		      }
+		    }
+		  
+		    lifecycle {
+		      create_before_destroy = true
+		    }
+		  }
+		  ```
+			- Maintains 2 to 4 instances, ensuring there are always at least 2 to handle traffic.
+			- Uses the `load_balancers` argument to associate with the ELB.
+			- `create_before_destroy` helps ensure no downtime when updating or changing the ASG.
+		- **Elastic Load Balancer (ELB)**:
+		  ```hcl
+		  resource "aws_elb" "web" {
+		    name               = "WebServer-HA-ELB"
+		    availability_zones = [data.aws_availability_zones.avaiblible.names[0], data.aws_availability_zones.avaiblible.names[1]]
+		    security_groups    = [aws_security_group.web.id]
+		  
+		    listener {
+		      lb_port           = 80
+		      lb_protocol       = "http"
+		      instance_port     = 80
+		      instance_protocol = "http"
+		    }
+		  
+		    health_check {
+		      healthy_threshold   = 2
+		      unhealthy_threshold = 2
+		      timeout             = 3
+		      target              = "HTTP:80/"
+		      interval            = 10
+		    }
+		  
+		    tags = {
+		      Name = "Web_server_Highly_Availible_ELB"
+		    }
+		  }
+		  ```
+			- Classic ELB listening on port 80.
+			- Health checks ensure only healthy instances receive traffic.
+		- **Default Subnets**:
+		  ```hcl
+		  resource "aws_default_subnet" "default_az1" {
+		    availability_zone = data.aws_availability_zones.avaiblible.names[0]
+		  }
+		  
+		  resource "aws_default_subnet" "default_az2" {
+		    availability_zone = data.aws_availability_zones.avaiblible.names[1]
+		  }
+		  ```
+			- Provide subnets in different AZs to improve availability.
+		- **Output**:
+		  ```hcl
+		  output "web_loadbalabcer_url" {
+		    value = aws_elb.web.dns_name
+		  }
+		  ```
+			- Shows the ELB’s DNS name after deployment.
+			- You can directly access your web server at this endpoint.
+	- **Zero Downtime Strategy**:
+		- **Multi-AZ**: By using at least two availability zones, you ensure that if one AZ experiences issues, the other can still serve traffic.
+		- **Rolling Updates via ASG**: With `create_before_destroy` and health checks, Terraform will create new instances, attach them to the ELB, and only then remove old instances. This ensures uninterrupted service.
+		- **Elastic Load Balancer**: The ELB automatically routes traffic to healthy instances and seamlessly handles scaling events.
+	- **Conclusion**:
+		- This Terraform configuration sets up a highly available web server using an **Auto Scaling Group** and **ELB** in multiple availability zones.
+		- **Zero Downtime** is achieved through careful use of Terraform’s lifecycle rules, health checks, and multi-AZ redundancy.
+		- For advanced configurations, consider exploring [[Terraform Modules]], containerization with [[Docker]] or [[Kubernetes]] for container-based deployments, or #ssh for remote instance management.
+-
