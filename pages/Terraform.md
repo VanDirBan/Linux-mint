@@ -924,4 +924,156 @@
 	- **Conclusion**:
 		- The **improved configuration** offers a more flexible and maintainable setup, leveraging Application Load Balancing, explicit network references, and centralized tagging.
 		- These changes make the infrastructure more **scalable, future-proof**, and **easier to manage** compared to the original version.
--
+- **Using Variables in Terraform**
+	- **Definition**:
+		- **Variables** in Terraform allow you to parameterize your configurations, making them more flexible and reusable.
+		- You can define variables for things like instance size, environment names, regions, credentials, and so on.
+		- This helps avoid hardcoding values in the main `.tf` files, simplifies environment switching, and keeps sensitive information out of version control when used properly with `sensitive` flags or variable files.
+	- **Why Use Variables?**:
+		- **Reusability**: The same Terraform code can be deployed with different parameters (e.g., dev, staging, production).
+		- **Maintainability**: Centralizing frequently changed values reduces duplication and the potential for errors.
+		- **Security**: Storing secrets or tokens as variables (especially with `sensitive = true`) can help keep them out of logs and outputs.
+		- **Consistency**: Enforces consistent settings across different modules or resources (e.g., naming conventions in [[AWS]] or #ssh key paths).
+	- **Declaring Variables**:
+		- **In a `.tf` file** (e.g., `variables.tf`):
+		  ```hcl
+		  variable "region" {
+		    type        = string
+		    description = "The AWS region where resources will be created"
+		    default     = "us-east-1"
+		  }
+		  
+		  variable "instance_type" {
+		    type        = string
+		    description = "EC2 instance type"
+		    default     = "t3.micro"
+		  }
+		  
+		  variable "ssh_key_name" {
+		    type        = string
+		    description = "Name of the SSH key pair"
+		  }
+		  
+		  variable "subnet_ids" {
+		    type        = list(string)
+		    description = "List of subnet IDs to deploy resources into"
+		  }
+		  
+		  variable "environment" {
+		    type    = string
+		    default = "dev"
+		  }
+		  ```
+			- **`type`**: Defines the variable’s data type (e.g., string, number, bool, list, map).
+			- **`description`**: Helps document the purpose of the variable.
+			- **`default`**: If specified, the variable becomes optional. Otherwise, it must be provided.
+	- **Variable Types**:
+		- **String**: Single value (e.g., `"t3.medium"`).
+		- **Number**: Numeric values (e.g., `8080`).
+		- **Bool**: Boolean values (`true` or `false`).
+		- **List(...)** or **tuple([...])**: For ordered collections of values (e.g., subnets, instance IDs).
+		- **Map(...)** or **object({...})**: For key-value pairs (useful for complex configuration, tagging, or environment-specific data).
+	- **Using Variables in Terraform Code**:
+		- **Within resource definitions**:
+		  ```hcl
+		  resource "aws_instance" "example" {
+		    ami           = data.aws_ami.ubuntu.id
+		    instance_type = var.instance_type
+		    vpc_security_group_ids = [aws_security_group.web.id]
+		    subnet_id     = element(var.subnet_ids, 0) # Example usage
+		    tags = {
+		      Name = "${var.environment}-example-instance"
+		    }
+		  }
+		  ```
+			- **`var.instance_type`** references the declared variable `instance_type`.
+			- **`var.subnet_ids`** references the list of subnet IDs; you can select a specific one or iterate over them.
+	- **Providing Variable Values**:
+	  1. **`-var` flag**:
+	     ```bash
+	     terraform plan -var="environment=prod" -var="ssh_key_name=myKey"
+	     ```
+	  2. **`-var-file` flag**:
+		- Create a `.tfvars` file (e.g., `prod.tfvars`):
+		  ```hcl
+		  environment   = "prod"
+		  ssh_key_name  = "myProdKey"
+		  subnet_ids    = ["subnet-12345678", "subnet-87654321"]
+		  ```
+		- Then run:
+		  ```bash
+		  terraform plan -var-file="prod.tfvars"
+		  ```
+		  3. **Environment Variables**:
+		- Set environment variables matching the variable name in uppercase with `TF_VAR_` prefix.
+		  ```bash
+		  export TF_VAR_environment="prod"
+		  export TF_VAR_ssh_key_name="myKey"
+		  terraform plan
+		  ```
+		  4. **Default Values**:
+		- If a variable has a default value, you can omit providing it explicitly.
+	- **Sensitive Variables**:
+		- Marking a variable **`sensitive = true`** hides its value in the Terraform output and logs:
+		  ```hcl
+		  variable "db_password" {
+		    type        = string
+		    description = "Database password"
+		    sensitive   = true
+		  }
+		  ```
+		- This prevents accidental exposure, especially in CI/CD pipelines or public logs.
+	- **Best Practices**:
+		- **Keep variable files out of version control** if they contain sensitive data.
+		- Use **descriptive variable names** and **descriptions** to make your configurations self-documenting.
+		- Consider using **`locals`** for short references to computed or repeated expressions, while variables remain user-facing parameters.
+		- Organize variables in a dedicated `variables.tf` file to keep the codebase structured.
+	- **Example Setup**:
+		- 1. **variables.tf**:
+		  ```
+		     variable "region" {
+		       type        = string
+		       default     = "us-east-1"
+		       description = "AWS region to deploy resources into"
+		     }
+		  
+		     variable "instance_count" {
+		       type        = number
+		       default     = 2
+		       description = "Number of EC2 instances for a cluster"
+		     }
+		     ```
+		  
+		  
+		  2. **main.tf**:
+		  
+		     ```
+		     provider "aws" {
+		       region = var.region
+		     }
+		  
+		     resource "aws_instance" "example" {
+		       ami           = data.aws_ami.ubuntu.id
+		       instance_type = "t3.micro"
+		       count         = var.instance_count
+		     }
+		     ```
+		  3. **custom.tfvars** (optional):
+		     ```
+		     region          = "eu-west-1"
+		     instance_count  = 4
+		     ```
+		  4. **Terraform Commands**:
+		     ```
+		     terraform init
+		     terraform plan -var-file="custom.tfvars"
+		     terraform apply -var-file="custom.tfvars"
+		     ```
+			- **References to Other Topics**:
+				- When deploying containerized workloads with [[Docker]] or [[Kubernetes]], variables can store image names, container ports, and cluster configurations.
+				- For remote access via #ssh, store key pair names or paths as Terraform variables to avoid hardcoding them in the config.
+				- If you’re provisioning in [[AWS]] using different instance types for dev/staging/prod, define them in variable files (e.g., `dev.tfvars`, `prod.tfvars`) for quick environment switching.
+			- **Summary**:
+				- **Variables** are a cornerstone of Terraform’s flexibility and reusability.
+				- They allow you to adapt your infrastructure configuration to different environments, reduce duplication, and maintain security for sensitive data.
+				- Combine variables with **local values**, **data sources**, and **outputs** to create a comprehensive, efficient Terraform workflow.
