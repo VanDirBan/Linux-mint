@@ -1179,3 +1179,112 @@
 		- **Locals** help keep your Terraform configuration clean, DRY, and easier to maintain by centralizing computed or repeated expressions.
 		- **Local-Exec Provisioner** is a handy mechanism for running commands on the machine executing Terraform, enabling external integrations and task automation.
 		- Together, they enhance Terraform’s capabilities for both internal logic simplification and orchestrating local steps in your infrastructure workflow.
+- **Generating and Storing Passwords with Terraform and SSM Parameter Store**
+	- **Overview**:
+		- Managing secrets (like passwords) is a common challenge when building infrastructure.
+		- Terraform provides the ability to **generate random passwords** via the `random` provider (specifically the `random_password` resource).
+		- These passwords can be securely stored in **[[AWS]] SSM Parameter Store** as `SecureString` parameters.
+		- Once stored, passwords can be retrieved by other Terraform resources or applications needing secure access to the secret.
+	- **1. Generating Passwords**
+		- **Definition**:
+			- Terraform’s **`random_password`** resource lets you generate strong, random secrets.
+			- You can customize length, special characters, numeric characters, uppercase, etc.
+		- **Example**:
+		  ```hcl
+		  resource "random_password" "db_password" {
+		    length           = 16
+		    special          = true
+		    override_special = "!@#$%*()_+"
+		  }
+		  ```
+			- This generates a 16-character password with special symbols.
+			- The resulting password is accessed via `random_password.db_password.result`.
+	- **2. Storing Passwords in SSM Parameter Store**
+		- **Definition**:
+			- [[AWS]] SSM Parameter Store securely stores configuration data and secrets.
+			- Supports different parameter types: `String`, `StringList`, and `SecureString`.
+			- `SecureString` encrypts the value at rest using a KMS key.
+		- **Example**:
+		  ```hcl
+		  resource "aws_ssm_parameter" "db_password_ssm" {
+		    name            = "/myapp/database/password"
+		    type            = "SecureString"
+		    value           = random_password.db_password.result
+		    description     = "Database password for MyApp"
+		    overwrite       = true
+		    tags = {
+		      Environment = "prod"
+		      Service     = "database"
+		    }
+		  }
+		  ```
+			- **`name`**: SSM parameter path; can be hierarchical (e.g., `/myapp/database/password`).
+			- **`type`**: `SecureString` for encryption.
+			- **`value`**: References the Terraform-generated password.
+			- **`overwrite`**: If `true`, updates the parameter if it already exists.
+	- **3. Retrieving and Using Stored Passwords**
+		- **Definition**:
+			- Other Terraform resources or external services (e.g., an EC2 instance or a container in [[Docker]]) may need to reference the password.
+			- You can retrieve the parameter using **`data "aws_ssm_parameter"`** in Terraform or via the AWS SDK/CLI at runtime.
+		- **Terraform Example**:
+		  ```hcl
+		  data "aws_ssm_parameter" "db_password_read" {
+		    name            = "/myapp/database/password"
+		    with_decryption = true
+		  }
+		  
+		  resource "aws_db_instance" "myapp_db" {
+		    allocated_storage    = 20
+		    engine              = "mysql"
+		    instance_class      = "db.t2.micro"
+		    name                = "myappdb"
+		    username            = "myappuser"
+		    password            = data.aws_ssm_parameter.db_password_read.value
+		    skip_final_snapshot = true
+		  }
+		  ```
+			- **`data.aws_ssm_parameter.db_password_read.value`**: Decrypted value used as the database password.
+	- **4. Security Considerations**:
+		- **SecureString & KMS**: Ensure you have a proper KMS key and IAM permissions to encrypt/decrypt the parameter.
+		- **Terraform State**: The generated password may appear in Terraform state files. Protect your state (e.g., using Terraform Cloud or encrypted backends).
+		- **Rotating Secrets**: You can re-run Terraform to rotate the password in SSM, but keep in mind that dependent services need to handle the updated password.
+	- **5. Example Complete Configuration**:
+	  ```hcl
+	  # Generate random password
+	  resource "random_password" "db_password" {
+	    length           = 16
+	    special          = true
+	    override_special = "!@#$%*()_+"
+	  }
+	  
+	  # Store password in SSM Parameter Store
+	  resource "aws_ssm_parameter" "db_password_ssm" {
+	    name        = "/myapp/database/password"
+	    type        = "SecureString"
+	    value       = random_password.db_password.result
+	    description = "Database password for MyApp"
+	    overwrite   = true
+	  }
+	  
+	  # Read password from SSM
+	  data "aws_ssm_parameter" "db_password_read" {
+	    name            = "/myapp/database/password"
+	    with_decryption = true
+	  }
+	  
+	  # Use password in RDS instance
+	  resource "aws_db_instance" "myapp_db" {
+	    allocated_storage    = 20
+	    engine              = "mysql"
+	    instance_class      = "db.t2.micro"
+	    name                = "myappdb"
+	    username            = "myappuser"
+	    password            = data.aws_ssm_parameter.db_password_read.value
+	    skip_final_snapshot = true
+	  }
+	  ```
+		- **Flow**: Generate random → Store in SSM → Retrieve via data source → Use in AWS resources.
+	- **Conclusion**:
+		- Generating random passwords and storing them securely in SSM Parameter Store improves **security** and **maintainability**.
+		- Terraform’s **`random_password`** + **SSM Parameter Store** is a powerful pattern for secret management in [[AWS]].
+		- Ensure you protect your Terraform state, carefully manage IAM permissions, and plan for secret rotation to maintain a secure infrastructure.
