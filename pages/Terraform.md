@@ -1077,3 +1077,105 @@
 				- **Variables** are a cornerstone of Terraform’s flexibility and reusability.
 				- They allow you to adapt your infrastructure configuration to different environments, reduce duplication, and maintain security for sensitive data.
 				- Combine variables with **local values**, **data sources**, and **outputs** to create a comprehensive, efficient Terraform workflow.
+- **Terraform Locals & Local-Exec Provisioner**
+	- **Locals**
+		- **Definition**:
+			- **Locals** in Terraform (`locals {}`) allow you to assign local names to expressions, making configurations more readable and maintainable.
+			- They are **not** intended for user input like **variables**, but rather for internal logic or computed values you reference multiple times within the same module.
+		- **Why Use Locals?**:
+			- **DRY Principle (Don’t Repeat Yourself)**: Compute a value once, store it as a local, and reuse it.
+			- **Readability**: Give descriptive names to complex expressions.
+			- **Performance**: Evaluate an expression once rather than multiple times, especially useful if the expression is resource-intensive or lengthy.
+		- **Syntax & Example**:
+		  ```hcl
+		  locals {
+		    environment   = "prod"
+		    instance_name = "${local.environment}-webserver"
+		    common_tags   = {
+		      Env = local.environment
+		      App = "MyApplication"
+		    }
+		  }
+		  
+		  resource "aws_instance" "web" {
+		    ami           = data.aws_ami.ubuntu.id
+		    instance_type = "t3.micro"
+		    tags          = local.common_tags
+		  
+		    # Using locals for naming
+		    tags = {
+		      Name = local.instance_name
+		    }
+		  }
+		  ```
+			- **Access**: Refer to a local by `local.<name>`, e.g. `local.environment`.
+			- Locals are lexically scoped to the module in which they are declared.
+		- **Best Practices**:
+			- Keep local naming consistent and descriptive.
+			- Store computed references to data sources, environment-specific logic, or repeated strings/expressions to avoid duplication.
+			- If a value is user-configurable, use a **variable** instead. Locals are for internal reuse, not for external input.
+	- **Local-Exec Provisioner**
+		- **Definition**:
+			- The `local-exec` provisioner in Terraform allows you to run **commands on the machine** where Terraform is running (i.e., your local workstation or CI/CD runner), **not** on the remote resource (unlike `remote-exec`).
+			- Commonly used for tasks like generating files, shell scripts, or performing local validations once a resource is created/modified.
+		- **Why Use Local-Exec?**:
+			- **Automation** of external tasks: Send notifications, run local scripts, manipulate files after resource creation.
+			- **Integration** with existing tools: For example, run a script to register the new instance to a monitoring system or version control hooks.
+			- **One-time local tasks** that are tied to the lifecycle of a Terraform resource.
+		- **Basic Usage**:
+		  ```hcl
+		  resource "null_resource" "example" {
+		    provisioner "local-exec" {
+		      command = "echo Hello from Terraform local-exec!"
+		    }
+		  }
+		  ```
+			- **`null_resource`** can be used as a placeholder for triggering local-exec commands.
+			- Alternatively, you can attach `local-exec` directly to other resource blocks (e.g., `aws_instance`), but `null_resource` is often cleaner if you’re just running commands.
+		- **Example with Dependencies**:
+		  ```hcl
+		  resource "aws_instance" "web" {
+		    ami           = data.aws_ami.ubuntu.id
+		    instance_type = "t3.micro"
+		    # ...
+		  }
+		  
+		  resource "null_resource" "notify" {
+		    provisioner "local-exec" {
+		      command = "echo 'Instance ${aws_instance.web.id} created in region ${var.region}' >> deployment.log"
+		    }
+		  
+		    depends_on = [
+		      aws_instance.web
+		    ]
+		  }
+		  ```
+			- **`depends_on`** ensures the local-exec command runs only after the `aws_instance.web` is created.
+			- Appends a message to a local `deployment.log` file with instance details.
+		- **Multiple Commands**:
+			- If you need multiple commands, you can either:
+			  1. Chain them with `&&`:
+			    ```hcl
+			    command = "echo 'Hello' && echo 'World'"
+			    ```
+			  2. Use a shell script file:
+			    ```hcl
+			    provisioner "local-exec" {
+			      command = "bash ./scripts/deploy.sh ${aws_instance.web.id}"
+			    }
+			    ```
+				- A separate script can be more maintainable and trackable in version control.
+		- **Use Cases**:
+			- **File Generation**: Create a config file for your new instance or environment.
+			- **Notification**: Trigger a local Slack or email script upon successful resource creation.
+			- **Running Unit Tests**: For advanced workflows, you might run tests or checks before finalizing a deployment.
+			- **Orchestration** with external tools, e.g., integrating Terraform with #ssh for local key distribution or synergy with [[Docker]] builds.
+	- **Tips and Gotchas**:
+		- **Avoid Overuse**: Terraform is primarily an IaC tool; extensive scripting might be better handled in separate CI/CD pipelines.
+		- **State Management**: Provisioners run during creation or destruction. If you rename or recreate a resource, these local commands might rerun.
+		- **Ordering**: Use `depends_on` or resource references to ensure local-exec runs after the necessary resources are provisioned.
+		- **Sensitive Data**: If the command includes secrets or sensitive data, be mindful that logs could expose them. Consider using `sensitive` variables or other secure practices.
+	- **Conclusion**:
+		- **Locals** help keep your Terraform configuration clean, DRY, and easier to maintain by centralizing computed or repeated expressions.
+		- **Local-Exec Provisioner** is a handy mechanism for running commands on the machine executing Terraform, enabling external integrations and task automation.
+		- Together, they enhance Terraform’s capabilities for both internal logic simplification and orchestrating local steps in your infrastructure workflow.
