@@ -1288,3 +1288,159 @@
 		- Generating random passwords and storing them securely in SSM Parameter Store improves **security** and **maintainability**.
 		- Terraform’s **`random_password`** + **SSM Parameter Store** is a powerful pattern for secret management in [[AWS]].
 		- Ensure you protect your Terraform state, carefully manage IAM permissions, and plan for secret rotation to maintain a secure infrastructure.
+- **Using Conditions and Lookups in Terraform**
+	- **Overview**:
+		- Terraform supports **conditional expressions** to dynamically set values based on given criteria.
+		- The **`lookup()`** function simplifies retrieving values from maps, enabling more flexible and concise configurations.
+		- Together, they help keep your Terraform code DRY (Don’t Repeat Yourself) and adaptable to different environments or resource states.
+		  
+		  ---
+	- **1. Conditional Expressions**
+		- **Definition**:
+			- A conditional expression in Terraform follows the **ternary operator** pattern:  
+			  ```
+			    condition ? value_if_true : value_if_false
+			  ```
+			- They work anywhere you can use expressions—within resource arguments, variables, locals, or module inputs.
+		- **Basic Example**:
+		  ```hcl
+		  variable "environment" {
+		    type    = string
+		    default = "dev"
+		  }
+		  
+		  locals {
+		    instance_type = var.environment == "prod" ? "t3.large" : "t3.micro"
+		  }
+		  
+		  resource "aws_instance" "example" {
+		    ami           = data.aws_ami.ubuntu.id
+		    instance_type = local.instance_type
+		  }
+		  ```
+			- If `environment` is **"prod"**, `local.instance_type` is `"t3.large"`. Otherwise, it’s `"t3.micro"`.
+		- **Nested Conditionals**:
+		  ```hcl
+		  locals {
+		    tier_type = var.environment == "prod"
+		      ? (var.high_performance ? "m5.large" : "t3.large")
+		      : "t3.micro"
+		  }
+		  ```
+			- You can nest multiple conditionals to create more complex logic, but be mindful of readability.
+		- **Use Cases**:
+		  1. **Environment-based** configuration (e.g., dev vs. prod).
+		  2. Toggling features or components (e.g., enable #ssh access only in non-production).
+		  3. Choosing between different providers, subnets, or region-specific settings.
+		  
+		  ---
+	- **2. The `lookup()` Function**
+		- **Definition**:
+			- **`lookup(map, key, default)`** retrieves a value from a map by a specific key. If the key is not found, it returns the `default` value.
+			- Useful for mapping environment names or resource identifiers to specific configurations without complicated `if-else` logic.
+		- **Example**:
+		  ```hcl
+		  variable "region_map" {
+		    type    = map(string)
+		    default = {
+		      dev  = "us-east-1"
+		      prod = "us-east-2"
+		    }
+		  }
+		  
+		  locals {
+		    current_region = lookup(var.region_map, var.environment, "us-west-1")
+		  }
+		  
+		  provider "aws" {
+		    region = local.current_region
+		  }
+		  ```
+			- If `var.environment` is **"dev"**, then `local.current_region` → `"us-east-1"`.
+			- If `var.environment` is something else (e.g., “stage”), the default `"us-west-1"` is used.
+		- **Combining with Conditionals**:
+		  ```hcl
+		  variable "instance_type_map" {
+		    type    = map(string)
+		    default = {
+		      dev  = "t3.micro"
+		      prod = "t3.large"
+		    }
+		  }
+		  
+		  locals {
+		    instance_type = lookup(var.instance_type_map, var.environment, "t3.medium")
+		    final_type    = var.enable_perf_mode ? "m5.large" : local.instance_type
+		  }
+		  ```
+			- First, retrieve a default instance type from a map.
+			- Then apply a conditional check to possibly override it if `var.enable_perf_mode` is true.
+		- **Use Cases**:
+		  1. Storing environment-based configurations in a **map** and fetching them with `lookup()`.
+		  2. Providing default fallback values when a key isn’t found or an environment is new.
+		  3. Handling **AWS** region or VPC ID lookups for different accounts.
+		  
+		  ---
+	- **3. Best Practices & Tips**:
+		- **Readability**:
+			- Avoid overly complex nested conditionals; break logic into smaller locals or separate variables for clarity.
+			- Maintain a consistent naming convention for environment keys in your maps.
+		- **Maintainability**:
+			- Store environment-specific or large map data in variables (e.g., `var.environment_map`) to keep code tidy.
+			- Use descriptive keys and default values in `lookup()` to prevent surprises when keys are missing.
+		- **Validate Key Existence**:
+			- If certain keys must exist, consider using a **`try()`** function or structured validation logic, rather than relying solely on the default value in `lookup()`.
+		- **Sensitive Data**:
+			- For secrets or sensitive info, store them in a secure system (e.g., [[AWS]] SSM Parameter Store) instead of a plain map in code. Conditionals and lookups can reference data sources or encrypted outputs.
+			  
+			  ---
+	- **4. Example Putting It All Together**:
+	  ```hcl
+	  variable "environment" {
+	    type    = string
+	    default = "dev"
+	  }
+	  
+	  variable "vpc_map" {
+	    type    = map(string)
+	    default = {
+	      dev  = "vpc-11111111"
+	      prod = "vpc-22222222"
+	    }
+	  }
+	  
+	  locals {
+	    # 1. Use lookup() to select VPC ID based on environment
+	    selected_vpc = lookup(var.vpc_map, var.environment, "vpc-33333333")
+	  
+	    # 2. Use a conditional for the instance_type
+	    instance_type = var.environment == "prod" ? "t3.large" : "t3.micro"
+	  }
+	  
+	  resource "aws_subnet" "example_subnet" {
+	    vpc_id     = local.selected_vpc
+	    cidr_block = "10.0.1.0/24"
+	    tags = {
+	      Name = "${var.environment}-subnet"
+	    }
+	  }
+	  
+	  resource "aws_instance" "example" {
+	    ami           = data.aws_ami.ubuntu.id
+	    instance_type = local.instance_type
+	    subnet_id     = aws_subnet.example_subnet.id
+	    tags = {
+	      Name = "${var.environment}-ec2"
+	    }
+	  }
+	  ```
+		- **Flow**:
+		  1. **Condition**: `var.environment == "prod"` picks `"t3.large"`, else defaults to `"t3.micro"`.
+		  2. **Lookup**: `lookup(var.vpc_map, var.environment, "vpc-33333333")` chooses the VPC ID for the environment, or a fallback if not found.
+		  3. Deploys resources using those computed values.
+		  
+		  ---
+	- **Conclusion**:
+		- **Conditions** (ternary expressions) in Terraform allow for adaptable, environment-aware logic without complex if-else chains.
+		- **Lookups** simplify retrieving key-based data, providing a clean fallback approach.
+		- By combining both techniques, you can create **flexible**, **maintainable** Terraform configurations suitable for multi-environment setups, dynamic resource definitions, or conditional feature toggles.
