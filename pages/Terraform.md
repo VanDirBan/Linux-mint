@@ -1444,3 +1444,232 @@
 		- **Conditions** (ternary expressions) in Terraform allow for adaptable, environment-aware logic without complex if-else chains.
 		- **Lookups** simplify retrieving key-based data, providing a clean fallback approach.
 		- By combining both techniques, you can create **flexible**, **maintainable** Terraform configurations suitable for multi-environment setups, dynamic resource definitions, or conditional feature toggles.
+- **Using Loops in Terraform**
+	- **Overview**:
+		- Terraform offers multiple ways to iterate over collections, enabling you to dynamically create or configure resources.
+		- Common loop mechanisms include:
+		  1. **`count`** — the simplest form, creating multiple instances of a resource based on an integer count.
+		  2. **`for_each`** — more explicit iteration, often used for maps or sets, attaching keys to resources.
+		  3. **`for` expressions** — used in locals or variables to transform collections.
+		  4. **`dynamic` blocks** — allows looping over sub-blocks within resources (e.g., multiple ingress rules in a security group).
+		  
+		  ---
+	- **1. The `count` Parameter**
+		- **Definition**:
+			- `count` is a meta-argument that tells Terraform how many instances of a resource or module to create.
+			- Available in every `resource` or `module` block.
+		- **Example**:
+		  ```hcl
+		  variable "number_of_instances" {
+		    type    = number
+		    default = 2
+		  }
+		  
+		  resource "aws_instance" "web" {
+		    count         = var.number_of_instances
+		    ami           = data.aws_ami.ubuntu.id
+		    instance_type = "t3.micro"
+		  
+		    tags = {
+		      Name = "web-instance-${count.index}"
+		    }
+		  }
+		  ```
+			- **`count.index`** represents the current iteration index (0-based).
+			- Creates a distinct resource for each index, e.g., `aws_instance.web[0]` and `aws_instance.web[1]`.
+		- **When to Use**:
+			- You simply need *n* identical resources with minor differences (e.g., naming).
+			- A small integer-based loop without advanced mapping logic.
+			  
+			  ---
+	- **2. The `for_each` Parameter**
+		- **Definition**:
+			- `for_each` is also a meta-argument for resources or modules.
+			- Allows you to create resources from a collection (map or set) where each element is identified by a **key**.
+		- **Example with a Map**:
+		  ```hcl
+		  variable "subnets" {
+		    type = map(string)
+		    default = {
+		      "subnet1" = "10.0.1.0/24"
+		      "subnet2" = "10.0.2.0/24"
+		    }
+		  }
+		  
+		  resource "aws_subnet" "example" {
+		    for_each            = var.subnets
+		    vpc_id              = aws_vpc.example.id
+		    cidr_block          = each.value
+		    availability_zone   = "us-east-1a"
+		  
+		    tags = {
+		      Name = each.key
+		    }
+		  }
+		  ```
+			- **`each.key`** and **`each.value`** let you refer to the iteration context.
+			- `aws_subnet.example["subnet1"]` becomes a separate resource from `aws_subnet.example["subnet2"]`.
+		- **When to Use**:
+			- You have a collection (map or set) and need distinct resources for each key-value pair (or each set item).
+			- You want resource names or references that map to specific keys, which is more explicit than a numeric index.
+			  
+			  ---
+	- **3. For Expressions in Locals/Variables**
+		- **Definition**:
+			- A **for expression** is used to transform or filter collections within Terraform code, typically in `locals` or variable assignments.
+			- Syntax:
+			  
+			  ```
+			  for <item> in <collection> : <transformation> [ if <condition> ]
+			  ```
+		- **Example**:
+		  ```hcl
+		  variable "environment_names" {
+		    type    = list(string)
+		    default = ["dev", "stage", "prod"]
+		  }
+		  
+		  locals {
+		    upper_environments = [
+		      for env in var.environment_names : upper(env)
+		    ]
+		  }
+		  ```
+			- Transforms each environment name into uppercase.
+		- **Filtering**:
+		  ```hcl
+		  locals {
+		    prod_environments = [
+		      for env in var.environment_names : env
+		      if env == "prod"
+		    ]
+		  }
+		  ```
+			- Creates a new list including only `"prod"` items.
+		- **Use Cases**:
+			- **Data transformation** before creating resources.
+			- Building custom maps or lists from inputs.
+			  
+			  ---
+	- **4. Dynamic Blocks**
+		- **Definition**:
+			- **`dynamic`** blocks generate nested resource blocks (e.g., multiple `ingress` or `egress` blocks in a security group) based on a collection.
+			- Typically used where Terraform syntax expects a block, not an entire new resource.
+		- **Example**:
+		  ```hcl
+		  variable "ingress_ports" {
+		    type    = list(number)
+		    default = [80, 443]
+		  }
+		  
+		  resource "aws_security_group" "web_sg" {
+		    name        = "web-sg"
+		    vpc_id      = aws_vpc.example.id
+		  
+		    dynamic "ingress" {
+		      for_each = var.ingress_ports
+		      content {
+		        from_port   = ingress.value
+		        to_port     = ingress.value
+		        protocol    = "tcp"
+		        cidr_blocks = ["0.0.0.0/0"]
+		      }
+		    }
+		  
+		    # Egress for all traffic
+		    egress {
+		      from_port   = 0
+		      to_port     = 0
+		      protocol    = "-1"
+		      cidr_blocks = ["0.0.0.0/0"]
+		    }
+		  }
+		  ```
+			- One security group resource, but multiple `ingress` blocks are rendered from the list of ports.
+		- **When to Use**:
+			- You need repeated sub-blocks within a single resource.
+			- Classic example: multiple HTTP rules, each a separate nested block in a firewall or load balancer configuration.
+			  
+			  ---
+	- **5. Best Practices**:
+		- **Choose the Right Loop**:
+			- **`count`**: Simple, integer-based scaling (like creating *n* instances).
+			- **`for_each`**: If you need a key-value approach, more explicit or for a map-based iteration.
+			- **`for` expressions**: Transform or filter collections, typically in `locals`.
+			- **`dynamic`**: Nested configuration blocks within a single resource definition.
+		- **Naming**:
+			- With **`count`**, reference resources by `[index]`.
+			- With **`for_each`**, reference resources by their key: `resource_name[key]`.
+			- Keep naming consistent and descriptive.
+		- **Avoid Overly Complex Loops**:
+			- Splitting large, nested loops into multiple modules or separate logic can improve readability and maintainability.
+		- **Combining Conditionals**:
+			- You can pair loops with conditionals (`if <condition>`) in `for` expressions or manipulate loops with function calls (`lookup`, `contains`, etc.).
+		- **Plan for Changes**:
+			- Changing from `count` to `for_each` (or vice versa) often forces resource re-creation. Plan carefully to avoid unintended downtime.
+			  
+			  ---
+	- **Example Putting It All Together**:
+	  ```hcl
+	  # Variables
+	  variable "servers" {
+	    type    = list(string)
+	    default = ["server1", "server2"]
+	  }
+	  
+	  variable "ports" {
+	    type    = list(number)
+	    default = [8080, 8443]
+	  }
+	  
+	  # Locals
+	  locals {
+	    server_tags = {
+	      for s in var.servers : s => "${s}-tag"
+	    }
+	  }
+	  
+	  # For_each Resource
+	  resource "aws_instance" "web" {
+	    for_each = local.server_tags
+	  
+	    ami           = data.aws_ami.ubuntu.id
+	    instance_type = "t3.micro"
+	    tags = {
+	      Name = each.key
+	      Desc = each.value
+	    }
+	  }
+	  
+	  # Dynamic Security Group
+	  resource "aws_security_group" "web_sg" {
+	    name = "web-sg"
+	  
+	    dynamic "ingress" {
+	      for_each = var.ports
+	      content {
+	        from_port   = ingress.value
+	        to_port     = ingress.value
+	        protocol    = "tcp"
+	        cidr_blocks = ["0.0.0.0/0"]
+	      }
+	    }
+	  
+	    egress {
+	      from_port   = 0
+	      to_port     = 0
+	      protocol    = "-1"
+	      cidr_blocks = ["0.0.0.0/0"]
+	    }
+	  }
+	  ```
+		- **Flow**:
+		  1. **Local Map**: Creates a map of server names to custom tag values.
+		  2. **`for_each`**: Deploys an instance per map entry, using `each.key` for naming.
+		  3. **Dynamic Block**: Creates multiple ingress rules based on the list of ports `[8080, 8443]`.
+		  
+		  ---
+	- **Conclusion**:
+		- Terraform loops (`count`, `for_each`, `for` expressions, `dynamic` blocks) enable you to scale and parameterize resources in an organized, repeatable manner.
+		- Properly choosing and combining these techniques results in **clean**, **flexible** infrastructure as code.
+		- Use them to reduce repetition, handle multiple environments or resources gracefully, and keep configurations DRY.
