@@ -1,4 +1,5 @@
 - [[Terraform Basics]]
+  collapsed:: true
 	- **Introduction to Terraform (v1.1+)**
 		- **Definition**:
 			- Terraform is an open-source Infrastructure as Code (IaC) tool by HashiCorp.
@@ -141,6 +142,7 @@
 		- Tag resources for easier identification and cost tracking.
 		- Combine with other IaC or config management tools if needed (e.g., [[Ansible]], [[Helm Charts]]).
 - [[Web Server Deployment]]
+  collapsed:: true
 	- **Deploying a Web Server with Terraform and NGINX (v1.1+)**
 		- **Definition**:
 			- Terraform can automate the deployment of a web server with NGINX on AWS.
@@ -337,6 +339,7 @@
 		- [[Terraform Modules]] – Reusable infrastructure patterns.
 		- [[Helm Charts]] – Kubernetes application management with Terraform.
 - **Lifecycle, Outputs, and Depends_On**
+  collapsed:: true
 	- **Overview**:
 		- Terraform is an Infrastructure as Code (IaC) tool used to provision and manage cloud infrastructure on various platforms (e.g., [[AWS]], [[GCP]], [[Azure]]).
 		- Key features include state management, dependency graphing, and repeatable, version-controlled provisioning.
@@ -428,6 +431,7 @@
 	- **Conclusion**:
 		- By leveraging `lifecycle`, `outputs`, and `depends_on`, you can create a robust, predictable workflow for managing infrastructure with Terraform, whether on [[AWS]], on-prem, or in container environments with [[Docker]] and [[Kubernetes]].
 - **Data Sources**
+  collapsed:: true
 	- **Definition**:
 		- Terraform **data sources** allow you to retrieve information from external systems to use within your Terraform configuration.
 		- For example, you can fetch details about existing resources (e.g., VPCs, subnets) or AWS account info without manually hardcoding them.
@@ -549,6 +553,7 @@
 		- **Auto-lookup of AMI** using **aws_ami** ensures you’re always using the latest or most suitable image for your [[AWS]] infrastructure.
 		- Overall, data sources help keep your infrastructure code clean, flexible, and up-to-date.
 - **Zero Downtime Web Server with Terraform**
+  collapsed:: true
 	- **Definition**:
 		- **Zero Downtime** refers to updating or redeploying your application or infrastructure without causing any interruptions or outages in the service.
 		- This approach is often required for production environments where a service must remain accessible at all times.
@@ -743,6 +748,7 @@
 		- **Zero Downtime** is achieved through careful use of Terraform’s lifecycle rules, health checks, and multi-AZ redundancy.
 		- For advanced configurations, consider exploring [[Terraform Modules]], containerization with [[Docker]] or [[Kubernetes]] for container-based deployments, or #ssh for remote instance management.
 - **Comparison: Zero Downtime Web Server (Version 1 vs. Improved Version)**
+  collapsed:: true
 	- **Overview**:
 		- In the first configuration, a **Classic ELB** (`aws_elb`) was used, while in the improved version we’ve migrated to an **Application Load Balancer (ALB)** (`aws_lb`).
 		- Default VPC and subnets are explicitly defined, making network configuration more intentional.
@@ -925,6 +931,7 @@
 		- The **improved configuration** offers a more flexible and maintainable setup, leveraging Application Load Balancing, explicit network references, and centralized tagging.
 		- These changes make the infrastructure more **scalable, future-proof**, and **easier to manage** compared to the original version.
 - **Using Variables in Terraform**
+  collapsed:: true
 	- **Definition**:
 		- **Variables** in Terraform allow you to parameterize your configurations, making them more flexible and reusable.
 		- You can define variables for things like instance size, environment names, regions, credentials, and so on.
@@ -1078,6 +1085,7 @@
 				- They allow you to adapt your infrastructure configuration to different environments, reduce duplication, and maintain security for sensitive data.
 				- Combine variables with **local values**, **data sources**, and **outputs** to create a comprehensive, efficient Terraform workflow.
 - **Terraform Locals & Local-Exec Provisioner**
+  collapsed:: true
 	- **Locals**
 		- **Definition**:
 			- **Locals** in Terraform (`locals {}`) allow you to assign local names to expressions, making configurations more readable and maintainable.
@@ -1180,6 +1188,7 @@
 		- **Local-Exec Provisioner** is a handy mechanism for running commands on the machine executing Terraform, enabling external integrations and task automation.
 		- Together, they enhance Terraform’s capabilities for both internal logic simplification and orchestrating local steps in your infrastructure workflow.
 - **Generating and Storing Passwords with Terraform and SSM Parameter Store**
+  collapsed:: true
 	- **Overview**:
 		- Managing secrets (like passwords) is a common challenge when building infrastructure.
 		- Terraform provides the ability to **generate random passwords** via the `random` provider (specifically the `random_password` resource).
@@ -1289,6 +1298,7 @@
 		- Terraform’s **`random_password`** + **SSM Parameter Store** is a powerful pattern for secret management in [[AWS]].
 		- Ensure you protect your Terraform state, carefully manage IAM permissions, and plan for secret rotation to maintain a secure infrastructure.
 - **Using Conditions and Lookups in Terraform**
+  collapsed:: true
 	- **Overview**:
 		- Terraform supports **conditional expressions** to dynamically set values based on given criteria.
 		- The **`lookup()`** function simplifies retrieving values from maps, enabling more flexible and concise configurations.
@@ -1673,3 +1683,218 @@
 		- Terraform loops (`count`, `for_each`, `for` expressions, `dynamic` blocks) enable you to scale and parameterize resources in an organized, repeatable manner.
 		- Properly choosing and combining these techniques results in **clean**, **flexible** infrastructure as code.
 		- Use them to reduce repetition, handle multiple environments or resources gracefully, and keep configurations DRY.
+- **Creating Resources in Multiple AWS Regions and Accounts**
+	- **Overview**:
+		- Sometimes you need to deploy infrastructure across various **[[AWS]] regions** or even **different AWS accounts**.
+		- Terraform supports using multiple providers (each with its own configuration) to handle multi-region or multi-account setups.
+		- A common pattern is to **alias** providers, allowing you to specify which provider configuration to use for specific resources.
+		  
+		  ---
+	- **1. Multiple Regions**
+		- **Definition**:
+			- You can configure multiple **AWS provider** blocks, each specifying a different region.
+			- Each provider block can have an **alias** to distinguish it from the default provider.
+		- **Example**:
+		  ```hcl
+		  # Default provider in us-east-1
+		  provider "aws" {
+		    region = "us-east-1"
+		  }
+		  
+		  # Additional provider in us-west-2
+		  provider "aws" {
+		    alias  = "us_west_2"
+		    region = "us-west-2"
+		  }
+		  
+		  # Resource in the default region (us-east-1)
+		  resource "aws_s3_bucket" "east_bucket" {
+		    bucket = "my-bucket-us-east"
+		  }
+		  
+		  # Resource in the secondary region (us-west-2)
+		  resource "aws_s3_bucket" "west_bucket" {
+		    provider = aws.us_west_2
+		    bucket   = "my-bucket-us-west"
+		  }
+		  ```
+			- **`provider = aws.us_west_2`** instructs Terraform to use the aliased provider in `us-west-2`.
+		- **Use Cases**:
+			- **High Availability** across multiple AWS regions.
+			- **Disaster Recovery** strategies where data is duplicated regionally.
+			- **Global Deployments** where latency or local compliance dictates multiple region usage.
+			  
+			  ---
+	- **2. Multiple Accounts**
+		- **Definition**:
+			- Each AWS account can have its own set of credentials.
+			- You can configure separate provider blocks referencing different credentials or assume roles if cross-account trust is set up.
+		- **Using Environment Variables**:
+		  1. **First account** might rely on `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`.
+		  2. **Second account** can be provided with a different set of credentials or an assumed role.
+		- **Example**:
+		  ```hcl
+		  # Default provider for Account A
+		  provider "aws" {
+		    region  = "us-east-1"
+		    profile = "accountA_profile"
+		  }
+		  
+		  # Provider for Account B
+		  provider "aws" {
+		    alias   = "account_b"
+		    region  = "us-east-1"
+		    profile = "accountB_profile"
+		  }
+		  
+		  # Resource in Account A
+		  resource "aws_iam_user" "user_in_account_a" {
+		    name = "test-user"
+		  }
+		  
+		  # Resource in Account B
+		  resource "aws_iam_user" "user_in_account_b" {
+		    provider = aws.account_b
+		    name     = "test-user-b"
+		  }
+		  ```
+			- Uses **profiles** in your local AWS config file (`~/.aws/credentials`).
+			- Alternatively, you can directly set `access_key`, `secret_key`, etc., in the provider block or rely on environment variables.
+		- **Assume Role** (Cross-Account):
+		  ```hcl
+		  provider "aws" {
+		    alias  = "assume_role"
+		    region = "us-east-1"
+		  
+		    assume_role {
+		      role_arn     = "arn:aws:iam::123456789012:role/cross-account-role"
+		      session_name = "TerraformSession"
+		    }
+		  }
+		  ```
+			- Terraform will assume the specified role **`cross-account-role`** for resource creation in that other account.
+			  
+			  ---
+	- **3. Combining Multi-Region and Multi-Account**
+		- **Definition**:
+			- You can define **multiple providers** for each combination of region + account.
+			- For instance, one provider for Account A in us-east-1, another provider for Account A in us-west-2, etc.
+		- **Example**:
+		  ```hcl
+		  # Account A, us-east-1
+		  provider "aws" {
+		    alias   = "acctA_east"
+		    region  = "us-east-1"
+		    profile = "accountA_profile"
+		  }
+		  
+		  # Account A, us-west-2
+		  provider "aws" {
+		    alias   = "acctA_west"
+		    region  = "us-west-2"
+		    profile = "accountA_profile"
+		  }
+		  
+		  # Account B, us-east-1
+		  provider "aws" {
+		    alias   = "acctB_east"
+		    region  = "us-east-1"
+		    profile = "accountB_profile"
+		  }
+		  
+		  # Resource in Account A, us-east-1
+		  resource "aws_s3_bucket" "acctA_east_bucket" {
+		    provider = aws.acctA_east
+		    bucket   = "my-acct-a-east-bucket"
+		  }
+		  
+		  # Resource in Account A, us-west-2
+		  resource "aws_s3_bucket" "acctA_west_bucket" {
+		    provider = aws.acctA_west
+		    bucket   = "my-acct-a-west-bucket"
+		  }
+		  
+		  # Resource in Account B, us-east-1
+		  resource "aws_s3_bucket" "acctB_east_bucket" {
+		    provider = aws.acctB_east
+		    bucket   = "my-acct-b-east-bucket"
+		  }
+		  ```
+			- This pattern scales, but can become verbose if you need many accounts + regions. Consider modules or a more programmatic approach.
+			  
+			  ---
+	- **4. Managing Complexity**:
+		- **Modules**:
+			- Encapsulate multi-region or multi-account logic in modules to keep the root configuration clean.
+			- Pass different provider aliases when instantiating modules.
+			  ```hcl
+			  module "my_module_east" {
+			  source   = "./modules/my_module"
+			  providers = {
+			    aws = aws.acctA_east
+			  }
+			  # Module variables...
+			  }
+			  ```
+		- **Workspaces or External Tools**:
+			- If you’re heavily using multiple accounts/regions, you might pair Terraform with a pipeline tool (e.g., Jenkins, GitHub Actions) that sets environment variables or provides different `-var-file` configurations.
+		- **Credential Handling**:
+			- Avoid storing access keys in plain text. Use environment variables, AWS Vault, or assume roles to keep secrets secure.
+			  
+			  ---
+	- **5. Best Practices**:
+	  1. **Use Aliases**:
+		- Always clearly label provider blocks, e.g., `aws.us_east_1`, `aws.account_b`.
+		  2. **Consistent Naming**:
+		- For multi-region, name providers like `us_west_2`, `us_east_1`.
+		- For multi-account, name providers like `account_a`, `account_b`.
+		  3. **Minimal Hardcoding**:
+		- Consider passing region or account as a variable or environment variable if you need to switch frequently.
+		  4. **Secure Credentials**:
+		- Rely on **AWS CLI profiles** or **assume role** mechanisms, rather than embedding keys.
+		  5. **Plan for Future Growth**:
+		- Large infrastructures might require a more modular approach or even separate Terraform states per account/region.
+		  
+		  ---
+	- **Example: Putting It All Together**  
+	  ```hcl
+	  # Account A, us-east-1
+	  provider "aws" {
+	    alias   = "acctA_east"
+	    region  = "us-east-1"
+	    profile = "accountA_profile"
+	  }
+	  
+	  # Account B, us-west-2 via assume_role
+	  provider "aws" {
+	    alias  = "acctB_west"
+	    region = "us-west-2"
+	  
+	    assume_role {
+	      role_arn     = "arn:aws:iam::987654321098:role/cross-account-role"
+	      session_name = "TerraformSession"
+	    }
+	  }
+	  
+	  # Create a bucket in Account A, us-east-1
+	  resource "aws_s3_bucket" "acctA_east_bucket" {
+	    provider = aws.acctA_east
+	    bucket   = "my-company-acctA-east-bucket"
+	  }
+	  
+	  # Create an IAM user in Account B, us-west-2
+	  resource "aws_iam_user" "acctB_west_user" {
+	    provider = aws.acctB_west
+	    name     = "cross-account-user"
+	  }
+	  ```
+		- **Flow**:
+		  1. Terraform reads each provider block and sets up the respective configuration (including credentials, region, or assume_role).
+		  2. Resources reference a specific **`provider =`** to ensure they’re created in the correct AWS account & region.
+		  3. You can expand this pattern to as many accounts or regions as needed (but watch complexity).
+		  
+		  ---
+	- **Conclusion**:
+		- **Multi-region** and **multi-account** deployments are straightforward in Terraform using **aliased providers**.
+		- Keep configurations organized with clear naming, secure credential handling, and potential use of modules.
+		- This approach scales for advanced scenarios like **disaster recovery**, **regional expansions**, or **cross-account** isolation in larger AWS environments.
