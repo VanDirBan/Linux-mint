@@ -1455,6 +1455,7 @@
 		- **Lookups** simplify retrieving key-based data, providing a clean fallback approach.
 		- By combining both techniques, you can create **flexible**, **maintainable** Terraform configurations suitable for multi-environment setups, dynamic resource definitions, or conditional feature toggles.
 - **Using Loops in Terraform**
+  collapsed:: true
 	- **Overview**:
 		- Terraform offers multiple ways to iterate over collections, enabling you to dynamically create or configure resources.
 		- Common loop mechanisms include:
@@ -1898,3 +1899,146 @@
 		- **Multi-region** and **multi-account** deployments are straightforward in Terraform using **aliased providers**.
 		- Keep configurations organized with clear naming, secure credential handling, and potential use of modules.
 		- This approach scales for advanced scenarios like **disaster recovery**, **regional expansions**, or **cross-account** isolation in larger AWS environments.
+- **Using Terraform Remote State**
+	- **Definition**:
+		- **Remote State** in Terraform allows you to store, share, and manage Terraform’s **state file** in a remote backend (e.g., [[AWS]] S3, Terraform Cloud, Azure Storage, GCS).
+		- This approach helps avoid local state file corruption, facilitates team collaboration, and centralizes state management.
+		  
+		  ---
+	- **1. Why Use Remote State**:
+		- **Collaboration**: Multiple team members can access and update the same infrastructure without overwriting local state.
+		- **Security**: Centralized encryption and access control policies to protect sensitive data in state.
+		- **Disaster Recovery**: Backups and versioning in the remote backend reduce risk if local files are lost or corrupted.
+		- **Automation**: CI/CD pipelines can reference the same state stored in a known location.
+		  
+		  ---
+	- **2. Common Remote State Backends**:
+	  1. **AWS S3**
+		- Often combined with **DynamoDB** for state locking.
+		- Example:
+		  ```hcl
+		  backend "s3" {
+		    bucket         = "my-terraform-state"
+		    key            = "myapp/terraform.tfstate"
+		    region         = "us-east-1"
+		    dynamodb_table = "terraform-locks"
+		    encrypt        = true
+		  }
+		  ```
+		  2. **Terraform Cloud/Enterprise**
+		- Integrates with Terraform’s SaaS solution for remote operations.
+		- Has built-in locking and versioning.
+		  3. **Azure Storage**
+		- Uses Azure Blob Storage.
+		  4. **Google Cloud Storage (GCS)**
+		- Uses Google Cloud Storage buckets.
+		  
+		  ---
+	- **3. Configuring Remote State**:
+		- **`terraform` block** in `backend` configuration:
+		  ```hcl
+		  terraform {
+		    backend "s3" {
+		      bucket         = "my-terraform-state"
+		      key            = "myapp/prod.tfstate"
+		      region         = "us-east-1"
+		      dynamodb_table = "terraform-state-lock"
+		      encrypt        = true
+		    }
+		  }
+		  ```
+		- **Initialization**:
+		  ```bash
+		  terraform init
+		  ```
+			- Terraform detects the backend config and prompts to copy local state (if any) to the new remote backend.
+			  
+			  ---
+	- **4. Remote State Access**:
+		- Sometimes, you need to **reference** outputs or resources in another Terraform configuration.
+		- You can use **`data "terraform_remote_state"`** to fetch data from an existing state.
+		- **Example**:
+		  ```hcl
+		  data "terraform_remote_state" "vpc_state" {
+		    backend = "s3"
+		    config = {
+		      bucket         = "my-terraform-state"
+		      key            = "vpc/terraform.tfstate"
+		      region         = "us-east-1"
+		      dynamodb_table = "terraform-state-lock"
+		    }
+		  }
+		  
+		  resource "aws_subnet" "example" {
+		    vpc_id     = data.terraform_remote_state.vpc_state.outputs.vpc_id
+		    cidr_block = "10.0.1.0/24"
+		    # ...
+		  }
+		  ```
+			- This pulls the `outputs.vpc_id` from the remote VPC module’s state.
+			- Encourages a **multi-module** architecture, where shared resources live in a separate config.
+			  
+			  ---
+	- **5. Best Practices**:
+		- **Locking**:
+			- Use **DynamoDB** (for S3) or built-in locking in Terraform Cloud to prevent concurrent state edits.
+		- **Secure Access**:
+			- Protect credentials (e.g., IAM roles, environment variables, profiles).
+			- Encrypt the remote store (e.g., `encrypt = true` in S3).
+		- **Organize State**:
+			- Separate Terraform state files by environment (`dev`, `staging`, `prod`) or by service (`vpc`, `db`, `app`).
+			- This modular approach reduces blast radius and improves parallel development.
+		- **Reference Minimally**:
+			- Keep cross-state references minimal to avoid tight coupling. Overuse can complicate dependency management.
+		- **State File Size**:
+			- Large monolithic states become slow and unwieldy; consider splitting them into multiple states or modules.
+			  
+			  ---
+	- **6. Example Putting It All Together**:
+		- **`main.tf`** with remote state config:
+		  ```hcl
+		  terraform {
+		    backend "s3" {
+		      bucket         = "my-terraform-state"
+		      key            = "network/terraform.tfstate"
+		      region         = "us-east-1"
+		      dynamodb_table = "terraform-state-lock"
+		      encrypt        = true
+		    }
+		  }
+		  
+		  provider "aws" {
+		    region = "us-east-1"
+		  }
+		  
+		  module "vpc" {
+		    source  = "./modules/vpc"
+		    cidr    = "10.0.0.0/16"
+		    # ...
+		  }
+		  ```
+			- **`terraform init`** to set up remote state.
+		- **Reference this state in another project**:
+		  ```hcl
+		  data "terraform_remote_state" "network_state" {
+		    backend = "s3"
+		    config = {
+		      bucket         = "my-terraform-state"
+		      key            = "network/terraform.tfstate"
+		      region         = "us-east-1"
+		      dynamodb_table = "terraform-state-lock"
+		    }
+		  }
+		  
+		  resource "aws_subnet" "app_subnet" {
+		    vpc_id     = data.terraform_remote_state.network_state.outputs.vpc_id
+		    cidr_block = "10.0.2.0/24"
+		    # ...
+		  }
+		  ```
+		  
+		  ---
+	- **Conclusion**:
+		- **Remote State** centralizes, secures, and coordinates Terraform state across teams and environments.
+		- Whether stored in S3/DynamoDB, Terraform Cloud, Azure, or GCS, the pattern remains the same—configure the **backend**, **init**, and optionally **reference** other states when needed.
+		- Following best practices around **locking**, **encryption**, and **organization** ensures a robust, collaborative infrastructure-as-code workflow.
