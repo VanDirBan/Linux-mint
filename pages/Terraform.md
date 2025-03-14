@@ -2042,3 +2042,84 @@
 		- **Remote State** centralizes, secures, and coordinates Terraform state across teams and environments.
 		- Whether stored in S3/DynamoDB, Terraform Cloud, Azure, or GCS, the pattern remains the same—configure the **backend**, **init**, and optionally **reference** other states when needed.
 		- Following best practices around **locking**, **encryption**, and **organization** ensures a robust, collaborative infrastructure-as-code workflow.
+- **Terraform Modules: Creating and Using Modules**
+	- **Definition**:
+		- Terraform modules are self-contained packages of configuration that group related resources together.
+		- They allow you to encapsulate complex setups and reuse configurations across projects, environments, or teams.
+		- Modules can be sourced locally, from a Git repository, or from the Terraform Registry.
+	- **Why Use Modules?**:
+		- **Reusability**: Write configuration once and deploy it in multiple contexts (e.g., different environments like dev, staging, prod).
+		- **Maintainability**: Organize and separate concerns by grouping related resources.
+		- **Encapsulation**: Hide implementation details; expose only required inputs and outputs.
+		- **Consistency**: Standardize resource configurations across your organization.
+	- **Creating a Module**:
+		- **Directory Structure**: Create a directory for your module (e.g., `modules/vpc`).
+			- **`main.tf`**: Contains the resource definitions.
+			- **`variables.tf`**: Defines input variables.
+			- **`outputs.tf`**: Exposes outputs for use in the parent configuration.
+		- **Example**:
+			- *modules/vpc/main.tf*:
+			  ```hcl
+			  resource "aws_vpc" "main" {
+			    cidr_block = var.cidr_block
+			    tags = {
+			      Name = var.name
+			    }
+			  }
+			  ```
+			- *modules/vpc/variables.tf*:
+			  ```hcl
+			  variable "cidr_block" {
+			    description = "CIDR block for the VPC"
+			    type        = string
+			  }
+			  
+			  variable "name" {
+			    description = "Name tag for the VPC"
+			    type        = string
+			  }
+			  ```
+			- *modules/vpc/outputs.tf*:
+			  ```hcl
+			  output "vpc_id" {
+			    description = "The ID of the VPC"
+			    value       = aws_vpc.main.id
+			  }
+			  ```
+	- **Using a Module in Your Configuration**:
+		- Reference the module from your root configuration.
+		- **Example**:
+		  ```hcl
+		  module "vpc" {
+		    source     = "./modules/vpc"
+		    cidr_block = "10.0.0.0/16"
+		    name       = "my-vpc"
+		  }
+		  ```
+		- **Accessing Module Outputs**:
+			- For instance, you can reference the VPC ID via `module.vpc.vpc_id` in other resources.
+	- **Advanced Module Usage**:
+		- **Nested Modules**: You can call modules within modules to further break down complex infrastructure.
+		- **Remote Modules**: Use modules from remote sources (e.g., Git repositories or the Terraform Registry).
+		  ```hcl
+		  module "vpc" {
+		    source  = "terraform-aws-modules/vpc/aws"
+		    version = "3.0.0"
+		    # Module-specific variables
+		    name = "my-vpc"
+		    cidr = "10.0.0.0/16"
+		    # Other VPC settings...
+		  }
+		  ```
+		- **Provider Inheritance**:
+			- Modules inherit provider configurations from the parent unless you explicitly override them.
+	- **Best Practices**:
+		- **Encapsulation**: Expose only the necessary inputs and outputs to keep the module interface clean.
+		- **Documentation**: Document each module’s purpose, required variables, and outputs.
+		- **Version Control**: Version your modules, especially when sourcing them remotely, to ensure stability.
+		- **Parameterization**: Use variables to allow customization of the module for different environments.
+		- **Modularity**: Break down large configurations into smaller, logically grouped modules (e.g., network, compute, security).
+	- **Conclusion**:
+		- Modules are a cornerstone of scalable, maintainable Terraform configurations.
+		- They promote reuse, reduce code duplication, and enforce consistency across deployments.
+		- When combined with variables, outputs, and remote state management, modules empower you to build complex infrastructures efficiently.
