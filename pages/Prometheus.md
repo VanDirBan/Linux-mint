@@ -369,3 +369,83 @@
 	- **Conclusion**:
 		- Installing Prometheus on Linux involves downloading the binaries, setting up a dedicated user, configuring the `prometheus.yml`, and managing Prometheus as a systemd service.
 		- Once running, you can scrape metrics from local or remote exporters and start building your observability stack with alerting, dashboards, and expansions to monitor your entire environment.
+- **Installing Node Exporter on Linux Servers**
+	- **Overview**:
+		- **Node Exporter** is a Prometheus exporter that collects hardware and OS metrics from Linux servers.
+		- It exposes key system metrics (CPU, memory, disk, network, etc.) via an HTTP endpoint (default port 9100).
+		- These metrics are used by Prometheus to monitor server health and performance.
+		- Installing Node Exporter on your servers provides a standardized view of your infrastructure’s resource usage.
+	- **Installation Steps Overview**:
+		- 1. **Download and Extract**:
+			- Retrieve the appropriate Node Exporter release from its [GitHub releases page](https://github.com/prometheus/node_exporter/releases).
+			- Extract the tarball.
+		- 2. **Install Binary**:
+			- Move the `node_exporter` binary to `/usr/bin/` for system-wide access.
+		- 3. **Create a Dedicated User**:
+			- Create a system user (without a login shell) to run Node Exporter securely.
+		- 4. **Configure systemd Service**:
+			- Create a systemd service file to manage the Node Exporter process.
+			- Enable and start the service to ensure it launches on boot.
+		- 5. **Verification**:
+			- Check the status of the service.
+			- Verify that Node Exporter is running and confirm its version.
+	- **Automated Installation Script**:
+		- Below is a bash script that automates all the above steps. You can save this script (e.g., as `install_node_exporter.sh`), make it executable, and run it on your Linux server.
+		  
+		  ```bash
+		  #!/bin/bash
+		  #--------------------------------------------------------------------
+		  # Script to Install Prometheus Node_Exporter on Linux
+		  # Tested on Ubuntu 24.04
+		  #--------------------------------------------------------------------
+		  # https://github.com/prometheus/node_exporter/releases
+		  NODE_EXPORTER_VERSION="1.9.0"
+		  
+		  cd /tmp
+		  wget https://github.com/prometheus/node_exporter/releases/download/v$NODE_EXPORTER_VERSION/node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
+		  tar xvfz node_exporter-$NODE_EXPORTER_VERSION.linux-amd64.tar.gz
+		  cd node_exporter-$NODE_EXPORTER_VERSION.linux-amd64
+		  
+		  mv node_exporter /usr/bin/
+		  rm -rf /tmp/node_exporter*
+		  
+		  useradd -rs /bin/false node_exporter
+		  chown node_exporter:node_exporter /usr/bin/node_exporter
+		  
+		  
+		  cat <<EOF> /etc/systemd/system/node_exporter.service
+		  [Unit]
+		  Description=Prometheus Node Exporter
+		  After=network.target
+		  
+		  [Service]
+		  User=node_exporter
+		  Group=node_exporter
+		  Type=simple
+		  Restart=on-failure
+		  ExecStart=/usr/bin/node_exporter
+		  
+		  [Install]
+		  WantedBy=multi-user.target
+		  EOF
+		  
+		  systemctl daemon-reload
+		  systemctl start node_exporter
+		  systemctl enable node_exporter
+		  systemctl status node_exporter
+		  node_exporter --version
+		  ```
+	- **Post-Installation**:
+		- Once the script runs successfully, Node Exporter will be installed and running as a systemd service.
+		- By default, it listens on port **9100**. Ensure that your firewall settings allow access to this port if needed.
+		- Configure your Prometheus server to scrape metrics from this endpoint by adding a new job in your Prometheus configuration:
+		  ```yaml
+		  scrape_configs:
+		    - job_name: 'node_exporter'
+		      static_configs:
+		        - targets: ['<server-ip>:9100']
+		  ```
+	- **Conclusion**:
+		- This script automates the installation and setup of Node Exporter on a Linux server.
+		- With Node Exporter running, you can now integrate it with Prometheus to monitor your server's health and performance.
+		- The standardized setup helps maintain consistency across multiple servers and simplifies future maintenance.
