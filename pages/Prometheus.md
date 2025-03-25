@@ -449,3 +449,52 @@
 		- This script automates the installation and setup of Node Exporter on a Linux server.
 		- With Node Exporter running, you can now integrate it with Prometheus to monitor your server's health and performance.
 		- The standardized setup helps maintain consistency across multiple servers and simplifies future maintenance.
+- **Installing Windows Exporter on Windows Servers**
+	- **Overview**:
+		- **Windows Exporter** (formerly known as WMI Exporter) is the Prometheus exporter for Windows, which collects and exposes various Windows metrics (e.g., CPU, memory, disk, network) for monitoring.
+		- It is essential for integrating Windows servers into a Prometheus-based monitoring system.
+		- This exporter enables you to collect system-level metrics from Windows Server 2019, 2022, and other supported versions.
+	- **Why Use Windows Exporter?**:
+		- **Standardized Monitoring**: Provides a consistent way to monitor Windows servers alongside Linux nodes.
+		- **Integration with Prometheus**: Metrics exposed by Windows Exporter can be scraped by Prometheus and visualized using tools like Grafana.
+		- **Automated Deployment**: Using scripts and MSI packages simplifies the installation process, ensuring repeatable and reliable deployments.
+	- **Installation Steps Overview**:
+		- 1. **Download the Installer**:
+			- Retrieve the appropriate MSI package from the [Prometheus Community Windows Exporter Releases](https://github.com/prometheus-community/windows_exporter/releases).
+		- 2. **Install the Exporter**:
+			- Run the MSI installer silently using PowerShell and `msiexec.exe` to avoid manual intervention.
+		- 3. **Clean Up**:
+			- Remove the downloaded MSI file after installation.
+		- 4. **Verify the Service**:
+			- Check that the Windows Exporter service is running and configured properly.
+	- **Automated Installation Script**:
+		- Below is a PowerShell script that automates the installation process on Windows servers.
+		- Save the script (e.g., as `Install-WindowsExporter.ps1`), then run it with appropriate privileges.
+		  
+		  ```powershell
+		  #--------------------------------------------------------------------
+		  # PowerShell Script to Install Prometheus Windows_Exporter on Windows
+		  # Tested on Windows Server 2019, 2022
+		  #--------------------------------------------------------------------
+		  # https://github.com/prometheus-community/windows_exporter/releases
+		  $WINDOWS_EXPORTER_VERSION="0.25.1"
+		  $URL="https://github.com/prometheus-community/windows_exporter/releases/download/v$WINDOWS_EXPORTER_VERSION/windows_exporter-$WINDOWS_EXPORTER_VERSION-amd64.msi"
+		  
+		  Invoke-WebRequest $URL -OutFile window_exporter.msi
+		  Start-Process "msiexec.exe" -ArgumentList "/i window_exporter.msi /qn" -Wait
+		  Remove-Item window_exporter.msi
+		  Get-Service windows_exporter
+		  ```
+	- **Script Explanation**:
+		- **Downloading**:
+			- The script uses `Invoke-WebRequest` to download the MSI package for the specified version.
+		- **Installation**:
+			- It installs the MSI package silently (`/qn` flag) using `msiexec.exe` to avoid pop-up dialogs.
+		- **Cleanup**:
+			- After installation, the MSI file is deleted to free up disk space.
+		- **Verification**:
+			- Finally, the script retrieves the status of the `windows_exporter` service with `Get-Service` to confirm the installation.
+	- **Conclusion**:
+		- This automated PowerShell script simplifies the deployment of Windows Exporter on Windows servers.
+		- Once installed, Windows Exporter will expose metrics (typically on port 9182) that can be scraped by Prometheus.
+		- Integrate these metrics into your monitoring stack to gain comprehensive visibility into your Windows environment.
