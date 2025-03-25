@@ -32,7 +32,7 @@
 			- Query language used to select and aggregate time-series data.
 			- Example: `sum(rate(http_requests_total[5m]))` aggregates HTTP requests over the last 5 minutes.
 		- 5. **Service Discovery**:
-			- Integrates with platforms like [[Kubernetes]], #Docker Swarm, AWS, or static configurations.
+			- Integrates with platforms like [[Kubernetes]], [[Docker]] Swarm, [[AWS]], or static configurations.
 			- Dynamically updates scrape targets as services come and go.
 	- **Metrics Collection Flow**:
 		- 1. **Application/Exporter**:
@@ -100,3 +100,272 @@
 		- **Prometheus** is a cornerstone for modern observability, especially in containerized or microservice environments like [[Kubernetes]].
 		- The pull-based metrics collection, combined with PromQL and integrated alerting, provides a flexible monitoring solution.
 		- By pairing Prometheus with tools like #Grafana for visualization and best practices around labeling and alert management, you can build a robust, scalable monitoring ecosystem.
+- **Installing Prometheus on a Linux Server**
+	- **Overview**:
+		- **Prometheus** is distributed as precompiled binaries for various operating systems, including Linux.
+		- A typical setup involves creating a dedicated Prometheus user, placing configuration files in standard locations, and running Prometheus as a service (e.g., via `systemd`).
+		  
+		  ---
+	- **1. Download and Extract**
+		- **Definition**:
+			- Prometheus provides official binaries. You can download them from the [Prometheus releases page](https://github.com/prometheus/prometheus/releases) or use package managers if available.
+		- **Example Steps** (using wget and tar):
+		  ```bash
+		  # 1. Fetch the latest release (example version: 2.41.0)
+		  wget https://github.com/prometheus/prometheus/releases/download/v2.41.0/prometheus-2.41.0.linux-amd64.tar.gz
+		  
+		  # 2. Extract the tarball
+		  tar xvf prometheus-2.41.0.linux-amd64.tar.gz
+		  
+		  # 3. Move binaries to /usr/local/bin
+		  cd prometheus-2.41.0.linux-amd64
+		  sudo mv prometheus /usr/local/bin/
+		  sudo mv promtool /usr/local/bin/
+		  
+		  # 4. Move console libraries and templates (optional if you want default console pages)
+		  sudo mkdir -p /etc/prometheus
+		  sudo mv consoles /etc/prometheus/
+		  sudo mv console_libraries /etc/prometheus/
+		  ```
+			- Adjust version numbers and paths to your environment.
+			  
+			  ---
+	- **2. User and Directories**
+		- **Definition**:
+			- Create a dedicated user/group for running Prometheus to adhere to the principle of least privilege.
+		- **Example**:
+		  ```bash
+		  # Create a prometheus user (no shell, no home directory)
+		  sudo useradd --no-create-home --shell /usr/sbin/nologin prometheus
+		  
+		  # Create directories for configuration and data
+		  sudo mkdir -p /etc/prometheus
+		  sudo mkdir -p /var/lib/prometheus
+		  
+		  # Set ownership
+		  sudo chown -R prometheus:prometheus /etc/prometheus
+		  sudo chown -R prometheus:prometheus /var/lib/prometheus
+		  ```
+		  
+		  ---
+	- **3. Configuration (`prometheus.yml`)**
+		- **Definition**:
+			- The main configuration file defines global settings, scrape intervals, and scrape targets.
+		- **Basic Example**:
+		  ```yaml
+		  global:
+		    scrape_interval: 15s
+		    evaluation_interval: 15s
+		  
+		  scrape_configs:
+		  - job_name: "node_exporter"
+		    static_configs:
+		    - targets: ["localhost:9100"]
+		  ```
+			- Place this file in `/etc/prometheus/prometheus.yml`.
+			- **Key Directives**:
+				- `scrape_interval`: How often Prometheus scrapes each target.
+				- `scrape_configs`: Specifies endpoints (targets) to scrape.
+		- **Set Ownership**:
+		  ```bash
+		  sudo mv prometheus.yml /etc/prometheus/prometheus.yml
+		  sudo chown prometheus:prometheus /etc/prometheus/prometheus.yml
+		  ```
+		  
+		  ---
+	- **4. Running Prometheus as a Service (systemd)**
+		- **Definition**:
+			- Using a systemd service file ensures Prometheus starts on boot and can be managed via `systemctl`.
+		- **Example service file** (`/etc/systemd/system/prometheus.service`):
+		  ```ini
+		  [Unit]
+		  Description=Prometheus Monitoring
+		  Wants=network-online.target
+		  After=network-online.target
+		  
+		  [Service]
+		  User=prometheus
+		  Group=prometheus
+		  Type=simple
+		  ExecStart=/usr/local/bin/prometheus \
+		    --config.file=/etc/prometheus/prometheus.yml \
+		    --storage.tsdb.path=/var/lib/prometheus/ \
+		    --web.console.templates=/etc/prometheus/consoles \
+		    --web.console.libraries=/etc/prometheus/console_libraries
+		  Restart=on-failure
+		  
+		  [Install]
+		  WantedBy=multi-user.target
+		  ```
+			- **Key Flags**:
+				- `--config.file`: Path to your `prometheus.yml`.
+				- `--storage.tsdb.path`: Directory where metrics data is stored.
+				- `--web.console.*`: Paths to optional web console templates/libraries.
+		- **Reload and Start**:
+		  ```bash
+		  sudo systemctl daemon-reload
+		  sudo systemctl enable prometheus
+		  sudo systemctl start prometheus
+		  
+		  # Check status
+		  systemctl status prometheus
+		  ```
+		- **Verify**:
+			- By default, Prometheus listens on port `9090`.
+			- You can access the web UI at:  
+			  ```plaintext
+			  http://<server-ip>:9090
+			  ```
+			  
+			  ---
+	- **5. Validating Installation**
+		- **Local Host Check**:
+			- `curl http://localhost:9090/metrics` to see raw metrics.
+			- `curl http://localhost:9090/-/healthy` for a quick health check.
+		- **Web UI**:
+			- Access the Prometheus expression browser at `<server-ip>:9090/graph`.
+			- Explore default metrics like `up` to confirm the scrape is working.
+			  
+			  ---
+	- **6. Basic Security Considerations**
+		- **Access Control**:
+			- Out of the box, Prometheus has no authentication/authorization.
+			- Use a reverse proxy (e.g., Nginx, Apache) or OAuth proxy if you need authentication.
+		- **Firewall**:
+			- Restrict access to port `9090` to trusted networks/IP addresses.
+		- **TLS Encryption**:
+			- Prometheus can run behind a reverse proxy that terminates TLS if you require HTTPS.
+			  
+			  ---
+	- **7. Next Steps**:
+		- **Add Exporters**:
+			- For node metrics, install **Node Exporter** on the same or other servers (listening on port `9100` by default).
+			- Update `prometheus.yml` to scrape those endpoints.
+		- **Set Up Alertmanager**:
+			- Configure alerting rules in `prometheus.yml`.
+			- Install and configure Alertmanager to handle alert routing.
+		- **Dashboarding**:
+			- Install #Grafana and connect it to Prometheus for a richer visualization experience.
+		- **Scale / HA**:
+			- Consider using multiple Prometheus instances for high availability or explore long-term storage solutions (Thanos, Cortex, etc.).
+			  
+			  ---
+	- **8. Automatic script example**
+		- ```
+		  #!/usr/bin/env bash
+		  #--------------------------------------------------------------------
+		  # Script to Install Prometheus Server on Linux (Ubuntu/CentOS)
+		  # Tested on Ubuntu 22.04, 24.04
+		  # Developed by [Van] in 2025
+		  #--------------------------------------------------------------------
+		  
+		  # Variables
+		  PROMETHEUS_VERSION="2.51.1"
+		  PROMETHEUS_USER="prometheus"
+		  PROMETHEUS_GROUP="prometheus"
+		  PROMETHEUS_FOLDER_CONFIG="/etc/prometheus"
+		  PROMETHEUS_FOLDER_TSDATA="/etc/prometheus/data"
+		  PROMETHEUS_BIN="/usr/bin/prometheus"
+		  SYSTEMD_SERVICE_PATH="/etc/systemd/system/prometheus.service"
+		  DOWNLOAD_URL="https://github.com/prometheus/prometheus/releases/download/v${PROMETHEUS_VERSION}/prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+		  
+		  # Colors for output
+		  GREEN="\033[0;32m"
+		  RED="\033[0;31m"
+		  RESET="\033[0m"
+		  
+		  echo -e "${GREEN}--- Installing Prometheus v${PROMETHEUS_VERSION} ---${RESET}"
+		  
+		  # 1. Update system packages (Uncomment if desired)
+		  # echo "Updating package list..."
+		  # sudo apt-get update -y
+		  
+		  # 2. Create Prometheus user if it does not exist
+		  if ! id -u "$PROMETHEUS_USER" > /dev/null 2>&1; then
+		    echo "Creating Prometheus user and group..."
+		    useradd -rs /bin/false "$PROMETHEUS_USER"
+		  else
+		    echo "User '$PROMETHEUS_USER' already exists. Skipping user creation."
+		  fi
+		  
+		  # 3. Download and extract Prometheus
+		  echo "Downloading Prometheus from ${DOWNLOAD_URL}"
+		  cd /tmp || exit 1
+		  wget -q "$DOWNLOAD_URL"
+		  if [ $? -ne 0 ]; then
+		    echo -e "${RED}Failed to download Prometheus. Check your network or version.${RESET}"
+		    exit 1
+		  fi
+		  
+		  tar xvfz "prometheus-${PROMETHEUS_VERSION}.linux-amd64.tar.gz"
+		  cd "prometheus-${PROMETHEUS_VERSION}.linux-amd64" || exit 1
+		  
+		  # 4. Move Prometheus binary to /usr/bin
+		  echo "Installing Prometheus binary to ${PROMETHEUS_BIN}"
+		  mv prometheus /usr/bin/
+		  chmod +x "$PROMETHEUS_BIN"
+		  
+		  # 5. Cleanup extracted files
+		  echo "Cleaning up /tmp..."
+		  rm -rf "/tmp/prometheus-${PROMETHEUS_VERSION}*" 
+		  
+		  # 6. Create necessary directories
+		  echo "Creating configuration and data directories..."
+		  mkdir -p "$PROMETHEUS_FOLDER_CONFIG"
+		  mkdir -p "$PROMETHEUS_FOLDER_TSDATA"
+		  
+		  # 7. Create a basic prometheus.yml file
+		  echo "Creating Prometheus config: $PROMETHEUS_FOLDER_CONFIG/prometheus.yml"
+		  cat <<EOF > "${PROMETHEUS_FOLDER_CONFIG}/prometheus.yml"
+		  global:
+		    scrape_interval: 15s
+		  
+		  scrape_configs:
+		    - job_name: "prometheus"
+		      static_configs:
+		        - targets: ["localhost:9090"]
+		  EOF
+		  
+		  # 8. Set ownership and permissions
+		  echo "Setting ownership and permissions..."
+		  chown -R "${PROMETHEUS_USER}:${PROMETHEUS_GROUP}" "$PROMETHEUS_BIN"
+		  chown -R "${PROMETHEUS_USER}:${PROMETHEUS_GROUP}" "$PROMETHEUS_FOLDER_CONFIG"
+		  chown -R "${PROMETHEUS_USER}:${PROMETHEUS_GROUP}" "$PROMETHEUS_FOLDER_TSDATA"
+		  
+		  # 9. Create systemd service file
+		  echo "Creating systemd service at $SYSTEMD_SERVICE_PATH"
+		  cat <<EOF > "$SYSTEMD_SERVICE_PATH"
+		  [Unit]
+		  Description=Prometheus Server
+		  After=network.target
+		  
+		  [Service]
+		  User=${PROMETHEUS_USER}
+		  Group=${PROMETHEUS_GROUP}
+		  Type=simple
+		  Restart=on-failure
+		  ExecStart=${PROMETHEUS_BIN} \\
+		    --config.file=${PROMETHEUS_FOLDER_CONFIG}/prometheus.yml \\
+		    --storage.tsdb.path=${PROMETHEUS_FOLDER_TSDATA}
+		  
+		  [Install]
+		  WantedBy=multi-user.target
+		  EOF
+		  
+		  # 10. Reload systemd and start Prometheus
+		  echo "Reloading systemd daemon and enabling Prometheus service..."
+		  systemctl daemon-reload
+		  systemctl enable prometheus
+		  systemctl start prometheus
+		  
+		  # 11. Check Prometheus service status
+		  echo "Checking Prometheus service status..."
+		  systemctl status prometheus --no-pager
+		  
+		  # 12. Display Prometheus version
+		  echo -e "\n${GREEN}Prometheus version:${RESET}"
+		  prometheus --version
+		  ```
+	- **Conclusion**:
+		- Installing Prometheus on Linux involves downloading the binaries, setting up a dedicated user, configuring the `prometheus.yml`, and managing Prometheus as a systemd service.
+		- Once running, you can scrape metrics from local or remote exporters and start building your observability stack with alerting, dashboards, and expansions to monitor your entire environment.
