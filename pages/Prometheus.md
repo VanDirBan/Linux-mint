@@ -498,3 +498,115 @@
 		- This automated PowerShell script simplifies the deployment of Windows Exporter on Windows servers.
 		- Once installed, Windows Exporter will expose metrics (typically on port 9182) that can be scraped by Prometheus.
 		- Integrate these metrics into your monitoring stack to gain comprehensive visibility into your Windows environment.
+- **Grafana: Installation, Data Source Setup, and Dashboard Integration**
+	- #Grafana
+	- **Overview**:
+		- Grafana is an open-source platform for monitoring and observability that allows you to create interactive, customizable dashboards.
+		- It integrates with various data sources, with Prometheus being one of the most popular.
+		- Dashboards can be imported from the Grafana.com repository or created from scratch.
+		  
+		  ---
+	- **1. Installing Grafana**
+		- **Using Package Manager (Ubuntu Example)**:
+		  1. **Add the Grafana APT repository**:
+		     ```bash
+		     sudo apt-get install -y software-properties-common
+		     sudo add-apt-repository "deb https://packages.grafana.com/oss/deb stable main"
+		     wget -q -O - https://packages.grafana.com/gpg.key | sudo apt-key add -
+		     sudo apt-get update
+		     ```
+		  2. **Install Grafana**:
+		     ```bash
+		     sudo apt-get install grafana -y
+		     ```
+		  3. **Enable and start the Grafana service**:
+		     ```bash
+		     sudo systemctl enable grafana-server
+		     sudo systemctl start grafana-server
+		     ```
+		- **Default Access**:
+			- Grafana’s web interface is available at: [http://<server-ip>:3000](http://<server-ip>:3000)
+			- Default login is typically **admin/admin** (Grafana will prompt to change the password on first login).
+			  
+			  ---
+		- install_grafana_server_ubuntu script
+			- ```
+			  #!/bin/bash
+			  #--------------------------------------------------------------------
+			  # Script to Install Grafana Server on Linux Ubuntu (22.04, 24.04)
+			  # Include Prometheus DataSource Configuration
+			  #--------------------------------------------------------------------
+			  # https://grafana.com/grafana/download
+			  GRAFANA_VERSION="11.6.0"
+			  PROMETHEUS_URL="http://localhost:9090"
+			  
+			  
+			  apt-get install -y apt-transport-https software-properties-common wget
+			  mkdir -p /etc/apt/keyrings/
+			  wget -q -O - https://apt.grafana.com/gpg.key | gpg --dearmor | sudo tee /etc/apt/keyrings/grafana.gpg > /dev/null
+			  echo "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main" | sudo tee -a /etc/apt/sources.list.d/grafana.list
+			  apt-get update
+			  apt-get install -y adduser libfontconfig1 musl
+			  
+			  wget https://dl.grafana.com/oss/release/grafana_${GRAFANA_VERSION}_amd64.deb
+			  dpkg -i grafana_${GRAFANA_VERSION}_amd64.deb
+			  
+			  echo "export PATH=/usr/share/grafana/bin:$PATH" >> /etc/profile
+			  
+			  
+			  cat <<EOF> /etc/grafana/provisioning/datasources/prometheus.yaml
+			  apiVersion: 1
+			  
+			  datasources:
+			    - name: Prometheus
+			      type: prometheus
+			      url: ${PROMETHEUS_URL}
+			  EOF
+			  
+			  systemctl daemon-reload
+			  systemctl enable grafana-server
+			  systemctl start grafana-server
+			  systemctl status grafana-server
+			  ```
+	- **2. Configuring Data Source**
+		- **Adding Prometheus as a Data Source**:
+		  1. **Login to Grafana**: Open the web interface.
+		  2. **Navigate to Data Sources**: Click on **Gear Icon (Configuration)** > **Data Sources**.
+		  3. **Add Data Source**: Click **Add data source**.
+		  4. **Select Prometheus**:
+			- In the data source settings, set the URL to your Prometheus server (e.g., `http://<prometheus-ip>:9090`).
+			- Adjust other settings as needed (access mode, scrape interval, etc.).
+			  5. **Save & Test**: Click the **Save & Test** button to verify the connection.
+			  
+			  ---
+	- **3. Adding Dashboards**
+		- **Importing a Pre-Built Dashboard**:
+		  1. **Navigate to Dashboards**: Click on the **+** icon > **Import**.
+		  2. **Enter Dashboard ID**:
+			- You can find dashboard IDs on [Grafana.com Dashboards](https://grafana.com/grafana/dashboards).
+			- Enter an ID (e.g., `1860` for a popular Prometheus dashboard) and click **Load**.
+			  3. **Select Data Source**: Choose your Prometheus data source from the dropdown.
+			  4. **Import Dashboard**: Click **Import** to add the dashboard.
+		- **Creating a Custom Dashboard**:
+		  1. **Start a New Dashboard**: Click **+ Create** > **Dashboard**.
+		  2. **Add Panels**:
+			- Click **Add new panel**.
+			- Write PromQL queries in the query editor to visualize metrics.
+			- Configure visualization options (graphs, singlestat, heatmaps, etc.).
+			  3. **Save Dashboard**:
+			- Give the dashboard a name.
+			- Optionally, add tags and set sharing options.
+			  
+			  ---
+	- **Best Practices & Tips**:
+		- **Organize Dashboards**: Group dashboards by environment or service to make navigation easier.
+		- **Dashboard Variables**: Use variables to create dynamic dashboards that let users select different servers, regions, or time intervals.
+		- **Alerting**: Grafana supports setting up alerts on panels, which can be sent via email, Slack, or other channels.
+		- **Backup Configurations**: Regularly export your dashboards and configuration settings for disaster recovery.
+		  
+		  ---
+	- **Conclusion**:
+		- By installing Grafana, configuring Prometheus as a data source, and setting up dashboards, you create a powerful monitoring and visualization system.
+		- This setup enhances observability by providing real-time insights into your infrastructure's performance.
+		- Customize and expand dashboards over time to meet the evolving needs of your monitoring strategy.
+-
