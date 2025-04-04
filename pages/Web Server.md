@@ -53,7 +53,7 @@
 		- **DDoS Protection**: Use `mod_evasive` to mitigate DoS/DDoS attacks.
 	- **Automation**:
 		- [[Ansible]]: Automate Apache installation and configuration.
-		- **CI/CD Integration**: Use tools like Jenkins or GitLab CI for automated deployments.
+		- **CI/CD Integration**: Use tools like Jenkins or [[GitLab CI/CD]] for automated deployments.
 	- **Load Balancing**:
 		- **mod_proxy_balancer**: Set up load balancing across multiple servers.
 		- **Failover**: Configure backup servers for high availability.
